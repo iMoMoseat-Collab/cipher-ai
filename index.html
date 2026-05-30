@@ -371,6 +371,15 @@ body::before{
     <span id="cbar-lbl">CREDIT</span>
     <div id="cbar-track" onclick="showCreditModal()"><div id="cbar-fill" style="width:100%"></div></div>
     <span id="cbar-pct">--%</span>
+    <span id="tok-display" style="font-size:7px;color:var(--txt3);letter-spacing:1px;white-space:nowrap;margin-left:4px;cursor:pointer" onclick="toggleTokDetail()" title="คลิกดูรายละเอียด">TOK: 0</span>
+  </div>
+  <!-- Token detail popup -->
+  <div id="tok-detail" style="display:none;padding:4px 14px;background:var(--bg3);border-bottom:1px solid var(--brd);font-size:7px;letter-spacing:1px;color:var(--g2);display:none;gap:16px;flex-wrap:wrap">
+    <span>TOTAL IN: <b id="td-in">0</b></span>
+    <span>TOTAL OUT: <b id="td-out">0</b></span>
+    <span>LAST IN: <b id="td-lin">0</b></span>
+    <span>LAST OUT: <b id="td-lout">0</b></span>
+    <span>COST: $<b id="td-cost">0.0000</b></span>
   </div>
 
   <div id="msgs">
@@ -443,6 +452,10 @@ const SY     = window.speechSynthesis;
 // Credit
 const PIN = 1/1e6, POUT = 5/1e6;
 let totalCost = parseFloat(localStorage.getItem('cipher_cost') || '0');
+let totalTokIn = parseInt(localStorage.getItem('cipher_tok_in') || '0');
+let totalTokOut = parseInt(localStorage.getItem('cipher_tok_out') || '0');
+let lastTokIn = 0, lastTokOut = 0;
+let tokDetailOpen = false;
 let creditUSD = parseFloat(localStorage.getItem('cipher_credit') || '0');
 let warnPct   = parseInt(localStorage.getItem('cipher_warn_pct') || '20');
 let alShown   = {w:false, d:false};
@@ -600,7 +613,15 @@ function addMsg(role, content, web) {
 }
 function setLoad(v){
   document.getElementById('loading').style.display=v?'flex':'none';
-  if(v)setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
+  if(v){
+    setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
+    // pulse tok display during loading
+    const el=document.getElementById('tok-display');
+    if(el){el.style.color='var(--g1)';el.style.textShadow='0 0 6px var(--g1)';}
+  } else {
+    const el=document.getElementById('tok-display');
+    if(el){el.style.color='var(--txt3)';el.style.textShadow='none';}
+  }
 }
 
 // ── Send ──────────────────────────────────────────────────────────
@@ -688,7 +709,32 @@ async function sendMsg() {
 }
 
 // ── Credit ────────────────────────────────────────────────────────
-function addCost(i,o){totalCost+=i*PIN+o*POUT;localStorage.setItem('cipher_cost',totalCost.toFixed(8));updateCBar();checkAl();}
+function addCost(i,o){
+  // update realtime
+  lastTokIn=i; lastTokOut=o;
+  totalTokIn+=i; totalTokOut+=o;
+  totalCost+=i*PIN+o*POUT;
+  localStorage.setItem('cipher_cost',totalCost.toFixed(8));
+  localStorage.setItem('cipher_tok_in',totalTokIn);
+  localStorage.setItem('cipher_tok_out',totalTokOut);
+  updateCBar(); updateTokDisplay(); checkAl();
+}
+
+function updateTokDisplay(){
+  const total=totalTokIn+totalTokOut;
+  const el=document.getElementById('tok-display');
+  if(el) el.textContent=`TOK: ${total.toLocaleString()}`;
+  document.getElementById('td-in').textContent=totalTokIn.toLocaleString();
+  document.getElementById('td-out').textContent=totalTokOut.toLocaleString();
+  document.getElementById('td-lin').textContent=lastTokIn.toLocaleString();
+  document.getElementById('td-lout').textContent=lastTokOut.toLocaleString();
+  document.getElementById('td-cost').textContent=totalCost.toFixed(6);
+}
+
+function toggleTokDetail(){
+  tokDetailOpen=!tokDetailOpen;
+  document.getElementById('tok-detail').style.display=tokDetailOpen?'flex':'none';
+}
 function updateCBar(){
   const f=document.getElementById('cbar-fill'),p=document.getElementById('cbar-pct');
   if(creditUSD<=0){f.style.width='100%';p.textContent='--%';return;}
@@ -767,7 +813,7 @@ document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='En
 function startApp(fromButton) {
   document.getElementById('api-scr').style.display='none';
   document.getElementById('app').style.display='flex';
-  updateCBar();if(creditUSD<=0)setTimeout(showCreditModal,2000);
+  updateCBar();updateTokDisplay();if(creditUSD<=0)setTimeout(showCreditModal,2000);
 
   const h=new Date().getHours();
   const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';
