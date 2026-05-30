@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CIPHER"/>
+<meta name="theme-color" content="#00040f"/>
+<title>CIPHER</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Noto+Sans+Thai:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --c0:#00040f;--c1:#000820;--c2:#001040;
+  --blu:#0066ff;--sky:#00aaff;--ice:#66ddff;
+  --cya:#00ffee;--wht:#e0f8ff;--dim:#1a4466;
+  --glo:#0066ff55;--glo2:#00aaff33;--glo3:#00ffee22;
+  --red:#ff3366;--ora:#ff8800;--grn:#00ff88;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--c0)}
+body{
+  height:100dvh;display:flex;flex-direction:column;
+  font-family:'Noto Sans Thai','Share Tech Mono',monospace;
+  color:var(--wht);position:relative;overflow:hidden;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+/* ── BG layers ── */
+#bg-nebula{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 100% 60% at 50% -5%,#001a5588 0%,transparent 65%),
+    radial-gradient(ellipse 50% 50% at 90% 90%,#00112244 0%,transparent 55%),
+    radial-gradient(ellipse 70% 70% at 10% 80%,#000d3344 0%,transparent 50%),
+    var(--c0);
+}
+#bg-hex{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06}
+#bg-hex svg{width:100%;height:100%}
+#bg-particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ptcl{position:absolute;border-radius:50%;animation:ptcl-float linear infinite}
+@keyframes ptcl-float{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:.4}100%{transform:translateY(-20vh) scale(1);opacity:0}}
+
+/* ── Scanline ── */
+#scan{
+  position:fixed;left:0;width:100%;height:1px;z-index:50;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--sky)44,var(--cya)88,var(--sky)44,transparent);
+  animation:scan 10s linear infinite;
+}
+@keyframes scan{0%{top:-1px}100%{top:100vh}}
+
+/* ── Noise overlay ── */
+#noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:128px 128px;
+}
+
+/* ── HEADER ── */
+#header{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;
+  position:relative;z-index:20;flex-shrink:0;
+  border-bottom:1px solid #0066ff22;
+  background:linear-gradient(180deg,#000d2ecc 0%,#00040f00 100%);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+}
+
+/* Hexagon logo */
+#logo{position:relative;width:46px;height:46px;flex-shrink:0}
+#logo svg{position:absolute;inset:0;width:100%;height:100%}
+#logo-pulse{position:absolute;inset:-6px;animation:logo-spin 8s linear infinite}
+@keyframes logo-spin{to{transform:rotate(360deg)}}
+#logo-core{
+  position:absolute;inset:8px;
+  background:radial-gradient(circle at 40% 35%,var(--ice),var(--blu) 60%,transparent);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  animation:logo-breath 3s ease-in-out infinite;
+  box-shadow:0 0 20px var(--glo),0 0 40px var(--glo2);
+}
+@keyframes logo-breath{0%,100%{box-shadow:0 0 20px var(--glo)}50%{box-shadow:0 0 40px var(--sky),0 0 80px var(--glo)}}
+#logo-dot{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:7px;height:7px;border-radius:50%;
+  background:white;box-shadow:0 0 12px white,0 0 24px var(--cya);
+}
+
+/* Name block */
+#name-block{flex:1;min-width:0}
+#ai-name{
+  font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;
+  letter-spacing:10px;line-height:1;
+  background:linear-gradient(135deg,var(--ice),var(--sky),var(--cya));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 0 12px var(--sky));
+}
+#ai-sub{
+  font-family:'Share Tech Mono',monospace;
+  font-size:7px;letter-spacing:3px;color:var(--dim);margin-top:3px;
+}
+#stat-row{display:flex;align-items:center;gap:8px;margin-top:5px}
+.pip{width:5px;height:5px;border-radius:50%;background:var(--cya);box-shadow:0 0 8px var(--cya);animation:pip-blink 2s ease-in-out infinite}
+@keyframes pip-blink{0%,100%{opacity:1}50%{opacity:.15}}
+#stat-txt{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--dim)}
+
+/* Header controls */
+#hctrl{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.hbtn{
+  width:34px;height:34px;border-radius:8px;font-size:14px;
+  border:1px solid #0066ff33;background:#0066ff0d;
+  color:var(--sky);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;position:relative;overflow:hidden;
+}
+.hbtn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--glo2),transparent);opacity:0;transition:opacity .2s}
+.hbtn:hover::before{opacity:1}
+.hbtn:hover{border-color:var(--blu);box-shadow:0 0 14px var(--glo2)}
+.hbtn:active{transform:scale(.9)}
+.hbtn.off{opacity:.28;background:transparent}
+#mode-btn{
+  height:34px;padding:0 12px;border-radius:8px;
+  border:1px solid #0066ff33;background:#0066ff0d;
+  color:var(--dim);font-size:8px;letter-spacing:2px;
+  cursor:pointer;font-family:'Share Tech Mono',monospace;
+  white-space:nowrap;transition:all .18s;
+}
+#mode-btn:hover{border-color:var(--blu);color:var(--sky)}
+#mode-btn.offline{border-color:#ff880044;background:#ff88000a;color:#ff8800aa}
+
+/* ── CREDIT BAR ── */
+#cbar{
+  padding:5px 16px;position:relative;z-index:10;flex-shrink:0;
+  display:flex;align-items:center;gap:10px;
+}
+#cbar-label{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--dim);white-space:nowrap}
+#cbar-track{flex:1;height:3px;background:#ffffff08;border-radius:2px;overflow:hidden;cursor:pointer;position:relative}
+#cbar-track::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,#ffffff08,transparent);animation:bar-shine 3s ease-in-out infinite}
+@keyframes bar-shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+#cbar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blu),var(--cya));transition:width .6s ease,background .4s}
+#cbar-pct{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--sky);min-width:32px;text-align:right}
+#cbar-cost{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--dim);white-space:nowrap}
+
+/* ── MESSAGES ── */
+#messages{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:16px 14px;
+  display:flex;flex-direction:column;gap:16px;
+  position:relative;z-index:5;
+  -webkit-overflow-scrolling:touch;
+}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:#0066ff33;border-radius:2px}
+
+.msg{animation:msg-in .28s cubic-bezier(.22,1,.36,1) both;display:flex;gap:9px;align-items:flex-end}
+.msg.usr{flex-direction:row-reverse}
+@keyframes msg-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Avatar */
+.av{
+  width:28px;height:28px;flex-shrink:0;margin-bottom:2px;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:linear-gradient(135deg,var(--blu),var(--c2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;color:var(--ice);
+  box-shadow:0 0 12px var(--glo2);
+  position:relative;
+}
+.av::before{
+  content:'';position:absolute;inset:1px;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:linear-gradient(135deg,var(--c1),var(--c2));
+  z-index:0;
+}
+.av span{position:relative;z-index:1}
+.msg.usr .av{clip-path:circle(50%);background:rgba(255,255,255,.04);box-shadow:none;border:1px solid rgba(255,255,255,.1)}
+.msg.usr .av::before{display:none}
+
+/* Body */
+.mb{max-width:82%;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.msg.usr .mb{align-items:flex-end}
+
+/* Label */
+.ml{
+  font-family:'Share Tech Mono',monospace;
+  font-size:7px;letter-spacing:2px;color:var(--dim);
+  padding:0 4px;display:flex;gap:6px;align-items:center;
+}
+.wb{
+  font-size:6px;letter-spacing:1px;
+  color:#ff8800bb;border:1px solid #ff880033;
+  border-radius:3px;padding:1px 5px;
+  font-family:'Share Tech Mono',monospace;
+}
+
+/* Bubble */
+.bub{
+  padding:11px 15px;
+  border-radius:3px 14px 14px 14px;
+  font-size:14px;line-height:1.75;
+  color:var(--wht);word-break:break-word;
+  white-space:pre-wrap;
+  position:relative;overflow:hidden;
+  font-family:'Noto Sans Thai',sans-serif;
+}
+.bub.ai{
+  background:linear-gradient(135deg,#00204488,#000d2266);
+  border:1px solid #0066ff33;
+  box-shadow:inset 0 1px 0 #ffffff08,0 4px 24px #0000ff0a;
+}
+.bub.ai::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--sky)66,transparent);
+}
+.bub.usr{
+  border-radius:14px 3px 14px 14px;
+  background:linear-gradient(135deg,#0033aa11,#001a6622);
+  border:1px solid #0066ff22;
+  color:var(--ice);
+}
+.bub-glow{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--glo3),transparent 60%);
+  pointer-events:none;
+  animation:bub-shim 6s ease-in-out infinite;
+}
+@keyframes bub-shim{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* Corner accents on AI bubble */
+.bub.ai::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:12px;height:12px;
+  border-right:1px solid var(--blu)44;
+  border-bottom:1px solid var(--blu)44;
+}
+
+.rbtn{
+  padding:2px 8px;border-radius:6px;font-size:7px;letter-spacing:2px;
+  border:1px solid #0066ff22;background:transparent;
+  color:var(--dim);font-family:'Share Tech Mono',monospace;cursor:pointer;
+  transition:all .18s;
+}
+.rbtn:hover{color:var(--sky);border-color:var(--blu)}
+
+/* ── LOADING ── */
+#loading{display:none;flex-direction:row;gap:9px;align-items:flex-end}
+#ld-av{
+  width:28px;height:28px;flex-shrink:0;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:linear-gradient(135deg,var(--blu),var(--c2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;color:var(--ice);
+  animation:logo-breath 1s ease-in-out infinite;
+}
+#ld-bub{
+  padding:11px 15px;border-radius:3px 14px 14px 14px;
+  background:linear-gradient(135deg,#00204488,#000d2266);
+  border:1px solid #0066ff33;
+}
+#ld-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:3px;color:var(--dim);margin-bottom:7px}
+.wave{display:flex;align-items:center;gap:3px}
+.wave span{width:3px;border-radius:3px;background:var(--sky);display:block;animation:wv .8s ease-in-out infinite}
+@keyframes wv{0%,100%{transform:scaleY(.3);opacity:.4}50%{transform:scaleY(1.5);opacity:1}}
+
+/* ── INPUT ── */
+#inp-area{
+  padding:10px 14px 14px;
+  position:relative;z-index:10;flex-shrink:0;
+  background:linear-gradient(0deg,#00040f 50%,transparent);
+}
+/* Top line */
+#inp-area::before{
+  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--blu)44,var(--cya)66,var(--blu)44,transparent);
+}
+
+#inp-wrap{
+  display:flex;gap:8px;align-items:flex-end;
+  border:1px solid #0066ff33;
+  border-radius:14px;padding:9px 9px 9px 16px;
+  background:linear-gradient(135deg,#001a3a88,#00040faa);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:border-color .3s,box-shadow .3s;
+  box-shadow:0 0 30px var(--glo2),inset 0 1px 0 #ffffff06;
+  position:relative;
+}
+#inp-wrap::before{
+  content:'';position:absolute;top:-1px;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--sky)55,transparent);
+  pointer-events:none;
+}
+#inp-wrap:focus-within{
+  border-color:var(--blu);
+  box-shadow:0 0 40px var(--glo),0 0 80px var(--glo2),inset 0 1px 0 #ffffff0a;
+}
+#inp-wrap.mic-on{border-color:#ff336644;box-shadow:0 0 30px #ff336622}
+
+#msg-in{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--wht);font-size:15px;
+  font-family:'Noto Sans Thai',sans-serif;
+  line-height:1.6;min-height:24px;resize:none;
+  -webkit-appearance:none;
+}
+#msg-in::placeholder{color:var(--dim)}
+
+.ibtn{
+  width:38px;height:38px;border-radius:10px;font-size:15px;flex-shrink:0;
+  border:1px solid #0066ff2a;background:transparent;
+  color:var(--dim);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;
+}
+.ibtn:hover{border-color:var(--blu);color:var(--sky);background:var(--glo2)}
+.ibtn:active{transform:scale(.88)}
+.ibtn.rdy{border-color:var(--blu)88;color:var(--sky);background:var(--glo2);box-shadow:0 0 14px var(--glo2)}
+.ibtn.mic-on{border-color:#ff336666;color:#ff6688;background:#ff33660d}
+#send-svg{transition:all .18s}
+
+#footer{
+  text-align:center;font-size:7px;color:#0d2233;
+  margin-top:7px;letter-spacing:2px;
+  font-family:'Share Tech Mono',monospace;
+}
+
+/* ── API SETUP SCREEN ── */
+#api-scr{
+  position:fixed;inset:0;z-index:200;
+  background:var(--c0);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px;gap:18px;
+}
+#setup-logo{position:relative;width:80px;height:80px;margin-bottom:6px}
+#setup-logo-core{
+  position:absolute;inset:10px;
+  background:radial-gradient(circle at 40% 35%,var(--ice),var(--blu) 60%,transparent);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  animation:logo-breath 3s ease-in-out infinite;
+}
+#setup-logo-ring{
+  position:absolute;inset:0;
+  animation:logo-spin 8s linear infinite;
+}
+#setup-title{
+  font-family:'Orbitron',sans-serif;font-size:32px;font-weight:900;letter-spacing:12px;
+  background:linear-gradient(135deg,var(--ice),var(--sky),var(--cya));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 20px var(--sky));
+}
+#setup-sub{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:4px;color:var(--dim)}
+#setup-desc{font-size:13px;color:var(--dim);text-align:center;line-height:1.9;max-width:300px;font-family:'Noto Sans Thai',sans-serif}
+#api-inp{
+  width:100%;max-width:360px;padding:14px 18px;
+  background:#000d22;border:1px solid #0066ff33;border-radius:12px;
+  color:var(--wht);font-size:14px;font-family:'Share Tech Mono',monospace;
+  outline:none;letter-spacing:1px;transition:border-color .3s,box-shadow .3s;
+}
+#api-inp:focus{border-color:var(--blu);box-shadow:0 0 24px var(--glo2)}
+#api-inp::placeholder{color:var(--dim)}
+#start-btn{
+  padding:14px 40px;
+  background:linear-gradient(135deg,#0044cc,var(--blu));
+  border:1px solid var(--sky)44;border-radius:12px;
+  color:white;font-size:12px;letter-spacing:5px;
+  font-family:'Orbitron',sans-serif;font-weight:700;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 0 30px var(--glo),0 8px 32px var(--glo2);
+  position:relative;overflow:hidden;
+}
+#start-btn::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:conic-gradient(transparent,var(--cya)11,transparent);
+  animation:btn-spin 4s linear infinite;
+}
+@keyframes btn-spin{to{transform:rotate(360deg)}}
+#start-btn:hover{box-shadow:0 0 50px var(--blu),0 8px 40px var(--glo)}
+#start-btn span{position:relative;z-index:1}
+#setup-note{font-size:9px;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:1px}
+
+/* ── CREDIT ALERT ── */
+#cred-alert{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  padding:12px 18px;display:none;align-items:center;gap:12px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  animation:alert-in .3s ease;
+}
+@keyframes alert-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+#cred-alert.warn{background:linear-gradient(135deg,#2a120088,#1a0a0088);border-bottom:1px solid #ff880044}
+#cred-alert.danger{background:linear-gradient(135deg,#2a000088,#1a000088);border-bottom:1px solid #ff336644}
+#al-icon{font-size:18px;flex-shrink:0}
+#al-body{flex:1}
+#al-title{font-size:11px;font-weight:600;letter-spacing:3px;font-family:'Orbitron',sans-serif;color:var(--wht)}
+#al-msg{font-size:11px;color:var(--dim);margin-top:2px;font-family:'Noto Sans Thai',sans-serif}
+#al-x{font-size:16px;cursor:pointer;color:var(--dim);padding:4px 8px;flex-shrink:0}
+
+/* ── CREDIT MODAL ── */
+#cred-modal{
+  position:fixed;inset:0;z-index:150;
+  background:rgba(0,4,15,.88);backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;
+}
+#cred-box{
+  background:linear-gradient(135deg,#001a3a,#000d22);
+  border:1px solid #0066ff33;border-radius:18px;
+  padding:26px 22px;width:90%;max-width:320px;
+  box-shadow:0 0 60px var(--glo2),0 0 120px var(--glo3);
+  position:relative;overflow:hidden;
+}
+#cred-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--sky)66,transparent)}
+#cred-box h3{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:4px;color:var(--ice);margin-bottom:6px}
+#cred-box p{font-size:12px;color:var(--dim);line-height:1.7;margin-bottom:16px;font-family:'Noto Sans Thai',sans-serif}
+.cr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cr label{font-size:10px;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:1px;white-space:nowrap}
+.cr input{flex:1;padding:10px 12px;background:#000820;border:1px solid #0066ff33;border-radius:9px;color:var(--wht);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;text-align:center;transition:border-color .2s}
+.cr input:focus{border-color:var(--blu)}
+#cr-save{
+  width:100%;padding:12px;border-radius:10px;
+  background:linear-gradient(135deg,#0044cc,var(--blu));
+  border:none;color:white;font-size:11px;letter-spacing:4px;
+  font-family:'Orbitron',sans-serif;font-weight:700;cursor:pointer;
+  box-shadow:0 0 20px var(--glo);transition:all .2s;
+}
+#cr-save:hover{box-shadow:0 0 35px var(--blu)}
+#cr-skip{display:block;text-align:center;margin-top:10px;font-size:9px;color:var(--dim);cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<!-- Backgrounds -->
+<div id="bg-nebula"></div>
+<canvas id="bg-hex" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05"></canvas>
+<div id="bg-particles"></div>
+<div id="noise"></div>
+<div id="scan"></div>
+
+<!-- ── API SETUP ── -->
+<div id="api-scr">
+  <div id="setup-logo">
+    <svg id="setup-logo-ring" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="40,2 78,21 78,59 40,78 2,59 2,21" stroke="#0066ff" stroke-width="1" stroke-dasharray="4 3" fill="none" opacity=".5"/>
+    </svg>
+    <div id="setup-logo-core"></div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:white;box-shadow:0 0 12px white,0 0 24px #00aaff"></div>
+  </div>
+  <div id="setup-title">CIPHER</div>
+  <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
+  <div id="setup-desc">ใส่ Anthropic API Key เพื่อเปิดใช้งาน<br/>คีย์จะถูกเก็บในอุปกรณ์นี้เท่านั้น</div>
+  <input id="api-inp" type="password" placeholder="sk-ant-api03-···"/>
+  <button id="start-btn" onclick="saveKey()"><span>INITIALIZE CIPHER</span></button>
+  <div id="setup-note">Haiku 4.5 · console.anthropic.com</div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app" style="display:none;flex-direction:column;height:100dvh">
+
+  <div id="header">
+    <div id="logo">
+      <svg id="logo-pulse" viewBox="0 0 46 46" fill="none">
+        <polygon points="23,1 45,12.5 45,33.5 23,45 1,33.5 1,12.5" stroke="#0066ff" stroke-width=".8" stroke-dasharray="3 2" fill="none" opacity=".6"/>
+      </svg>
+      <div id="logo-core"></div>
+      <div id="logo-dot"></div>
+    </div>
+    <div id="name-block">
+      <div id="ai-name">CIPHER</div>
+      <div id="ai-sub">COGNITIVE INTELLIGENCE · HAIKU 4.5</div>
+      <div id="stat-row">
+        <div class="pip" id="spip"></div>
+        <span id="stat-txt">READY</span>
+      </div>
+    </div>
+    <div id="hctrl">
+      <button class="hbtn" id="stop-btn" style="display:none;border-color:#ff336644;background:#ff33660a;color:#ff6688" onclick="stopSpeak()">⏹</button>
+      <button class="hbtn" id="vbtn" onclick="toggleVoice()" title="เสียง">🔊</button>
+      <button id="mode-btn" onclick="toggleMode()">🌐 ON</button>
+      <button class="hbtn" onclick="clearKey()" style="font-size:9px;letter-spacing:0;font-family:'Share Tech Mono',monospace">KEY</button>
+    </div>
+  </div>
+
+  <!-- Credit bar -->
+  <div id="cbar">
+    <span id="cbar-label">CREDIT</span>
+    <div id="cbar-track" onclick="showCreditModal()" title="คลิกตั้งค่าเครดิต">
+      <div id="cbar-fill" style="width:100%"></div>
+    </div>
+    <span id="cbar-pct">--%</span>
+    <span id="cbar-cost" style="display:none">$0.0000</span>
+  </div>
+
+  <!-- Messages -->
+  <div id="messages">
+    <div id="loading">
+      <div id="ld-av"><span>CI</span></div>
+      <div id="ld-bub">
+        <div id="ld-lbl">PROCESSING</div>
+        <div class="wave" id="ld-wave"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div id="inp-area">
+    <div id="inp-wrap">
+      <textarea id="msg-in" rows="1" placeholder="พิมพ์หรือพูดกับ CIPHER..."></textarea>
+      <button class="ibtn" id="mic-btn" onclick="toggleListen()" style="display:none" title="พูด">🎤</button>
+      <button class="ibtn" id="send-btn" onclick="sendMsg()">
+        <svg id="send-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+    <div id="footer">CIPHER · <span id="ft-mode">ONLINE</span> · <span id="ft-voice">VOICE ON</span> · HAIKU 4.5</div>
+  </div>
+</div>
+
+<!-- Credit Alert -->
+<div id="cred-alert">
+  <span id="al-icon">⚡</span>
+  <div id="al-body"><div id="al-title"></div><div id="al-msg"></div></div>
+  <span id="al-x" onclick="closeAlert()">✕</span>
+</div>
+
+<!-- Credit Modal -->
+<div id="cred-modal">
+  <div id="cred-box">
+    <h3>CREDIT CONFIG</h3>
+    <p>ใส่เครดิตที่เติมไว้ใน Anthropic<br/>CIPHER จะแจ้งเตือนเมื่อใกล้หมด</p>
+    <div class="cr"><label>CREDIT $</label><input id="cr-amt" type="number" min="1" max="9999" value="5"/></div>
+    <div class="cr"><label>ALERT AT</label><input id="cr-wp" type="number" min="1" max="50" value="20"/><label>%</label></div>
+    <button id="cr-save" onclick="saveCred()">SAVE CONFIG</button>
+    <span id="cr-skip" onclick="closeCreditModal()">ข้ามไปก่อน</span>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────
+let API_KEY=localStorage.getItem('cipher_key')||'';
+let msgs=[],speaking=false,listening=false,autoSpeak=true,offline=false;
+let voiceObj=null;
+const SY=window.speechSynthesis;
+
+// Pricing: Haiku 4.5 = $1/$5 per 1M tokens
+const PIN=1/1e6, POUT=5/1e6;
+let totalCost=parseFloat(localStorage.getItem('cipher_cost')||'0');
+let creditUSD=parseFloat(localStorage.getItem('cipher_credit')||'0');
+let warnPct=parseInt(localStorage.getItem('cipher_warn_pct')||'20');
+let alShown={w:false,d:false};
+
+const PROMPT=`คุณคือ CIPHER — ระบบปัญญาประดิษฐ์ส่วนตัวขั้นสูง
+บุคลิก: พูดไทยเป็นหลัก สุภาพ ฉลาด มั่นใจ เรียก "ท่าน" เป็นครั้งคราว ตอบกระชับแต่ครบ
+ค้นหา: ถ้าไม่ทราบหรือข้อมูลปัจจุบัน ให้ค้นหาและสรุปเป็นภาษาไทย
+ตอบไทยเสมอ`;
+
+const OFFL=[
+  {k:["สวัสดี","หวัดดี","hello","hi"],r:"สวัสดีครับท่าน ไซเฟอร์พร้อมรับใช้แล้วครับ"},
+  {k:["ชื่ออะไร","คุณคือ","เป็นใคร"],r:"ผมคือไซเฟอร์ ระบบปัญญาประดิษฐ์ส่วนตัวขั้นสูงครับท่าน"},
+  {k:["กี่โมง","เวลา"],r:()=>`ขณะนี้เวลา ${new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})} นาฬิกาครับ`},
+  {k:["วันนี้","วันที่"],r:()=>`วันนี้คือ${new Date().toLocaleDateString("th-TH",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}ครับ`},
+  {k:["ขอบคุณ","thanks"],r:"ยินดีให้บริการเสมอครับท่าน"},
+  {k:["ช่วยอะไร","ทำอะไรได้"],r:"ผมช่วยตอบคำถาม ค้นหาข้อมูล บอกเวลาวันที่ และคุยได้ทุกเรื่องครับ"},
+  {k:["เหนื่อย","เครียด","ท้อ"],r:"พักผ่อนบ้างนะครับท่าน ผมยังอยู่ตรงนี้เสมอครับ"},
+  {k:["ลาก่อน","บาย","bye"],r:"ลาก่อนครับท่าน เรียกผมได้ตลอดนะครับ"},
+  {k:["ตลก","joke"],r:"ทำไม AI ถึงไม่นอนดึก เพราะกลัว deep sleep ครับท่าน"},
+  {k:["ทดสอบ","test","ping"],r:"ระบบออนไลน์ครับท่าน พร้อมใช้งานเต็มที่ครับ"},
+];
+function getOffline(t){const l=t.toLowerCase();for(const i of OFFL)if(i.k.some(k=>l.includes(k)))return typeof i.r==='function'?i.r():i.r;return null;}
+
+function cleanTTS(t){
+  return t.replace(/[*_`#>~]/g,'')
+    .replace(/\bCIPHER\b/gi,'ไซเฟอร์').replace(/\bAI\b/gi,'เอไอ')
+    .replace(/\bAPI\b/gi,'เอพีไอ').replace(/\bOnline\b/gi,'ออนไลน์')
+    .replace(/\bOffline\b/gi,'ออฟไลน์').replace(/\bmode\b/gi,'โหมด')
+    .replace(/\bdata\b/gi,'ข้อมูล').replace(/\bserver\b/gi,'เซิร์ฟเวอร์')
+    .replace(/\berror\b/gi,'ข้อผิดพลาด').replace(/\bwifi\b/gi,'ไวไฟ')
+    .replace(/[a-zA-Z]{4,}/g,'').replace(/https?:\/\/\S+/g,'ลิงก์')
+    .replace(/\s+/g,' ').trim();
+}
+
+// TTS
+function loadV(){const v=SY.getVoices();voiceObj=v.find(x=>x.lang==='th-TH'&&!/female|woman/i.test(x.name))||v.find(x=>x.lang.startsWith('th'))||v.find(x=>/daniel|david|google uk/i.test(x.name))||v.find(x=>x.lang.startsWith('en'))||v[0]||null;}
+if(SY){loadV();SY.onvoiceschanged=loadV;}
+
+function speak(text){
+  if(!SY)return;SY.cancel();
+  setTimeout(()=>{
+    const c=cleanTTS(text);if(!c)return;
+    const MAX=150,ch=[];let r=c;
+    while(r.length>MAX){let cut=r.lastIndexOf('ครับ',MAX);if(cut<MAX*.4)cut=r.lastIndexOf(' ',MAX);if(cut<1)cut=MAX;ch.push(r.slice(0,cut+1).trim());r=r.slice(cut+1).trim();}
+    if(r)ch.push(r);
+    let i=0;
+    const nxt=()=>{if(i>=ch.length){setSp(false);return;}const u=new SpeechSynthesisUtterance(ch[i++]);u.voice=voiceObj;u.lang='th-TH';u.rate=.86;u.pitch=.68;u.volume=1;if(i===1)u.onstart=()=>setSp(true);u.onend=nxt;u.onerror=()=>setSp(false);SY.speak(u);};nxt();
+  },130);
+}
+function stopSpeak(){SY&&SY.cancel();setSp(false);}
+function setSp(v){
+  speaking=v;
+  document.getElementById('stop-btn').style.display=v?'flex':'none';
+  setStat(v?'SPEAKING':listening?'LISTENING':'READY',v?'#66ddff':listening?'#ff6688':'');
+}
+
+// STT
+let rec=null;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+  rec=new SR();rec.lang='th-TH';rec.continuous=false;rec.interimResults=false;
+  rec.onresult=e=>{document.getElementById('msg-in').value=e.results[0][0].transcript;resize();setLis(false);};
+  rec.onerror=()=>setLis(false);rec.onend=()=>setLis(false);
+  document.getElementById('mic-btn').style.display='flex';
+}
+function toggleListen(){if(!rec)return;if(listening){rec.stop();setLis(false);}else{stopSpeak();rec.start();setLis(true);}}
+function setLis(v){
+  listening=v;
+  const w=document.getElementById('inp-wrap');
+  const m=document.getElementById('mic-btn');
+  const i=document.getElementById('msg-in');
+  if(v){w.classList.add('mic-on');m.classList.add('mic-on');i.placeholder='🎤 กำลังฟัง...';}
+  else{w.classList.remove('mic-on');m.classList.remove('mic-on');i.placeholder='พิมพ์หรือพูดกับ CIPHER...';}
+  setStat(v?'LISTENING':'READY',v?'#ff6688':'');
+}
+function setStat(t,c){
+  const e=document.getElementById('stat-txt');e.textContent=t;
+  e.style.color=c||'var(--dim)';
+  document.getElementById('spip').style.background=c||'var(--cya)';
+  document.getElementById('spip').style.boxShadow=`0 0 8px ${c||'var(--cya)'}`;
+}
+
+// Render message
+function addMsg(role,content,web){
+  const isU=role==='user';
+  const d=document.createElement('div');d.className='msg'+(isU?' usr':'');
+  const av=document.createElement('div');av.className='av';
+  const sp=document.createElement('span');sp.textContent=isU?'⬡':'CI';av.appendChild(sp);
+  const bd=document.createElement('div');bd.className='mb';
+  const lb=document.createElement('div');lb.className='ml';lb.textContent=isU?'◂ YOU':'CIPHER ▸';
+  if(web){const b=document.createElement('span');b.className='wb';b.textContent='🔍 SEARCH';lb.appendChild(b);}
+  const bb=document.createElement('div');bb.className='bub '+(isU?'usr':'ai');
+  bb.style.borderRadius=isU?'14px 3px 14px 14px':'3px 14px 14px 14px';
+  if(!isU){const g=document.createElement('div');g.className='bub-glow';bb.appendChild(g);}
+  const tx=document.createElement('span');tx.textContent=content;bb.appendChild(tx);
+  bd.appendChild(lb);bd.appendChild(bb);
+  if(!isU&&SY){const rb=document.createElement('button');rb.className='rbtn';rb.textContent='▶ เล่นซ้ำ';rb.onclick=()=>speak(content);bd.appendChild(rb);}
+  d.appendChild(av);d.appendChild(bd);
+  const ms=document.getElementById('messages');
+  const ld=document.getElementById('loading');
+  ms.insertBefore(d,ld);ld.scrollIntoView({behavior:'smooth'});
+}
+function setLoad(v){document.getElementById('loading').style.display=v?'flex':'none';if(v)document.getElementById('loading').scrollIntoView({behavior:'smooth'});}
+
+// Send
+async function sendMsg(){
+  const inp=document.getElementById('msg-in');
+  const t=inp.value.trim();if(!t)return;
+  inp.value='';resize();stopSpeak();
+  msgs.push({role:'user',content:t});addMsg('user',t,false);
+
+  if(offline){
+    const r=getOffline(t)||'ขออภัยครับท่าน ในโหมดออฟไลน์ผมยังไม่มีคำตอบสำหรับเรื่องนี้ครับ';
+    setTimeout(()=>{msgs.push({role:'assistant',content:r});addMsg('assistant',r,false);speak(r);},300);return;
+  }
+  setLoad(true);
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,system:PROMPT,messages:msgs.map(m=>({role:m.role,content:m.content})),tools:[{type:'web_search_20250305',name:'web_search'}]}),
+    });
+    const data=await res.json();
+    let reply='',web=false;
+    for(const b of(data.content||[])){if(b.type==='text')reply+=b.text;if(b.type==='tool_use'&&b.name==='web_search')web=true;}
+    if(!reply)reply='ขออภัยครับ ประมวลผลไม่ได้';
+    msgs.push({role:'assistant',content:reply});addMsg('assistant',reply,web);
+    if(autoSpeak)speak(reply);
+    if(data.usage)addCost(data.usage.input_tokens||0,data.usage.output_tokens||0);
+    else addCost(msgs.reduce((s,m)=>s+Math.ceil(m.content.length/3.5),0),Math.ceil(reply.length/3.5));
+  }catch(e){
+    const err='ขออภัยครับท่าน ตรวจพบปัญหาการเชื่อมต่อ กรุณาลองใหม่ครับ';
+    msgs.push({role:'assistant',content:err});addMsg('assistant',err,false);if(autoSpeak)speak(err);
+  }finally{setLoad(false);}
+}
+
+// Credit
+function addCost(i,o){
+  totalCost+=i*PIN+o*POUT;
+  localStorage.setItem('cipher_cost',totalCost.toFixed(8));
+  updateCBar();checkAlert();
+}
+function updateCBar(){
+  const f=document.getElementById('cbar-fill');
+  const p=document.getElementById('cbar-pct');
+  const c=document.getElementById('cbar-cost');
+  if(creditUSD<=0){f.style.width='100%';p.textContent='--%';c.style.display='none';return;}
+  const used=Math.min(totalCost/creditUSD,1);
+  const pLeft=Math.max(100-used*100,0);
+  f.style.width=`${(1-used)*100}%`;
+  p.textContent=`${pLeft.toFixed(0)}%`;
+  c.textContent=`$${totalCost.toFixed(4)}`;c.style.display='block';
+  if(pLeft<=5)f.style.background='linear-gradient(90deg,#880000,#ff2222)';
+  else if(pLeft<=20)f.style.background='linear-gradient(90deg,#885500,#ff8800)';
+  else f.style.background='linear-gradient(90deg,var(--blu),var(--cya))';
+}
+function checkAlert(){
+  if(creditUSD<=0)return;
+  const pl=(1-totalCost/creditUSD)*100;
+  if(pl<=5&&!alShown.d){alShown.d=true;showAlert('danger','🔴','CRITICAL — CREDIT CRITICAL',`เหลือน้อยกว่า 5% กรุณาเติมเครดิตที่ console.anthropic.com`);}
+  else if(pl<=warnPct&&!alShown.w){alShown.w=true;showAlert('warn','⚡',`WARNING — ${pl.toFixed(0)}% REMAINING`,`ใช้ไปแล้ว $${totalCost.toFixed(4)} จาก $${creditUSD.toFixed(2)}`);}
+}
+function showAlert(type,icon,title,msg){
+  const el=document.getElementById('cred-alert');
+  el.className=type;document.getElementById('al-icon').textContent=icon;
+  document.getElementById('al-title').textContent=title;document.getElementById('al-msg').textContent=msg;
+  el.style.display='flex';if(type==='warn')setTimeout(closeAlert,8000);
+}
+function closeAlert(){document.getElementById('cred-alert').style.display='none';}
+function showCreditModal(){document.getElementById('cr-amt').value=creditUSD||5;document.getElementById('cr-wp').value=warnPct;document.getElementById('cred-modal').style.display='flex';}
+function closeCreditModal(){document.getElementById('cred-modal').style.display='none';}
+function saveCred(){
+  const a=parseFloat(document.getElementById('cr-amt').value);
+  const w=parseInt(document.getElementById('cr-wp').value);
+  if(isNaN(a)||a<=0)return;
+  creditUSD=a;warnPct=isNaN(w)||w<=0?20:Math.min(w,50);alShown={w:false,d:false};
+  localStorage.setItem('cipher_credit',creditUSD);localStorage.setItem('cipher_warn_pct',warnPct);
+  closeCreditModal();updateCBar();
+}
+
+// Controls
+function toggleVoice(){
+  autoSpeak=!autoSpeak;if(!autoSpeak)stopSpeak();
+  const b=document.getElementById('vbtn');b.textContent=autoSpeak?'🔊':'🔇';b.classList.toggle('off',!autoSpeak);
+  document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';
+}
+function toggleMode(){
+  offline=!offline;const b=document.getElementById('mode-btn');
+  b.textContent=offline?'⚡ OFF':'🌐 ON';b.classList.toggle('offline',offline);
+  document.getElementById('ft-mode').textContent=offline?'OFFLINE':'ONLINE';
+  const m=offline?'เปลี่ยนเป็นโหมดออฟไลน์แล้วครับท่าน':'เปลี่ยนเป็นโหมดออนไลน์แล้วครับ พร้อมเต็มที่ครับท่าน';
+  msgs.push({role:'assistant',content:m});addMsg('assistant',m,false);if(autoSpeak)speak(m);
+}
+
+// Resize textarea
+function resize(){
+  const e=document.getElementById('msg-in');e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';
+  document.getElementById('send-btn').classList.toggle('rdy',e.value.trim().length>0);
+}
+document.getElementById('msg-in').addEventListener('input',resize);
+document.getElementById('msg-in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+
+// API Key
+function saveKey(){
+  const k=document.getElementById('api-inp').value.trim();
+  if(!k.startsWith('sk-')){alert('API Key ไม่ถูกต้องครับ');return;}
+  API_KEY=k;localStorage.setItem('cipher_key',k);startApp();
+}
+function clearKey(){if(!confirm('เปลี่ยน API Key ไหมครับ?'))return;localStorage.removeItem('cipher_key');location.reload();}
+document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();});
+
+function startApp(){
+  document.getElementById('api-scr').style.display='none';
+  document.getElementById('app').style.display='flex';
+  updateCBar();if(creditUSD<=0)setTimeout(showCreditModal,1500);
+  const g='ไซเฟอร์ออนไลน์แล้วครับ พร้อมรับใช้ท่านเต็มที่ครับ';
+  msgs.push({role:'assistant',content:g});addMsg('assistant',g,false);
+  if(autoSpeak&&SY)setTimeout(()=>speak(g),700);
+}
+
+// Hex BG
+(function(){
+  const cv=document.getElementById('bg-hex');
+  const ctx=cv.getContext('2d');
+  function draw(){
+    cv.width=window.innerWidth;cv.height=window.innerHeight;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    const s=52,h=s*Math.sqrt(3)/2;
+    ctx.strokeStyle='#0066ff';ctx.lineWidth=.6;
+    for(let row=-1;row<cv.height/h+2;row++){
+      for(let col=-1;col<cv.width/s*2+2;col++){
+        const x=(col+(row%2)*.5)*s*1.5;const y=row*h;
+        ctx.beginPath();
+        for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;ctx.lineTo(x+s/2*Math.cos(a),y+s/2*Math.sin(a));}
+        ctx.closePath();ctx.stroke();
+      }
+    }
+  }
+  draw();window.addEventListener('resize',draw);
+})();
+
+// Particles
+(function(){
+  const c=document.getElementById('bg-particles');
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');p.className='ptcl';
+    const sz=Math.random()*3+1;
+    const col=['#0066ff','#00aaff','#00ffee','#66ddff'][Math.floor(Math.random()*4)];
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${col};box-shadow:0 0 ${sz*3}px ${col};animation-duration:${8+Math.random()*12}s;animation-delay:-${Math.random()*15}s;opacity:0`;
+    c.appendChild(p);
+  }
+})();
+
+// Wave
+(function(){
+  const c=document.getElementById('ld-wave');
+  [2,4,7,5,9,6,4,8,5,3].forEach((h,i)=>{
+    const s=document.createElement('span');s.style.height=h*2+'px';s.style.animationDelay=i*.08+'s';c.appendChild(s);
+  });
+})();
+
+if(API_KEY)startApp();
+</script>
+</body>
+</html>
