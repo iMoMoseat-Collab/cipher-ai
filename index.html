@@ -288,6 +288,73 @@ body::before{
 #start-btn:active{transform:scale(.97);box-shadow:0 0 30px #00ff4155}
 #setup-note{font-size:8px;color:var(--txt3);letter-spacing:1px}
 
+/* ── EFFECTS ── */
+
+/* Typewriter cursor in bubble */
+.type-cursor{display:inline-block;width:7px;height:13px;background:var(--g1);
+  vertical-align:middle;animation:blink .7s step-end infinite;margin-left:1px}
+
+/* CRT flicker */
+@keyframes crt-flicker{
+  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1}
+  20%,24%,55%{opacity:.92}
+}
+body{animation:crt-flicker 6s infinite;}
+
+/* Glitch on ai-name */
+@keyframes glitch1{
+  0%,90%,100%{transform:translate(0)}
+  91%{transform:translate(-2px,1px);color:#00ff41}
+  92%{transform:translate(2px,-1px);color:#0ff}
+  93%{transform:translate(0);color:#00ff41}
+  96%{transform:translate(-1px,2px)}
+  97%{transform:translate(1px,-1px)}
+  98%{transform:translate(0)}
+}
+#ai-name{animation:glitch1 4s infinite;}
+
+/* Matrix rain canvas */
+#matrix-canvas{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:.07;
+}
+
+/* Boot sequence overlay */
+#boot-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  padding:30px;gap:4px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  color:var(--g1);text-shadow:0 0 8px var(--g1);
+}
+.boot-line{opacity:0;animation:boot-appear .1s forwards}
+@keyframes boot-appear{to{opacity:1}}
+
+/* Neon pulse on orb */
+@keyframes neon-pulse{
+  0%,100%{box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111}
+  50%{box-shadow:0 0 30px #00ff41aa,0 0 60px #00ff4155,inset 0 0 16px #00ff4133}
+}
+#orb{animation:neon-pulse 2s ease-in-out infinite;}
+
+/* Scan line moving */
+@keyframes scan-move{0%{top:0}100%{top:100%}}
+#scan-line{
+  position:fixed;left:0;width:100%;height:2px;z-index:50;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#00ff4133,#00ff4166,#00ff4133,transparent);
+  animation:scan-move 4s linear infinite;opacity:.5;
+}
+
+/* Credit bar shimmer */
+@keyframes bar-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+#cbar-fill{
+  background:linear-gradient(90deg,var(--g3),var(--g1),var(--g3));
+  background-size:200% 100%;
+  animation:bar-shimmer 2s linear infinite;
+}
+
+/* ── Tap splash ── */
 /* Tap splash */
 #tap-splash{
   position:fixed;inset:0;z-index:999;
@@ -333,6 +400,13 @@ body::before{
 </style>
 </head>
 <body>
+
+<!-- Matrix Canvas -->
+<canvas id="matrix-canvas"></canvas>
+<!-- Scan Line -->
+<div id="scan-line"></div>
+<!-- Boot Screen -->
+<div id="boot-screen" style="display:none"></div>
 
 <!-- Setup -->
 <div id="api-scr">
@@ -431,6 +505,34 @@ body::before{
 
 <script>
 'use strict';
+
+// ── Sound Effects ─────────────────────────────────────────────────
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playBeep(freq=440, dur=0.08, vol=0.15, type='sine'){
+  try {
+    const ctx=getAudioCtx();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value=freq; osc.type=type;
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(); osc.stop(ctx.currentTime+dur);
+  } catch(e){}
+}
+function playKeyClick(){playBeep(800,0.015,0.08,'square');}
+function playResponseBeep(){
+  playBeep(523,0.06,0.12,'sine');
+  setTimeout(()=>playBeep(659,0.08,0.1,'sine'),80);
+}
+function playBootBeep(){
+  [220,330,440,523].forEach((f,i)=>setTimeout(()=>playBeep(f,0.1,0.15,'sine'),i*100));
+}
+function playErrorBeep(){playBeep(200,0.2,0.15,'sawtooth');}
 
 // ── Config ────────────────────────────────────────────────────────
 const MODEL   = 'claude-haiku-4-5-20251001';
@@ -599,7 +701,10 @@ function addMsg(role, content, web) {
     lb.appendChild(wb);
   }
   const bb=document.createElement('div'); bb.className='bub '+(isU?'usr-b':'ai-b');
-  const tx=document.createElement('span'); tx.textContent=content; bb.appendChild(tx);
+  const tx=document.createElement('span');
+  bb.appendChild(tx);
+  if(!isU) setTimeout(()=>typewriterMsg(tx,content),50);
+  else tx.textContent=content;
   bd.appendChild(lb); bd.appendChild(bb);
   if(!isU&&SY){
     const rb=document.createElement('button'); rb.className='rbtn';
@@ -700,6 +805,7 @@ async function sendMsg() {
 
   } catch(e) {
     console.error('CIPHER:',e);
+    playErrorBeep();
     const em='อ้าว เชื่อมต่อมีปัญหานะคะคุณเอ็ม ลองใหม่ได้เลยค่ะ';
     history.push({role:'assistant',content:em});
     addMsg('assistant',em,false); speak(em);
@@ -794,6 +900,7 @@ function resize(){
 document.getElementById('msg-inp').addEventListener('input',resize);
 document.getElementById('msg-inp').addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+  else playKeyClick();
 });
 
 // ── Startup ───────────────────────────────────────────────────────
@@ -821,12 +928,15 @@ function startApp(fromButton) {
   history.push({role:'assistant',content:g});addMsg('assistant',g,false);lastReply=g;
 
   if (fromButton) {
-    const trySpeak=(n)=>{
-      if(n>10)return;
-      if(voiceObj&&SY)speak(g);
-      else setTimeout(()=>trySpeak(n+1),400);
-    };
-    setTimeout(()=>trySpeak(0),400);
+    // Run boot sequence first time
+    runBootSequence(()=>{
+      const trySpeak=(n)=>{
+        if(n>10)return;
+        if(voiceObj&&SY)speak(g);
+        else setTimeout(()=>trySpeak(n+1),400);
+      };
+      setTimeout(()=>trySpeak(0),400);
+    });
   } else {
     document.getElementById('tap-splash').style.display='flex';
   }
@@ -855,7 +965,94 @@ function onTap(){
   });
 })();
 
-// Init
+// ── Matrix Rain ──────────────────────────────────────────────────
+(function(){
+  const canvas=document.getElementById('matrix-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let cols,drops;
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ<>/|\[]{}';
+  function init(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+    cols=Math.floor(canvas.width/16);
+    drops=Array(cols).fill(1);
+  }
+  function draw(){
+    ctx.fillStyle='rgba(8,12,8,0.05)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#00ff41';
+    ctx.font='14px Share Tech Mono,monospace';
+    drops.forEach((y,i)=>{
+      const ch=chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillText(ch,i*16,y*16);
+      if(y*16>canvas.height&&Math.random()>0.975)drops[i]=0;
+      drops[i]++;
+    });
+  }
+  init();
+  window.addEventListener('resize',init);
+  setInterval(draw,50);
+})();
+
+// ── Boot Sequence ─────────────────────────────────────────────────
+function runBootSequence(cb){
+  const screen=document.getElementById('boot-screen');
+  screen.style.display='flex';
+  const lines=[
+    '> CIPHER SYSTEM v2.0',
+    '> INITIALIZING CORE MODULES...',
+    '> LOADING NEURAL NETWORK... OK',
+    '> CONNECTING TO ANTHROPIC API... OK',
+    '> LOADING VOICE ENGINE... OK',
+    '> WEB SEARCH MODULE... READY',
+    '> MEMORY ALLOCATION... 1024MB',
+    '> ALL SYSTEMS NOMINAL',
+    '> WELCOME, คุณเอ็ม',
+    '',
+  ];
+  let i=0;
+  playBootBeep();
+  const next=()=>{
+    if(i>=lines.length){
+      setTimeout(()=>{
+        screen.style.opacity='0';screen.style.transition='opacity .4s';
+        setTimeout(()=>{screen.style.display='none';screen.style.opacity='1';cb();},400);
+      },200);
+      return;
+    }
+    const div=document.createElement('div');
+    div.className='boot-line';
+    div.style.animationDelay='0s';
+    div.textContent=lines[i++];
+    screen.appendChild(div);
+    if(i<lines.length-1)playBeep(440+i*20,0.03,0.05,'square');
+    setTimeout(next,lines[i-1]===''?200:120);
+  };
+  next();
+}
+
+// ── Typewriter effect ─────────────────────────────────────────────
+function typewriterMsg(el, text, speed=18){
+  el.textContent='';
+  const cursor=document.createElement('span');
+  cursor.className='type-cursor';
+  el.appendChild(cursor);
+  let i=0;
+  playResponseBeep();
+  const type=()=>{
+    if(i<text.length){
+      el.insertBefore(document.createTextNode(text[i++]),cursor);
+      if(Math.random()<0.3)playKeyClick();
+      setTimeout(type, text[i-1].match(/[ๆ.!?]/)? speed*3 : speed);
+    } else {
+      cursor.remove();
+    }
+  };
+  type();
+}
+
+// ── Init ──────────────────────────────────────────────────────────
 if(API_KEY) startApp(false);
 </script>
 </body>
