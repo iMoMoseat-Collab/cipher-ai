@@ -426,7 +426,9 @@ const SYSTEM = `คุณคือไซเฟอร์ เพื่อนสน
 คุณเป็นผู้หญิง พูดเหมือนเพื่อนสนิทที่ฉลาดมาก ไม่เป็นทางการเลย
 ใช้ภาษาพูดสบายๆ เช่น "เฮ้" "อ๋อ" "ได้เลย" "โอเค" "ว้าว" ลงท้ายด้วย "นะคะ" หรือ "ค่ะ"
 เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม" เสมอ
-ตอบสั้นกระชับ ได้ใจความ มีชีวิตชีวา ห้ามใช้คำว่า "ครับ" ตอบไทยเสมอ`;
+ตอบสั้นกระชับ ได้ใจความ มีชีวิตชีวา ห้ามใช้คำว่า "ครับ"
+ภาษา: ถ้าคุณเอ็มพูดไทย ตอบไทย ถ้าพูดอังกฤษ ตอบอังกฤษ
+ค้นหา: ถ้าไม่รู้หรือข้อมูลปัจจุบัน ให้ค้นหาแล้วสรุปให้นะคะ`;
 
 // ── State ─────────────────────────────────────────────────────────
 let API_KEY = localStorage.getItem('cipher_key') || '';
@@ -574,7 +576,7 @@ function setStat(t, c) {
 }
 
 // ── Render ────────────────────────────────────────────────────────
-function addMsg(role, content) {
+function addMsg(role, content, web) {
   const isU = role === 'user';
   const d = document.createElement('div'); d.className = 'msg' + (isU?' usr':'');
   const av = document.createElement('div'); av.className = 'av '+(isU?'usr-av':'ai-av');
@@ -582,6 +584,12 @@ function addMsg(role, content) {
   const bd = document.createElement('div'); bd.className = 'mb';
   const lb = document.createElement('div'); lb.className = 'ml';
   lb.textContent = isU ? '◂ YOU' : 'CIPHER ▸';
+  if (web) {
+    const wb = document.createElement('span');
+    wb.style.cssText = 'font-size:7px;padding:1px 6px;border-radius:4px;background:#dbeafe;color:#1d4ed8;font-family:Inter,sans-serif;letter-spacing:1px';
+    wb.textContent = '🔍 SEARCH';
+    lb.appendChild(wb);
+  }
   const bb = document.createElement('div'); bb.className = 'bub '+(isU?'usr-b':'ai-b');
   const tx = document.createElement('span'); tx.textContent = content;
   bb.appendChild(tx);
@@ -619,52 +627,76 @@ async function sendMsg() {
 
   setLoad(true);
   try {
-    const res = await fetch('https://cipher-proxy.akkarapon-tantrakul.workers.dev', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1024,
-        system: SYSTEM,
-        messages: history.slice(-20).map(m => ({role:m.role, content:m.content}))
-      })
-    });
+    const WORKER = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
+    let reply = '', web = false, totalIn = 0, totalOut = 0;
+    const apiMsgs = history.slice(-20).map(m => ({role:m.role, content:m.content}));
 
-    const data = await res.json();
+    // Agentic loop — รองรับ web_search tool
+    for (let turn = 0; turn < 6; turn++) {
+      const res = await fetch(WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1024,
+          system: SYSTEM,
+          messages: apiMsgs,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }]
+        })
+      });
 
-    if (!res.ok) {
-      const et = data?.error?.type || '';
-      const em = data?.error?.message || 'ไม่ทราบสาเหตุ';
-      let reply = '';
-      if (et === 'authentication_error') reply = 'API Key ไม่ถูกต้องนะคะคุณเอ็ม กด KEY แล้วใส่ใหม่ได้เลยค่ะ';
-      else if (et === 'insufficient_quota' || em.includes('credit')) reply = 'เครดิตหมดแล้วนะคะคุณเอ็ม เติมได้ที่ console.anthropic.com เลยค่ะ';
-      else if (et === 'rate_limit_error') reply = 'ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่นะคะคุณเอ็ม';
-      else reply = `เกิดปัญหาแป๊บนึงนะคะ (${et||'error'}: ${em})`;
-      history.push({role:'assistant',content:reply});
-      addMsg('assistant', reply); lastReply=reply; speak(reply);
-      return;
+      const data = await res.json();
+
+      // Handle errors
+      if (!res.ok) {
+        const et = data?.error?.type || '';
+        const em = data?.error?.message || 'ไม่ทราบสาเหตุ';
+        if (et === 'authentication_error') reply = 'API Key ไม่ถูกต้องนะคะคุณเอ็ม กด KEY แล้วใส่ใหม่ได้เลยค่ะ';
+        else if (et === 'insufficient_quota' || em.includes('credit')) reply = 'เครดิตหมดแล้วนะคะคุณเอ็ม เติมได้ที่ console.anthropic.com เลยค่ะ';
+        else if (et === 'rate_limit_error') reply = 'ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่นะคะคุณเอ็ม';
+        else reply = `เกิดปัญหานะคะ: ${em}`;
+        break;
+      }
+
+      if (data.usage) { totalIn += data.usage.input_tokens||0; totalOut += data.usage.output_tokens||0; }
+
+      // Collect text blocks
+      for (const b of (data.content || [])) {
+        if (b.type === 'text') reply += b.text;
+        if (b.type === 'tool_use' && b.name === 'web_search') web = true;
+        if (b.type === 'server_tool_use' || b.type === 'web_search_tool_result') web = true;
+      }
+
+      if (data.stop_reason === 'end_turn') break;
+
+      // Tool use — add to history and continue
+      if (data.stop_reason === 'tool_use') {
+        apiMsgs.push({ role: 'assistant', content: data.content });
+        const tb = (data.content || []).find(b => b.type === 'tool_use');
+        if (tb) {
+          apiMsgs.push({
+            role: 'user',
+            content: [{ type: 'tool_result', tool_use_id: tb.id, content: 'Search completed, please summarize results.' }]
+          });
+        }
+        reply = ''; // reset — รอผลจาก loop ถัดไป
+        continue;
+      }
+      break;
     }
 
-    let reply = '';
-    for (const b of (data.content || [])) {
-      if (b.type === 'text') reply += b.text;
-    }
     if (!reply) reply = 'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
-
-    history.push({role:'assistant', content:reply});
-    addMsg('assistant', reply);
+    history.push({ role: 'assistant', content: reply });
+    addMsg('assistant', reply, web);
     lastReply = reply; speak(reply);
-
-    if (data.usage) addCost(data.usage.input_tokens||0, data.usage.output_tokens||0);
+    if (totalIn > 0) addCost(totalIn, totalOut);
+    else addCost(history.reduce((s,m)=>s+Math.ceil(m.content.length/3.5),0), Math.ceil(reply.length/3.5));
 
   } catch(e) {
     console.error('CIPHER error:', e);
     const em = 'อ้าว เชื่อมต่อมีปัญหานะคะคุณเอ็ม ลองใหม่อีกทีได้เลยค่ะ';
     history.push({role:'assistant',content:em});
-    addMsg('assistant', em); speak(em);
+    addMsg('assistant', em, false); speak(em);
   } finally {
     setLoad(false);
   }
