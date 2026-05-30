@@ -924,7 +924,7 @@ function startApp(fromButton) {
 
   const h=new Date().getHours();
   const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';
-  const g=`สวัสดีค่ะ ${gt} คุณเอ็ม~ ไซเฟอร์ออนไลน์แล้วนะคะ มีอะไรให้ช่วยไหมคะ?`;
+  const g=`สวัสดี ${gt} คุณเอ็ม~ ไซเฟอร์ออนไลน์แล้วนะคะ มีอะไรให้ช่วยไหมคะ?`;
   history.push({role:'assistant',content:g});addMsg('assistant',g,false);lastReply=g;
 
   if (fromButton) {
