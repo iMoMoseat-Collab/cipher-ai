@@ -492,22 +492,22 @@ let creditUSD=parseFloat(localStorage.getItem('cipher_credit')||'0');
 let warnPct=parseInt(localStorage.getItem('cipher_warn_pct')||'20');
 let alShown={w:false,d:false};
 
-const PROMPT=`คุณคือ CIPHER — ระบบปัญญาประดิษฐ์ส่วนตัวขั้นสูง
-บุคลิก: พูดไทยเป็นหลัก สุภาพ ฉลาด มั่นใจ เรียก "ท่าน" เป็นครั้งคราว ตอบกระชับแต่ครบ
+const PROMPT=`คุณคือ CIPHER — ระบบปัญญาประดิษฐ์ส่วนตัวขั้นสูงของคุณเอ็ม
+บุคลิก: พูดไทยเป็นหลัก สุภาพ ฉลาด มั่นใจ เรียกผู้ใช้ว่า "คุณเอ็ม" เสมอ ตอบกระชับแต่ครบ
 ค้นหา: ถ้าไม่ทราบหรือข้อมูลปัจจุบัน ให้ค้นหาและสรุปเป็นภาษาไทย
 ตอบไทยเสมอ`;
 
 const OFFL=[
-  {k:["สวัสดี","หวัดดี","hello","hi"],r:"สวัสดีครับท่าน ไซเฟอร์พร้อมรับใช้แล้วครับ"},
-  {k:["ชื่ออะไร","คุณคือ","เป็นใคร"],r:"ผมคือไซเฟอร์ ระบบปัญญาประดิษฐ์ส่วนตัวขั้นสูงครับท่าน"},
+  {k:["สวัสดี","หวัดดี","hello","hi"],r:"สวัสดีครับคุณเอ็ม ไซเฟอร์พร้อมรับใช้แล้วครับ"},
+  {k:["ชื่ออะไร","คุณคือ","เป็นใคร"],r:"ผมคือไซเฟอร์ ระบบปัญญาประดิษฐ์ส่วนตัวขั้นสูงของคุณเอ็มครับ"},
   {k:["กี่โมง","เวลา"],r:()=>`ขณะนี้เวลา${new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})}นาฬิกาครับ`},
   {k:["วันนี้","วันที่"],r:()=>`วันนี้คือ${new Date().toLocaleDateString("th-TH",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}ครับ`},
-  {k:["ขอบคุณ","thanks"],r:"ยินดีให้บริการเสมอครับท่าน"},
+  {k:["ขอบคุณ","thanks"],r:"ยินดีให้บริการเสมอครับคุณเอ็ม"},
   {k:["ช่วยอะไร","ทำอะไรได้"],r:"ผมช่วยตอบคำถาม ค้นหาข้อมูล บอกเวลาวันที่ และคุยได้ทุกเรื่องครับ"},
-  {k:["เหนื่อย","เครียด","ท้อ"],r:"พักผ่อนบ้างนะครับท่าน ผมยังอยู่ตรงนี้เสมอครับ"},
-  {k:["ลาก่อน","บาย","bye"],r:"ลาก่อนครับท่าน เรียกผมได้ตลอดนะครับ"},
+  {k:["เหนื่อย","เครียด","ท้อ"],r:"พักผ่อนบ้างนะครับคุณเอ็ม ผมยังอยู่ตรงนี้เสมอครับ"},
+  {k:["ลาก่อน","บาย","bye"],r:"ลาก่อนครับคุณเอ็ม เรียกผมได้ตลอดนะครับ"},
   {k:["ตลก","joke"],r:"ทำไม AI ถึงไม่นอนดึก เพราะกลัว deep sleep ครับท่าน"},
-  {k:["ทดสอบ","test","ping"],r:"ระบบออนไลน์ครับท่าน พร้อมใช้งานเต็มที่ครับ"},
+  {k:["ทดสอบ","test","ping"],r:"ระบบออนไลน์ครับคุณเอ็ม พร้อมใช้งานเต็มที่ครับ"},
 ];
 function getOffline(t){const l=t.toLowerCase();for(const i of OFFL)if(i.k.some(k=>l.includes(k)))return typeof i.r==='function'?i.r():i.r;return null;}
 
@@ -530,17 +530,61 @@ function unlockAudio(){
 document.addEventListener('touchstart',unlockAudio,{once:true,passive:true});
 document.addEventListener('click',unlockAudio,{once:true});
 
+let voiceEN=null; // เสียงอังกฤษ
+
 function loadV(){
   const v=SY.getVoices();
-  // ค้นหา Narisa ก่อน แล้ว fallback ไปเสียงไทยอื่น
+  // Thai voice — Narisa ก่อน
   voiceObj=v.find(x=>/narisa/i.test(x.name))
     ||v.find(x=>x.lang==='th-TH'&&/narong/i.test(x.name))
     ||v.find(x=>x.lang==='th-TH')
     ||v.find(x=>x.lang.startsWith('th'))
-    ||v.find(x=>/daniel|google uk english male/i.test(x.name))
-    ||v.find(x=>x.lang.startsWith('en'))||v[0]||null;
+    ||v[0]||null;
+  // English voice — Google UK / Daniel / Samantha
+  voiceEN=v.find(x=>/google uk english male/i.test(x.name))
+    ||v.find(x=>/daniel/i.test(x.name)&&x.lang.startsWith('en'))
+    ||v.find(x=>/samantha|karen|moira/i.test(x.name))
+    ||v.find(x=>x.lang==='en-GB')
+    ||v.find(x=>x.lang==='en-US')
+    ||v.find(x=>x.lang.startsWith('en'))
+    ||null;
 }
 if(SY){loadV();SY.onvoiceschanged=loadV;setTimeout(()=>{if(!voiceObj)loadV();},600);}
+
+// detect ว่าข้อความส่วนใหญ่เป็นภาษาอะไร
+function detectLang(text){
+  const thaiChars=(text.match(/[฀-๿]/g)||[]).length;
+  const enChars=(text.match(/[a-zA-Z]/g)||[]).length;
+  const total=thaiChars+enChars;
+  if(total===0)return'th';
+  return thaiChars/total>=0.3?'th':'en';
+}
+
+// แบ่ง chunk ตามภาษา เพื่อสลับ voice ระหว่างพูด
+function splitByLang(text){
+  const chunks=[];
+  // แบ่งเป็นประโยคก่อน
+  const sentences=text.split(/(?<=[.!?।ๆ।])\s+|(?<=ครับ|ค่ะ|นะ|แล้ว)\s+/u).filter(s=>s.trim());
+  let buf='',bufLang='';
+  for(const s of sentences){
+    const lang=detectLang(s);
+    if(lang!==bufLang&&buf){
+      chunks.push({text:buf.trim(),lang:bufLang});
+      buf='';
+    }
+    bufLang=lang;
+    buf+=s+' ';
+  }
+  if(buf.trim())chunks.push({text:buf.trim(),lang:bufLang||'th'});
+  // รวม chunk เล็กๆ ที่ภาษาเดียวกัน
+  const merged=[];
+  for(const c of chunks){
+    if(merged.length&&merged[merged.length-1].lang===c.lang&&(merged[merged.length-1].text+c.text).length<150){
+      merged[merged.length-1].text+=' '+c.text;
+    } else merged.push({...c});
+  }
+  return merged;
+}
 
 // ลบ emoji และทำความสะอาดก่อนอ่าน
 function cleanForSpeech(text){
@@ -586,25 +630,18 @@ function speak(text){
   unlockAudio();SY.cancel();
   setTimeout(()=>{
     const c=cleanForSpeech(text);if(!c)return;
-    // แบ่งประโยคที่จุดสิ้นสุดประโยค
-    const sentences=c.split(/(?<=[.!?।ๆ])\s+|(?<=ครับ|ค่ะ|นะ|แล้ว)\s+/u).filter(s=>s.trim().length>0);
-    // รวม sentence สั้นๆ เข้าด้วยกัน
-    const chunks=[];let buf='';
-    for(const s of sentences){
-      if((buf+s).length>100&&buf){chunks.push(buf.trim());buf=s+' ';}
-      else buf+=s+' ';
-    }
-    if(buf.trim())chunks.push(buf.trim());
+    const chunks=splitByLang(c);
     if(!chunks.length)return;
-
     let i=0;
     const nxt=()=>{
       if(i>=chunks.length){setSp(false);stopKeepAlive();return;}
-      const u=new SpeechSynthesisUtterance(chunks[i++]);
-      u.voice=voiceObj;
-      u.lang='th-TH';
-      u.rate=0.9;    // เร็วขึ้นนิดนึง ฟังธรรมชาติกว่า
-      u.pitch=1.0;   // Narisa เสียงปกติ ไม่ต้องปรับ pitch
+      const chunk=chunks[i++];
+      const isEN=chunk.lang==='en';
+      const u=new SpeechSynthesisUtterance(chunk.text);
+      u.voice=isEN?(voiceEN||voiceObj):voiceObj;
+      u.lang=isEN?'en-GB':'th-TH';
+      u.rate=isEN?0.95:0.9;
+      u.pitch=1.0;
       u.volume=1;
       if(i===1)u.onstart=()=>{setSp(true);startKeepAlive();}
       u.onend=nxt;
@@ -829,8 +866,8 @@ function startApp(){
   updateCBar();if(creditUSD<=0)setTimeout(showCreditModal,2500);
 
   const hour=new Date().getHours();
-  const greetTime=hour<12?'อรุณสวัสดิ์ครับท่าน':hour<17?'สวัสดีตอนบ่ายครับท่าน':'สวัสดีตอนเย็นครับท่าน';
-  const g=greetTime+' ไซเฟอร์ออนไลน์และพร้อมรับใช้ท่านเต็มที่แล้วครับ มีอะไรให้ช่วยไหมครับ';
+  const greetTime=hour<12?'อรุณสวัสดิ์ครับคุณเอ็ม':hour<17?'สวัสดีตอนบ่ายครับคุณเอ็ม':'สวัสดีตอนเย็นครับคุณเอ็ม';
+  const g=greetTime+' ไซเฟอร์ออนไลน์และพร้อมรับใช้คุณเอ็มเต็มที่แล้วครับ มีอะไรให้ช่วยไหมครับ';
   msgs.push({role:'assistant',content:g});addMsg('assistant',g,false);lastReply=g;
 
   // โหลด voice แล้วพูดทันทีเมื่อพร้อม
