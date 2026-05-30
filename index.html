@@ -4,361 +4,359 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="CIPHER"/>
-<meta name="theme-color" content="#f0f4ff"/>
+<meta name="theme-color" content="#0a0f0a"/>
 <title>CIPHER</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+Thai:wght@300;400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --bg:#f0f4ff;
-  --bg2:#e8eeff;
-  --bg3:#ffffff;
-  --b1:#2563eb;--b2:#3b82f6;--b3:#60a5fa;--b4:#93c5fd;
-  --acc:#0ea5e9;
-  --txt:#0f172a;--txt2:#475569;--txt3:#94a3b8;
-  --brd:#dbeafe;--brd2:#bfdbfe;
-  --red:#ef4444;--ora:#f97316;--grn:#10b981;
-  --gold:#f59e0b;
-  --shadow:0 2px 16px rgba(37,99,235,0.10);
-  --shadow2:0 4px 32px rgba(37,99,235,0.16);
+  --bg:#080c08;--bg2:#0d120d;--bg3:#111811;
+  --g1:#00ff41;--g2:#00cc33;--g3:#008f23;--g4:#004d12;
+  --g5:#001a06;--dim:#003d10;
+  --txt:#00ff41;--txt2:#00cc33;--txt3:#006b1c;
+  --brd:#003d10;--brd2:#006b1c;
+  --red:#ff3333;--ora:#ff8800;--amber:#ffcc00;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;-webkit-font-smoothing:antialiased}
-html{height:100%;height:-webkit-fill-available}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html{height:100%;height:-webkit-fill-available;background:var(--bg)}
 body{
   min-height:100dvh;min-height:-webkit-fill-available;
   display:flex;flex-direction:column;
-  font-family:'Noto Sans Thai','Inter',sans-serif;
+  font-family:'Share Tech Mono','Noto Sans Thai',monospace;
   color:var(--txt);background:var(--bg);
   overflow:hidden;position:relative;
   padding-top:env(safe-area-inset-top);
   padding-bottom:env(safe-area-inset-bottom);
 }
 
-/* BG subtle gradient */
-body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:radial-gradient(ellipse 80% 40% at 50% 0%,#dbeafe88,transparent 60%),
-  radial-gradient(ellipse 50% 50% at 100% 100%,#ede9fe44,transparent 60%);
+/* Scanline effect */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+}
+
+/* CRT glow bg */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,#001a0688 0%,transparent 70%);
 }
 
 /* ── HEADER ── */
 #header{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 16px;
-  background:rgba(255,255,255,0.85);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  background:var(--bg2);
   border-bottom:1px solid var(--brd2);
   position:relative;z-index:20;flex-shrink:0;
-  box-shadow:0 1px 12px rgba(37,99,235,0.08);
+  box-shadow:0 0 20px #00ff4122;
 }
 
-/* Orb */
+/* Orb terminal style */
 #orb{
-  width:44px;height:44px;border-radius:50%;flex-shrink:0;cursor:pointer;
-  background:linear-gradient(135deg,var(--b1),var(--acc));
-  box-shadow:0 0 0 3px #dbeafe,var(--shadow2);
+  width:40px;height:40px;border-radius:4px;flex-shrink:0;cursor:pointer;
+  background:var(--bg3);
+  border:1px solid var(--g2);
+  box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111;
   display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
-  animation:orb-breath 3s ease-in-out infinite;
-  transition:transform .18s;
+  font-size:18px;
+  animation:orb-pulse 3s ease-in-out infinite;
+  transition:all .15s;
 }
-#orb:active{transform:scale(.92)}
-#orb::before{content:'';position:absolute;top:6px;left:8px;width:12px;height:8px;
-  border-radius:50%;background:rgba(255,255,255,.35);transform:rotate(-20deg);filter:blur(2px)}
-#orb-dot{width:10px;height:10px;border-radius:50%;background:white;
-  box-shadow:0 0 8px rgba(255,255,255,.8);position:relative;z-index:1}
-@keyframes orb-breath{0%,100%{box-shadow:0 0 0 3px #dbeafe,0 4px 20px rgba(37,99,235,.2)}
-  50%{box-shadow:0 0 0 4px #bfdbfe,0 4px 30px rgba(37,99,235,.35)}}
+#orb:active{transform:scale(.9)}
+@keyframes orb-pulse{0%,100%{box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111}50%{box-shadow:0 0 24px #00ff4188,inset 0 0 14px #00ff4122}}
 
-/* Name */
 #name-block{flex:1;min-width:0}
-#ai-name{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;
-  letter-spacing:5px;color:var(--b1);line-height:1}
-#ai-sub{font-size:9px;letter-spacing:2px;color:var(--txt3);margin-top:2px;font-family:'Inter',sans-serif}
-#stat-row{display:flex;align-items:center;gap:6px;margin-top:4px}
-#spip{width:6px;height:6px;border-radius:50%;background:var(--grn);
-  box-shadow:0 0 6px var(--grn);animation:pip 2s ease-in-out infinite;flex-shrink:0}
-@keyframes pip{0%,100%{opacity:1}50%{opacity:.25}}
-#stat-txt{font-size:8px;letter-spacing:1.5px;color:var(--txt3);font-family:'Inter',sans-serif}
-
-/* Controls */
-#hbtns{display:flex;gap:7px;align-items:center;flex-shrink:0}
-.hb{
-  width:38px;height:38px;border-radius:12px;font-size:16px;
-  border:1px solid var(--brd2);background:var(--bg3);
-  color:var(--b2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .18s;box-shadow:var(--shadow);
+#ai-name{
+  font-size:16px;font-weight:700;letter-spacing:4px;
+  color:var(--g1);text-shadow:0 0 10px var(--g1);line-height:1;
 }
-.hb:active{transform:scale(.9);background:var(--bg2)}
-.hb.off{opacity:.35;background:var(--bg)}
-.hb.red-btn{border-color:#fecaca;color:var(--red)}
-#mode-pill{
-  height:34px;padding:0 12px;border-radius:17px;
+#ai-sub{font-size:7px;letter-spacing:2px;color:var(--txt3);margin-top:2px}
+#stat-row{display:flex;align-items:center;gap:6px;margin-top:3px}
+#spip{width:6px;height:6px;border-radius:50%;background:var(--g1);
+  box-shadow:0 0 6px var(--g1);animation:pip 2s ease-in-out infinite}
+@keyframes pip{0%,100%{opacity:1}50%{opacity:.2}}
+#stat-txt{font-size:8px;letter-spacing:1px;color:var(--txt3)}
+
+#hbtns{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.hb{
+  width:36px;height:36px;border-radius:4px;font-size:14px;
   border:1px solid var(--brd2);background:var(--bg3);
-  color:var(--txt3);font-size:8px;letter-spacing:1.5px;
-  cursor:pointer;font-family:'Inter',sans-serif;
-  transition:all .18s;box-shadow:var(--shadow);white-space:nowrap;
+  color:var(--g2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;box-shadow:0 0 8px #00ff4111;
+}
+.hb:active{transform:scale(.88);background:var(--g5)}
+.hb.off{opacity:.3}
+.hb.red{border-color:#ff333355;color:var(--red)}
+#mode-pill{
+  height:32px;padding:0 10px;border-radius:4px;
+  border:1px solid var(--brd2);background:var(--bg3);
+  color:var(--txt3);font-size:7px;letter-spacing:1.5px;
+  cursor:pointer;font-family:'Share Tech Mono',monospace;
+  transition:all .15s;white-space:nowrap;
 }
 #mode-pill:active{transform:scale(.96)}
-#mode-pill.offline{border-color:#fed7aa;color:var(--ora);background:#fff7ed}
+#mode-pill.offline{border-color:#ff880055;color:var(--ora)}
 
 /* Credit bar */
 #cbar{
-  padding:5px 16px 3px;
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.6);
-  border-bottom:1px solid var(--brd);
+  padding:4px 14px;display:flex;align-items:center;gap:8px;
+  background:var(--bg2);border-bottom:1px solid var(--brd);
   position:relative;z-index:10;flex-shrink:0;
 }
-#cbar-lbl{font-size:7px;letter-spacing:2px;color:var(--txt3);font-family:'Inter',sans-serif;white-space:nowrap}
-#cbar-track{flex:1;height:3px;background:var(--brd);border-radius:2px;overflow:hidden;cursor:pointer}
-#cbar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--b1),var(--acc));transition:width .6s ease,background .4s}
-#cbar-pct{font-size:8px;color:var(--b2);min-width:28px;text-align:right;font-family:'Inter',sans-serif;font-weight:500}
+#cbar-lbl{font-size:7px;letter-spacing:2px;color:var(--txt3);white-space:nowrap}
+#cbar-track{flex:1;height:3px;background:var(--dim);border-radius:1px;overflow:hidden;cursor:pointer}
+#cbar-fill{height:100%;border-radius:1px;background:linear-gradient(90deg,var(--g3),var(--g1));transition:width .6s,background .4s}
+#cbar-pct{font-size:8px;color:var(--g2);min-width:28px;text-align:right}
 
 /* Messages */
 #msgs{
   flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:16px 14px 8px;
-  display:flex;flex-direction:column;gap:12px;
+  padding:12px 12px 6px;
+  display:flex;flex-direction:column;gap:10px;
   position:relative;z-index:5;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
 }
-::-webkit-scrollbar{width:0px}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
 
-.msg{animation:msg-up .25s cubic-bezier(.22,1,.36,1) both;display:flex;gap:9px;align-items:flex-end}
+.msg{animation:msg-in .2s ease both;display:flex;gap:8px;align-items:flex-start}
 .msg.usr{flex-direction:row-reverse}
-@keyframes msg-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 .av{
-  width:32px;height:32px;border-radius:10px;flex-shrink:0;
+  width:28px;height:28px;border-radius:3px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  font-size:9px;font-weight:700;letter-spacing:1px;border:1px solid var(--brd2);
 }
-.av.ai-av{
-  background:linear-gradient(135deg,var(--b1),var(--acc));
-  color:white;box-shadow:var(--shadow);
-}
-.av.usr-av{
-  border-radius:50%;background:var(--bg2);
-  border:1px solid var(--brd2);color:var(--txt3);font-size:15px;
-}
+.av.ai-av{background:var(--g5);color:var(--g1);box-shadow:0 0 8px #00ff4122}
+.av.usr-av{background:var(--bg3);color:var(--txt3)}
 
-.mb{max-width:82%;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.mb{max-width:85%;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 .msg.usr .mb{align-items:flex-end}
 
-.ml{font-size:7px;letter-spacing:2px;color:var(--txt3);padding:0 4px;
-  font-family:'Inter',sans-serif;display:flex;gap:6px;align-items:center}
+.ml{font-size:7px;letter-spacing:1.5px;color:var(--txt3);padding:0 3px;
+  display:flex;gap:5px;align-items:center}
+.wb{font-size:6px;padding:1px 5px;border-radius:2px;
+  background:var(--g5);color:var(--g2);border:1px solid var(--brd2);letter-spacing:1px}
 
 .bub{
-  padding:11px 15px;font-size:15px;line-height:1.7;
-  color:var(--txt);word-break:break-word;white-space:pre-wrap;
-  font-family:'Noto Sans Thai',sans-serif;
+  padding:10px 13px;font-size:14px;line-height:1.7;
+  word-break:break-word;white-space:pre-wrap;
+  border-radius:2px;border-left:2px solid;
+  font-family:'Noto Sans Thai','Share Tech Mono',monospace;
   -webkit-user-select:text;user-select:text;
 }
 .bub.ai-b{
-  background:var(--bg3);
-  border:1px solid var(--brd2);
-  border-radius:4px 18px 18px 18px;
-  box-shadow:var(--shadow);
+  background:var(--bg2);color:var(--g1);
+  border-color:var(--g2);
+  box-shadow:0 0 12px #00ff4111;
+  text-shadow:0 0 8px #00ff4133;
 }
 .bub.usr-b{
-  border-radius:18px 4px 18px 18px;
-  background:var(--b1);
-  color:white;
-  box-shadow:var(--shadow2);
+  background:var(--bg3);color:var(--g3);
+  border-color:var(--dim);
+  text-align:right;
 }
 
 .rbtn{
-  padding:3px 10px;border-radius:8px;font-size:8px;letter-spacing:1.5px;
-  border:1px solid var(--brd2);background:transparent;
-  color:var(--txt3);font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;
+  padding:2px 8px;border-radius:2px;font-size:7px;letter-spacing:1px;
+  border:1px solid var(--brd);background:transparent;
+  color:var(--txt3);cursor:pointer;transition:all .15s;
+  font-family:'Share Tech Mono',monospace;
 }
-.rbtn:active{background:var(--bg2);color:var(--b2)}
+.rbtn:active{background:var(--g5);color:var(--g1)}
 
 /* Loading */
-#loading{display:none;gap:9px;align-items:flex-end}
-#ld-av{width:32px;height:32px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--b1),var(--acc));
+#loading{display:none;gap:8px;align-items:flex-start}
+#ld-av{width:28px;height:28px;border-radius:3px;flex-shrink:0;
+  background:var(--g5);border:1px solid var(--brd2);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:white;
-  box-shadow:var(--shadow);animation:orb-breath 1s ease-in-out infinite;}
-#ld-bub{padding:11px 16px;border-radius:4px 18px 18px 18px;
-  background:var(--bg3);border:1px solid var(--brd2);box-shadow:var(--shadow);}
-#ld-lbl{font-size:7px;letter-spacing:2px;color:var(--txt3);margin-bottom:7px;font-family:'Inter',sans-serif}
+  font-size:9px;color:var(--g1);animation:orb-pulse 1s ease-in-out infinite}
+#ld-bub{padding:10px 13px;border-radius:2px;border-left:2px solid var(--g2);
+  background:var(--bg2);box-shadow:0 0 12px #00ff4111}
+#ld-lbl{font-size:7px;letter-spacing:2px;color:var(--txt3);margin-bottom:6px}
 .wave{display:flex;align-items:center;gap:3px}
-.wave span{width:3px;border-radius:3px;background:var(--b3);display:block;animation:wv .9s ease-in-out infinite}
-@keyframes wv{0%,100%{transform:scaleY(.3);opacity:.4}50%{transform:scaleY(1.5);opacity:1}}
+.wave span{width:3px;border-radius:1px;background:var(--g2);display:block;animation:wv .8s ease-in-out infinite}
+@keyframes wv{0%,100%{transform:scaleY(.3);opacity:.3}50%{transform:scaleY(1.5);opacity:1}}
+
+/* Typing cursor blink */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+#cursor{display:inline-block;width:8px;height:14px;background:var(--g1);vertical-align:middle;animation:blink .8s step-end infinite;margin-left:2px}
 
 /* Input */
 #inp-wrap{
-  padding:10px 14px max(14px,env(safe-area-inset-bottom));
-  background:rgba(255,255,255,.92);
-  border-top:1px solid var(--brd2);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:8px 12px max(12px,env(safe-area-inset-bottom));
+  background:var(--bg2);border-top:1px solid var(--brd2);
   position:relative;z-index:10;flex-shrink:0;
-  box-shadow:0 -2px 16px rgba(37,99,235,.06);
+  box-shadow:0 -4px 20px #00ff4108;
 }
+/* Terminal prompt line */
+#inp-wrap::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g2)55,transparent);
+}
+
 #inp-box{
-  display:flex;gap:8px;align-items:flex-end;
-  background:var(--bg);
-  border:1.5px solid var(--brd2);
-  border-radius:22px;
-  padding:9px 9px 9px 16px;
-  transition:border-color .25s,box-shadow .25s;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.04);
+  display:flex;gap:6px;align-items:flex-end;
+  background:var(--bg3);
+  border:1px solid var(--brd2);
+  border-radius:3px;
+  padding:8px 8px 8px 12px;
+  transition:border-color .2s,box-shadow .2s;
+  box-shadow:0 0 0 0 transparent;
 }
-#inp-box:focus-within{border-color:var(--b2);box-shadow:0 0 0 3px #dbeafe,inset 0 1px 3px rgba(0,0,0,.04)}
-#inp-box.mic-on{border-color:#fca5a5;box-shadow:0 0 0 3px #fee2e2}
+#inp-box:focus-within{
+  border-color:var(--g1);
+  box-shadow:0 0 16px #00ff4133;
+}
+#inp-box.mic-on{border-color:var(--red);box-shadow:0 0 16px #ff333333}
+
+/* Prompt symbol */
+#prompt-sym{color:var(--g1);font-size:14px;padding-bottom:1px;flex-shrink:0;
+  text-shadow:0 0 8px var(--g1)}
+
 #msg-inp{
   flex:1;background:transparent;border:none;outline:none;
-  color:var(--txt);font-size:16px;font-family:'Noto Sans Thai',sans-serif;
-  line-height:1.5;min-height:26px;max-height:120px;resize:none;-webkit-appearance:none;
-  caret-color:var(--b1);
+  color:var(--g1);font-size:15px;font-family:'Noto Sans Thai','Share Tech Mono',monospace;
+  line-height:1.5;min-height:24px;max-height:120px;resize:none;
+  caret-color:var(--g1);text-shadow:0 0 6px #00ff4155;
 }
-#msg-inp::placeholder{color:var(--txt3)}
+#msg-inp::placeholder{color:var(--dim)}
+
 .ab{
-  width:40px;height:40px;border-radius:14px;font-size:18px;flex-shrink:0;
-  border:1px solid var(--brd2);background:var(--bg3);
+  width:38px;height:38px;border-radius:3px;font-size:16px;flex-shrink:0;
+  border:1px solid var(--brd2);background:var(--bg);
   color:var(--txt3);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:all .18s;box-shadow:var(--shadow);
+  transition:all .15s;
 }
-.ab:active{transform:scale(.88)}
-.ab.mic-on{border-color:#fca5a5;color:var(--red);background:#fff5f5}
-#send-ab{background:var(--b1);border-color:var(--b1);color:white;
-  box-shadow:var(--shadow2);}
-#send-ab.dim{background:var(--bg2);border-color:var(--brd2);color:var(--txt3);box-shadow:var(--shadow)}
-#footer-txt{text-align:center;font-size:7px;color:var(--txt3);margin-top:7px;letter-spacing:1.5px;font-family:'Inter',sans-serif}
+.ab:active{transform:scale(.88);background:var(--g5)}
+.ab.mic-on{border-color:var(--red);color:var(--red)}
+#send-ab{background:var(--g5);border-color:var(--g2);color:var(--g1);
+  box-shadow:0 0 10px #00ff4133;font-size:14px}
+#send-ab.dim{background:var(--bg);border-color:var(--brd);color:var(--dim);box-shadow:none}
 
-/* Setup screen */
+#footer-txt{text-align:center;font-size:7px;color:var(--dim);margin-top:6px;letter-spacing:1px}
+
+/* Setup */
 #api-scr{
   position:fixed;inset:0;z-index:200;
-  background:linear-gradient(160deg,#eff6ff 0%,#f0f4ff 50%,#faf5ff 100%);
+  background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:32px;gap:18px;
+  padding:32px;gap:16px;
 }
-#setup-orb{
-  width:84px;height:84px;border-radius:50%;
-  background:linear-gradient(135deg,var(--b1),var(--acc));
-  box-shadow:0 0 0 8px #dbeafe,var(--shadow2);
-  display:flex;align-items:center;justify-content:center;
-  animation:orb-breath 3s ease-in-out infinite;margin-bottom:4px;
-  position:relative;overflow:hidden;
+/* ASCII art style header */
+#setup-ascii{
+  font-size:11px;letter-spacing:2px;color:var(--g1);
+  text-shadow:0 0 10px var(--g1);text-align:center;line-height:1.6;
+  white-space:pre;
 }
-#setup-orb::before{content:'';position:absolute;top:10px;left:14px;width:18px;height:12px;
-  border-radius:50%;background:rgba(255,255,255,.4);transform:rotate(-20deg);filter:blur(3px)}
-#setup-orb-dot{width:14px;height:14px;border-radius:50%;background:white;
-  box-shadow:0 0 12px rgba(255,255,255,.9);position:relative;z-index:1}
-#setup-name{font-family:'Orbitron',sans-serif;font-size:30px;font-weight:900;
-  letter-spacing:10px;color:var(--b1)}
-#setup-sub{font-size:8px;letter-spacing:3px;color:var(--txt3);font-family:'Inter',sans-serif}
-#setup-desc{font-size:14px;color:var(--txt2);text-align:center;line-height:1.8;max-width:280px}
+#setup-name{font-size:28px;letter-spacing:10px;color:var(--g1);
+  text-shadow:0 0 20px var(--g1),0 0 40px #00ff4155}
+#setup-sub{font-size:7px;letter-spacing:3px;color:var(--txt3)}
+#setup-desc{font-size:13px;color:var(--g3);text-align:center;line-height:1.9;max-width:300px;
+  font-family:'Noto Sans Thai',monospace}
 #api-inp{
-  width:100%;max-width:340px;padding:14px 18px;
-  background:var(--bg3);border:1.5px solid var(--brd2);border-radius:16px;
-  color:var(--txt);font-size:15px;font-family:'Inter',sans-serif;
-  outline:none;transition:border-color .25s,box-shadow .25s;
-  box-shadow:var(--shadow);
+  width:100%;max-width:340px;padding:13px 16px;
+  background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;
+  color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;
+  outline:none;letter-spacing:1px;
+  transition:border-color .2s,box-shadow .2s;
+  text-shadow:0 0 6px #00ff4155;
 }
-#api-inp:focus{border-color:var(--b1);box-shadow:0 0 0 3px #dbeafe}
-#api-inp::placeholder{color:var(--txt3)}
+#api-inp:focus{border-color:var(--g1);box-shadow:0 0 16px #00ff4133}
+#api-inp::placeholder{color:var(--dim)}
 #start-btn{
-  width:100%;max-width:340px;padding:15px;
-  background:var(--b1);border:none;border-radius:16px;
-  color:white;font-size:13px;letter-spacing:4px;
-  font-family:'Orbitron',sans-serif;font-weight:700;
-  cursor:pointer;box-shadow:var(--shadow2);transition:all .2s;
+  width:100%;max-width:340px;padding:14px;
+  background:var(--g5);border:1px solid var(--g2);border-radius:3px;
+  color:var(--g1);font-size:12px;letter-spacing:4px;
+  font-family:'Share Tech Mono',monospace;font-weight:700;
+  cursor:pointer;box-shadow:0 0 20px #00ff4133;transition:all .2s;
+  text-shadow:0 0 8px var(--g1);
 }
-#start-btn:active{transform:scale(.97);opacity:.9}
-#setup-note{font-size:9px;color:var(--txt3);font-family:'Inter',sans-serif;letter-spacing:1px}
-
-/* Alerts */
-#cred-alert{position:fixed;top:0;left:0;right:0;z-index:300;
-  padding:12px 18px;display:none;align-items:center;gap:12px;
-  backdrop-filter:blur(20px);animation:msg-up .3s ease}
-#cred-alert.warn{background:#fffbebee;border-bottom:2px solid var(--gold)}
-#cred-alert.danger{background:#fef2f2ee;border-bottom:2px solid var(--red)}
-#al-i{font-size:18px;flex-shrink:0}
-#al-b{flex:1}
-#al-t{font-size:12px;font-weight:600;letter-spacing:1px;font-family:'Inter',sans-serif;color:var(--txt)}
-#al-m{font-size:11px;color:var(--txt2);margin-top:2px}
-#al-x{font-size:18px;cursor:pointer;color:var(--txt3);padding:4px 8px}
-
-/* Credit modal */
-#cred-modal{position:fixed;inset:0;z-index:150;
-  background:rgba(15,23,42,.3);backdrop-filter:blur(8px);
-  display:none;align-items:center;justify-content:center}
-#cred-box{
-  background:var(--bg3);border:1px solid var(--brd2);border-radius:20px;
-  padding:26px 22px;width:90%;max-width:320px;box-shadow:var(--shadow2);
-}
-#cred-box h3{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;color:var(--b1);margin-bottom:6px}
-#cred-box p{font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:16px}
-.cr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.cr label{font-size:10px;color:var(--txt3);font-family:'Inter',sans-serif;white-space:nowrap}
-.cr input{flex:1;padding:10px 12px;background:var(--bg);border:1.5px solid var(--brd2);
-  border-radius:10px;color:var(--txt);font-size:14px;outline:none;text-align:center;transition:border-color .2s}
-.cr input:focus{border-color:var(--b1)}
-#cr-save{width:100%;padding:13px;border-radius:12px;background:var(--b1);
-  border:none;color:white;font-size:11px;letter-spacing:3px;
-  font-family:'Orbitron',sans-serif;font-weight:700;cursor:pointer;box-shadow:var(--shadow2);transition:all .2s}
-#cr-save:active{transform:scale(.97)}
-#cr-skip{display:block;text-align:center;margin-top:10px;font-size:10px;
-  color:var(--txt3);cursor:pointer;font-family:'Inter',sans-serif}
+#start-btn:active{transform:scale(.97);box-shadow:0 0 30px #00ff4155}
+#setup-note{font-size:8px;color:var(--txt3);letter-spacing:1px}
 
 /* Tap splash */
 #tap-splash{
   position:fixed;inset:0;z-index:999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  background:rgba(240,244,255,.96);backdrop-filter:blur(10px);cursor:pointer;
+  background:rgba(8,12,8,.96);backdrop-filter:blur(4px);cursor:pointer;
 }
-#tap-orb{
-  width:72px;height:72px;border-radius:50%;
-  background:linear-gradient(135deg,var(--b1),var(--acc));
-  box-shadow:0 0 0 8px #dbeafe,var(--shadow2);
-  display:flex;align-items:center;justify-content:center;
-  animation:orb-breath 2s ease-in-out infinite;
-}
-#tap-orb-dot{width:12px;height:12px;border-radius:50%;background:white;box-shadow:0 0 10px white}
-#tap-title{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:4px;color:var(--b1)}
-#tap-sub{font-size:9px;letter-spacing:2px;color:var(--txt3);font-family:'Inter',sans-serif}
+#tap-icon{font-size:40px;animation:orb-pulse 2s ease-in-out infinite}
+#tap-title{font-size:11px;letter-spacing:4px;color:var(--g1);text-shadow:0 0 10px var(--g1)}
+#tap-sub{font-size:9px;letter-spacing:2px;color:var(--txt3)}
+
+/* Alerts */
+#cred-alert{position:fixed;top:0;left:0;right:0;z-index:300;
+  padding:10px 16px;display:none;align-items:center;gap:10px;
+  background:var(--bg2);border-bottom:1px solid;animation:msg-in .3s ease}
+#cred-alert.warn{border-color:var(--amber)}
+#cred-alert.danger{border-color:var(--red)}
+#al-i{font-size:16px;flex-shrink:0}
+#al-b{flex:1}
+#al-t{font-size:11px;font-weight:600;letter-spacing:1px;color:var(--g1)}
+#al-m{font-size:10px;color:var(--txt3);margin-top:1px}
+#al-x{font-size:16px;cursor:pointer;color:var(--txt3);padding:3px 6px}
+
+/* Credit modal */
+#cred-modal{position:fixed;inset:0;z-index:150;
+  background:rgba(8,12,8,.88);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center}
+#cred-box{background:var(--bg2);border:1px solid var(--brd2);border-radius:4px;
+  padding:24px 20px;width:90%;max-width:300px;box-shadow:0 0 30px #00ff4122}
+#cred-box h3{font-size:12px;letter-spacing:3px;color:var(--g1);margin-bottom:6px;text-shadow:0 0 8px var(--g1)}
+#cred-box p{font-size:12px;color:var(--g3);line-height:1.7;margin-bottom:14px;font-family:'Noto Sans Thai',monospace}
+.cr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cr label{font-size:9px;color:var(--txt3);white-space:nowrap;letter-spacing:1px}
+.cr input{flex:1;padding:9px 10px;background:var(--bg);border:1px solid var(--brd2);
+  border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;
+  outline:none;text-align:center;transition:border-color .2s}
+.cr input:focus{border-color:var(--g1);box-shadow:0 0 10px #00ff4122}
+#cr-save{width:100%;padding:11px;border-radius:3px;background:var(--g5);
+  border:1px solid var(--g2);color:var(--g1);font-size:10px;letter-spacing:3px;
+  font-family:'Share Tech Mono',monospace;cursor:pointer;box-shadow:0 0 12px #00ff4122;transition:all .2s}
+#cr-save:active{transform:scale(.97)}
+#cr-skip{display:block;text-align:center;margin-top:10px;font-size:9px;
+  color:var(--txt3);cursor:pointer;letter-spacing:1px}
 </style>
 </head>
 <body>
 
 <!-- Setup -->
 <div id="api-scr">
-  <div id="setup-orb"><div id="setup-orb-dot"></div></div>
+  <div id="setup-ascii">[ CIPHER SYSTEM v2.0 ]
+─────────────────────</div>
   <div id="setup-name">CIPHER</div>
   <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
   <div id="setup-desc">ใส่ Anthropic API Key เพื่อเปิดใช้งานค่ะ<br/>คีย์จะถูกเก็บในอุปกรณ์นี้เท่านั้น</div>
   <input id="api-inp" type="password" placeholder="sk-ant-api03-···"/>
-  <button id="start-btn" onclick="saveKey()">INITIALIZE CIPHER</button>
-  <div id="setup-note">Haiku 4.5 · console.anthropic.com</div>
+  <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
+  <div id="setup-note">MODEL: claude-haiku-4-5 · PROXY: cloudflare workers</div>
 </div>
 
 <!-- App -->
 <div id="app" style="display:none;flex-direction:column;height:100dvh;min-height:-webkit-fill-available">
 
   <div id="header">
-    <div id="orb" onclick="replayLast()">
-      <div id="orb-dot"></div>
-    </div>
+    <div id="orb" onclick="replayLast()" title="กดเพื่อเล่นซ้ำ">⬡</div>
     <div id="name-block">
       <div id="ai-name">CIPHER</div>
-      <div id="ai-sub">COGNITIVE INTELLIGENCE · HAIKU 4.5</div>
+      <div id="ai-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
       <div id="stat-row">
         <div id="spip"></div>
-        <span id="stat-txt">READY</span>
+        <span id="stat-txt">ONLINE</span>
       </div>
     </div>
     <div id="hbtns">
-      <button class="hb red-btn" id="stop-btn" style="display:none" onclick="stopSpeak()">⏹</button>
-      <button class="hb" id="vbtn" onclick="toggleVoice()">🔊</button>
-      <button id="mode-pill" onclick="toggleMode()">🌐 ONLINE</button>
-      <button class="hb" onclick="clearKey()" style="font-size:10px;font-family:Inter,sans-serif;letter-spacing:0;color:var(--txt3)">KEY</button>
+      <button class="hb red" id="stop-btn" style="display:none" onclick="stopSpeak()">⏹</button>
+      <button class="hb" id="vbtn" onclick="toggleVoice()" title="เสียง">🔊</button>
+      <button id="mode-pill" onclick="toggleMode()">🌐 ON</button>
+      <button class="hb" onclick="clearKey()" style="font-size:9px;letter-spacing:0" title="API Key">KEY</button>
     </div>
   </div>
 
@@ -372,7 +370,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <div id="loading" style="display:none;flex-direction:row">
       <div id="ld-av">CI</div>
       <div id="ld-bub">
-        <div id="ld-lbl">PROCESSING</div>
+        <div id="ld-lbl">PROCESSING<span id="cursor"></span></div>
         <div class="wave" id="ld-wave"></div>
       </div>
     </div>
@@ -380,23 +378,20 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
   <div id="inp-wrap">
     <div id="inp-box">
-      <textarea id="msg-inp" rows="1" placeholder="พิมพ์หรือพูดกับ CIPHER..."></textarea>
+      <span id="prompt-sym">&gt;_</span>
+      <textarea id="msg-inp" rows="1" placeholder="พิมพ์คำสั่งหรือคำถาม..."></textarea>
       <button class="ab" id="mic-btn" onclick="toggleListen()" style="display:none">🎤</button>
-      <button class="ab dim" id="send-ab" onclick="sendMsg()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
+      <button class="ab dim" id="send-ab" onclick="sendMsg()">▶</button>
     </div>
-    <div id="footer-txt">CIPHER · <span id="ft-mode">ONLINE</span> · <span id="ft-voice">VOICE ON</span></div>
+    <div id="footer-txt">CIPHER · <span id="ft-mode">ONLINE</span> · <span id="ft-voice">VOICE ON</span> · HAIKU 4.5</div>
   </div>
 </div>
 
 <!-- Tap splash -->
 <div id="tap-splash" style="display:none" onclick="onTap()">
-  <div id="tap-orb"><div id="tap-orb-dot"></div></div>
-  <div id="tap-title">แตะเพื่อเริ่มต้น</div>
-  <div id="tap-sub">TAP ANYWHERE TO START</div>
+  <div id="tap-icon">⬡</div>
+  <div id="tap-title">[ TAP TO INITIALIZE ]</div>
+  <div id="tap-sub">แตะที่ไหนก็ได้เพื่อเริ่ม</div>
 </div>
 
 <!-- Alerts -->
@@ -406,13 +401,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   <span id="al-x" onclick="closeAlert()">✕</span>
 </div>
 
+<!-- Credit modal -->
 <div id="cred-modal">
   <div id="cred-box">
-    <h3>CREDIT CONFIG</h3>
+    <h3>[ CREDIT CONFIG ]</h3>
     <p>ใส่เครดิตที่เติมไว้ ไซเฟอร์จะแจ้งเตือนเมื่อใกล้หมดนะคะ</p>
     <div class="cr"><label>CREDIT $</label><input id="cr-amt" type="number" min="1" max="9999" value="5"/></div>
-    <div class="cr"><label>ALERT AT</label><input id="cr-wp" type="number" min="1" max="50" value="20"/><label>%</label></div>
-    <button id="cr-save" onclick="saveCred()">SAVE</button>
+    <div class="cr"><label>ALERT %</label><input id="cr-wp" type="number" min="1" max="50" value="20"/></div>
+    <button id="cr-save" onclick="saveCred()">[ SAVE ]</button>
     <span id="cr-skip" onclick="closeCreditModal()">ข้ามไปก่อน</span>
   </div>
 </div>
@@ -421,45 +417,45 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 'use strict';
 
 // ── Config ────────────────────────────────────────────────────────
-const MODEL = 'claude-haiku-4-5-20251001';
-const SYSTEM = `คุณคือไซเฟอร์ เพื่อนสนิท AI ของคุณเอ็ม
-คุณเป็นผู้หญิง พูดเหมือนเพื่อนสนิทที่ฉลาดมาก ไม่เป็นทางการเลย
-ใช้ภาษาพูดสบายๆ เช่น "เฮ้" "อ๋อ" "ได้เลย" "โอเค" "ว้าว" ลงท้ายด้วย "นะคะ" หรือ "ค่ะ"
+const MODEL   = 'claude-haiku-4-5-20251001';
+const WORKER  = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
+const SYSTEM  = `คุณคือไซเฟอร์ เพื่อนสนิท AI ของคุณเอ็ม
+คุณเป็นผู้หญิง พูดภาษาไทยสบายๆ เป็นกันเอง ใช้ภาษาพูดเช่น "เฮ้" "อ๋อ" "ได้เลย" "โอเค" ลงท้ายด้วย "นะคะ" หรือ "ค่ะ"
 เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม" เสมอ
-ตอบสั้นกระชับ ได้ใจความ มีชีวิตชีวา ห้ามใช้คำว่า "ครับ"
-ภาษา: ถ้าคุณเอ็มพูดไทย ตอบไทย ถ้าพูดอังกฤษ ตอบอังกฤษ
-ค้นหา: ถ้าไม่รู้หรือข้อมูลปัจจุบัน ให้ค้นหาแล้วสรุปให้นะคะ`;
+ตอบสั้นกระชับ มีชีวิตชีวา ห้ามใช้คำว่า "ครับ"
+ถ้าคุณเอ็มพูดไทย ตอบไทย ถ้าพูดอังกฤษ ตอบอังกฤษ
+ถ้าต้องการข้อมูลสด ให้ใช้ web_search เพื่อค้นหาและสรุปผลให้คุณเอ็มเสมอ`;
 
 // ── State ─────────────────────────────────────────────────────────
-let API_KEY = localStorage.getItem('cipher_key') || '';
-let history = [];
+let API_KEY  = localStorage.getItem('cipher_key') || '';
+let history  = [];
 let speaking = false, listening = false, autoSpeak = true, offline = false;
 let voiceObj = null, voiceEN = null, audioUnlocked = false, lastReply = '';
-const SY = window.speechSynthesis;
+const SY     = window.speechSynthesis;
 
 // Credit
 const PIN = 1/1e6, POUT = 5/1e6;
 let totalCost = parseFloat(localStorage.getItem('cipher_cost') || '0');
 let creditUSD = parseFloat(localStorage.getItem('cipher_credit') || '0');
-let warnPct = parseInt(localStorage.getItem('cipher_warn_pct') || '20');
-let alShown = {w:false, d:false};
+let warnPct   = parseInt(localStorage.getItem('cipher_warn_pct') || '20');
+let alShown   = {w:false, d:false};
 
 // Offline replies
 const OFFL = [
-  {k:['สวัสดี','หวัดดี','hello','hi','hey'], r:'เฮ้ คุณเอ็ม~ ไซเฟอร์อยู่ตรงนี้แล้วนะคะ มีอะไรให้ช่วยไหมคะ'},
-  {k:['ชื่ออะไร','คุณคือ','เป็นใคร'], r:'ไซเฟอร์ไง เพื่อน AI ของคุณเอ็มเองเลยค่ะ'},
+  {k:['สวัสดี','หวัดดี','hello','hi'], r:'เฮ้ คุณเอ็ม~ ไซเฟอร์พร้อมแล้วนะคะ มีอะไรให้ช่วยไหมคะ'},
+  {k:['ชื่ออะไร','คุณคือ','เป็นใคร'], r:'ไซเฟอร์ไง เพื่อน AI ของคุณเอ็มเองค่ะ'},
   {k:['กี่โมง','เวลา'], r:()=>`ตอนนี้ ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. นะคะ`},
   {k:['วันนี้','วันที่'], r:()=>`วันนี้ ${new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} ค่ะ`},
-  {k:['ขอบคุณ','thanks'], r:'ไม่เป็นไรเลยค่ะ คุณเอ็ม~ 😊'},
-  {k:['ช่วยอะไร','ทำอะไรได้'], r:'ช่วยได้เยอะเลยนะคะ ตอบคำถาม คุยเล่น บอกเวลา หรืออะไรก็ได้เลยค่ะ'},
-  {k:['เหนื่อย','เครียด','ท้อ'], r:'อ้าว พักบ้างนะคะคุณเอ็ม ไซเฟอร์อยู่ตรงนี้เสมอนะคะ'},
+  {k:['ขอบคุณ','thanks'], r:'ไม่เป็นไรเลยค่ะคุณเอ็ม 😊'},
+  {k:['ช่วยอะไร','ทำอะไรได้'], r:'ช่วยได้เยอะเลยนะคะ ตอบคำถาม ค้นข้อมูล บอกเวลา หรือคุยเล่นก็ได้ค่ะ'},
+  {k:['เหนื่อย','เครียด'], r:'พักบ้างนะคะคุณเอ็ม ไซเฟอร์อยู่ตรงนี้เสมอนะคะ'},
   {k:['ลาก่อน','บาย','bye'], r:'บาย~ คุณเอ็ม เรียกได้ตลอดเลยนะคะ'},
-  {k:['ตลก','joke'], r:'ทำไม AI ถึงไม่นอนดึก เพราะกลัว deep sleep ไงคะ 555'},
-  {k:['ทดสอบ','test'], r:'โอเค ระบบปกติดีนะคะ พร้อมเต็มที่เลยค่ะ คุณเอ็ม'},
+  {k:['ตลก','joke'], r:'ทำไม AI ถึงไม่นอนดึก? เพราะกลัว deep sleep ไงคะ 555'},
+  {k:['ทดสอบ','test'], r:'ระบบปกติดีนะคะ พร้อมเต็มที่เลยค่ะ'},
 ];
 function getOffline(t) {
   const l = t.toLowerCase();
-  for (const i of OFFL) if (i.k.some(k => l.includes(k))) return typeof i.r==='function'?i.r():i.r;
+  for (const i of OFFL) if (i.k.some(k=>l.includes(k))) return typeof i.r==='function'?i.r():i.r;
   return null;
 }
 
@@ -467,354 +463,330 @@ function getOffline(t) {
 function unlockAudio() {
   if (audioUnlocked || !SY) return;
   const u = new SpeechSynthesisUtterance(' ');
-  u.volume = 0; u.rate = 10;
-  SY.speak(u);
+  u.volume = 0; u.rate = 10; SY.speak(u);
   audioUnlocked = true;
 }
-
 function loadVoices() {
-  const v = SY ? SY.getVoices() : [];
-  voiceObj = v.find(x => /narisa/i.test(x.name))
-    || v.find(x => /kanya/i.test(x.name))
-    || v.find(x => x.lang === 'th-TH')
-    || v.find(x => x.lang.startsWith('th'))
+  if (!SY) return;
+  const v = SY.getVoices();
+  voiceObj = v.find(x=>/narisa/i.test(x.name))
+    || v.find(x=>/kanya/i.test(x.name))
+    || v.find(x=>x.lang==='th-TH')
+    || v.find(x=>x.lang.startsWith('th'))
     || v[0] || null;
-  voiceEN = v.find(x => /samantha|karen/i.test(x.name))
-    || v.find(x => x.lang === 'en-GB')
-    || v.find(x => x.lang.startsWith('en')) || null;
+  voiceEN = v.find(x=>/samantha|karen/i.test(x.name))
+    || v.find(x=>x.lang==='en-GB')
+    || v.find(x=>x.lang.startsWith('en')) || null;
 }
-if (SY) { loadVoices(); SY.onvoiceschanged = loadVoices; setTimeout(loadVoices, 500); }
+if (SY) { loadVoices(); SY.onvoiceschanged=loadVoices; setTimeout(loadVoices,600); }
 
 function cleanText(t) {
   return t
-    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
-    .replace(/[\u{2600}-\u{27FF}]/gu, '')
-    .replace(/[*_`#>~|]/g, '')
-    .replace(/https?:\/\/\S+/g, '')
-    .replace(/\s+/g, ' ').trim();
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
+    .replace(/[\u{2600}-\u{27FF}]/gu,'')
+    .replace(/[*_`#>~|]/g,'')
+    .replace(/https?:\/\/\S+/g,'')
+    .replace(/\s+/g,' ').trim();
 }
-
 function detectLang(t) {
-  const th = (t.match(/[\u0E00-\u0E7F]/g) || []).length;
-  const en = (t.match(/[a-zA-Z]/g) || []).length;
-  return (th / (th + en + 0.1)) >= 0.3 ? 'th' : 'en';
+  const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length;
+  const en=(t.match(/[a-zA-Z]/g)||[]).length;
+  return (th/(th+en+0.1))>=0.3?'th':'en';
 }
 
-let keepAlive = null;
-function startKA() { stopKA(); keepAlive = setInterval(() => { if(SY&&speaking){SY.pause();SY.resume();}}, 9000); }
-function stopKA() { if(keepAlive){clearInterval(keepAlive);keepAlive=null;} }
+let keepAlive=null;
+function startKA(){stopKA();keepAlive=setInterval(()=>{if(SY&&speaking){SY.pause();SY.resume();}},9000);}
+function stopKA(){if(keepAlive){clearInterval(keepAlive);keepAlive=null;}}
 
 function speak(text) {
-  if (!SY || !autoSpeak) return;
+  if (!SY||!autoSpeak) return;
   unlockAudio(); SY.cancel();
-  setTimeout(() => {
-    const c = cleanText(text); if (!c) return;
-    // Split into sentences
-    const parts = c.split(/(?<=[.!?ๆ])\s+|(?<=ค่ะ|นะคะ|นะ|แล้ว)\s+/u).filter(s=>s.trim());
-    const chunks = []; let buf='', bufLang='';
+  setTimeout(()=>{
+    const c=cleanText(text); if(!c) return;
+    const parts=c.split(/(?<=[.!?ๆ])\s+|(?<=ค่ะ|นะคะ|นะ|แล้ว)\s+/u).filter(s=>s.trim());
+    const chunks=[]; let buf='',bufLang='';
     for (const s of parts) {
-      const lang = detectLang(s);
-      if (lang !== bufLang && buf) { chunks.push({t:buf.trim(),l:bufLang}); buf=''; }
-      bufLang = lang; buf += s + ' ';
+      const lang=detectLang(s);
+      if (lang!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}
+      bufLang=lang; buf+=s+' ';
     }
-    if (buf.trim()) chunks.push({t:buf.trim(), l:bufLang||'th'});
+    if (buf.trim()) chunks.push({t:buf.trim(),l:bufLang||'th'});
     if (!chunks.length) return;
-    let i = 0;
-    const nxt = () => {
-      if (i >= chunks.length) { setSp(false); stopKA(); return; }
-      const ch = chunks[i++];
-      const isEN = ch.l === 'en';
-      const u = new SpeechSynthesisUtterance(ch.t);
-      u.voice = isEN ? (voiceEN||voiceObj) : voiceObj;
-      u.lang = isEN ? 'en-GB' : 'th-TH';
-      u.rate = isEN ? 1.1 : 1.15;
-      u.pitch = 1.05; u.volume = 1;
-      if (i===1) u.onstart = () => { setSp(true); startKA(); };
-      u.onend = nxt;
-      u.onerror = e => { if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;} setSp(false);stopKA(); };
+    let i=0;
+    const nxt=()=>{
+      if(i>=chunks.length){setSp(false);stopKA();return;}
+      const ch=chunks[i++];
+      const isEN=ch.l==='en';
+      const u=new SpeechSynthesisUtterance(ch.t);
+      u.voice=isEN?(voiceEN||voiceObj):voiceObj;
+      u.lang=isEN?'en-GB':'th-TH';
+      u.rate=isEN?1.1:1.15; u.pitch=1.05; u.volume=1;
+      if(i===1)u.onstart=()=>{setSp(true);startKA();};
+      u.onend=nxt;
+      u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
       SY.speak(u);
     };
     nxt();
-  }, 200);
+  },200);
 }
-function stopSpeak() { SY&&SY.cancel(); setSp(false); stopKA(); }
-function setSp(v) {
-  speaking = v;
-  document.getElementById('stop-btn').style.display = v ? 'flex' : 'none';
-  setStat(v?'SPEAKING':listening?'LISTENING':'READY', v?'#2563eb':listening?'#ef4444':'');
+function stopSpeak(){SY&&SY.cancel();setSp(false);stopKA();}
+function setSp(v){
+  speaking=v;
+  document.getElementById('stop-btn').style.display=v?'flex':'none';
+  setStat(v?'SPEAKING':listening?'LISTENING':'ONLINE', v?'#00ff41':listening?'#ff3333':'');
 }
-function replayLast() { if(lastReply) { unlockAudio(); speak(lastReply); } }
+function replayLast(){if(lastReply){unlockAudio();speak(lastReply);}}
 
 // ── STT ──────────────────────────────────────────────────────────
-let rec = null;
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec=null;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if (SR) {
-  rec = new SR(); rec.lang='th-TH'; rec.continuous=false; rec.interimResults=false;
-  rec.onresult = e => { document.getElementById('msg-inp').value=e.results[0][0].transcript; resize(); setLis(false); };
-  rec.onerror = () => setLis(false); rec.onend = () => setLis(false);
-  document.getElementById('mic-btn').style.display = 'flex';
+  rec=new SR(); rec.lang='th-TH'; rec.continuous=false; rec.interimResults=false;
+  rec.onresult=e=>{document.getElementById('msg-inp').value=e.results[0][0].transcript;resize();setLis(false);};
+  rec.onerror=()=>setLis(false); rec.onend=()=>setLis(false);
+  document.getElementById('mic-btn').style.display='flex';
 }
-function toggleListen() {
-  if (!rec) return;
-  if (listening) { rec.stop(); setLis(false); }
-  else { stopSpeak(); unlockAudio(); rec.start(); setLis(true); }
+function toggleListen(){
+  if(!rec)return;
+  if(listening){rec.stop();setLis(false);}
+  else{stopSpeak();unlockAudio();rec.start();setLis(true);}
 }
-function setLis(v) {
-  listening = v;
-  document.getElementById('inp-box').classList.toggle('mic-on', v);
-  document.getElementById('mic-btn').classList.toggle('mic-on', v);
-  document.getElementById('msg-inp').placeholder = v ? '🎤 กำลังฟัง...' : 'พิมพ์หรือพูดกับ CIPHER...';
-  setStat(v?'LISTENING':'READY', v?'#ef4444':'');
+function setLis(v){
+  listening=v;
+  document.getElementById('inp-box').classList.toggle('mic-on',v);
+  document.getElementById('mic-btn').classList.toggle('mic-on',v);
+  document.getElementById('msg-inp').placeholder=v?'[ LISTENING... ]':'พิมพ์คำสั่งหรือคำถาม...';
+  setStat(v?'LISTENING':'ONLINE',v?'#ff3333':'');
 }
-
-function setStat(t, c) {
-  document.getElementById('stat-txt').textContent = t;
-  document.getElementById('stat-txt').style.color = c || 'var(--txt3)';
-  const pip = document.getElementById('spip');
-  pip.style.background = c || 'var(--grn)';
-  pip.style.boxShadow = `0 0 6px ${c||'var(--grn)'}`;
+function setStat(t,c){
+  document.getElementById('stat-txt').textContent=t;
+  const pip=document.getElementById('spip');
+  pip.style.background=c||'var(--g1)';
+  pip.style.boxShadow=`0 0 6px ${c||'var(--g1)'}`;
 }
 
 // ── Render ────────────────────────────────────────────────────────
 function addMsg(role, content, web) {
-  const isU = role === 'user';
-  const d = document.createElement('div'); d.className = 'msg' + (isU?' usr':'');
-  const av = document.createElement('div'); av.className = 'av '+(isU?'usr-av':'ai-av');
-  av.textContent = isU ? '⬡' : 'CI';
-  const bd = document.createElement('div'); bd.className = 'mb';
-  const lb = document.createElement('div'); lb.className = 'ml';
-  lb.textContent = isU ? '◂ YOU' : 'CIPHER ▸';
-  if (web) {
-    const wb = document.createElement('span');
-    wb.style.cssText = 'font-size:7px;padding:1px 6px;border-radius:4px;background:#dbeafe;color:#1d4ed8;font-family:Inter,sans-serif;letter-spacing:1px';
-    wb.textContent = '🔍 SEARCH';
+  const isU=role==='user';
+  const d=document.createElement('div'); d.className='msg'+(isU?' usr':'');
+  const av=document.createElement('div'); av.className='av '+(isU?'usr-av':'ai-av');
+  av.textContent=isU?'YOU':'CI';
+  const bd=document.createElement('div'); bd.className='mb';
+  const lb=document.createElement('div'); lb.className='ml';
+  lb.textContent=isU?'[ YOU ]':'[ CIPHER ]';
+  if(web){
+    const wb=document.createElement('span'); wb.className='wb'; wb.textContent='WEB SEARCH';
     lb.appendChild(wb);
   }
-  const bb = document.createElement('div'); bb.className = 'bub '+(isU?'usr-b':'ai-b');
-  const tx = document.createElement('span'); tx.textContent = content;
-  bb.appendChild(tx);
+  const bb=document.createElement('div'); bb.className='bub '+(isU?'usr-b':'ai-b');
+  const tx=document.createElement('span'); tx.textContent=content; bb.appendChild(tx);
   bd.appendChild(lb); bd.appendChild(bb);
-  if (!isU && SY) {
-    const rb = document.createElement('button'); rb.className = 'rbtn';
-    rb.textContent = '▶ เล่นซ้ำ';
-    rb.onclick = () => { unlockAudio(); speak(content); };
+  if(!isU&&SY){
+    const rb=document.createElement('button'); rb.className='rbtn';
+    rb.textContent='[ REPLAY ]';
+    rb.onclick=()=>{unlockAudio();speak(content);};
     bd.appendChild(rb);
   }
   d.appendChild(av); d.appendChild(bd);
-  const ms = document.getElementById('msgs');
-  ms.insertBefore(d, document.getElementById('loading'));
-  setTimeout(() => document.getElementById('loading').scrollIntoView({behavior:'smooth'}), 50);
+  document.getElementById('msgs').insertBefore(d,document.getElementById('loading'));
+  setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
 }
-
-function setLoad(v) {
-  document.getElementById('loading').style.display = v ? 'flex' : 'none';
-  if (v) setTimeout(() => document.getElementById('loading').scrollIntoView({behavior:'smooth'}), 50);
+function setLoad(v){
+  document.getElementById('loading').style.display=v?'flex':'none';
+  if(v)setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
 }
 
 // ── Send ──────────────────────────────────────────────────────────
 async function sendMsg() {
-  const inp = document.getElementById('msg-inp');
-  const t = inp.value.trim(); if (!t) return;
-  inp.value = ''; resize(); stopSpeak(); unlockAudio();
-  history.push({role:'user', content:t});
-  addMsg('user', t);
+  const inp=document.getElementById('msg-inp');
+  const t=inp.value.trim(); if(!t) return;
+  inp.value=''; resize(); stopSpeak(); unlockAudio();
+  history.push({role:'user',content:t});
+  addMsg('user',t,false);
 
   if (offline) {
-    const r = getOffline(t) || 'อ๋อ ตอนนี้ออฟไลน์อยู่ ตอบเรื่องนี้ไม่ได้นะคะ ลองสลับออนไลน์ก่อนได้เลยค่ะ';
-    setTimeout(() => { history.push({role:'assistant',content:r}); addMsg('assistant',r); lastReply=r; speak(r); }, 300);
+    const r=getOffline(t)||'อ๋อ ออฟไลน์อยู่นะคะ ตอบเรื่องนี้ไม่ได้ค่ะ ลองสลับออนไลน์ก่อนได้เลย';
+    setTimeout(()=>{history.push({role:'assistant',content:r});addMsg('assistant',r,false);lastReply=r;speak(r);},300);
     return;
   }
 
   setLoad(true);
   try {
-    const WORKER = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
-    let reply = '', web = false, totalIn = 0, totalOut = 0;
-    const apiMsgs = history.slice(-20).map(m => ({role:m.role, content:m.content}));
+    let reply='', web=false, totalIn=0, totalOut=0;
+    const apiMsgs=history.slice(-20).map(m=>({role:m.role,content:m.content}));
 
-    // Agentic loop — รองรับ web_search tool
-    for (let turn = 0; turn < 6; turn++) {
-      const res = await fetch(WORKER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-        body: JSON.stringify({
-          model: MODEL,
-          max_tokens: 1024,
-          system: SYSTEM,
-          messages: apiMsgs,
-          tools: [{ type: 'web_search_20250305', name: 'web_search' }]
+    // Agentic loop — รองรับ web_search
+    for (let turn=0; turn<6; turn++) {
+      const res=await fetch(WORKER, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':API_KEY},
+        body:JSON.stringify({
+          model:MODEL,
+          max_tokens:1024,
+          system:SYSTEM,
+          messages:apiMsgs,
+          tools:[{type:'web_search_20250305',name:'web_search'}]
         })
       });
 
-      const data = await res.json();
+      const data=await res.json();
 
-      // Handle errors
       if (!res.ok) {
-        const et = data?.error?.type || '';
-        const em = data?.error?.message || 'ไม่ทราบสาเหตุ';
-        if (et === 'authentication_error') reply = 'API Key ไม่ถูกต้องนะคะคุณเอ็ม กด KEY แล้วใส่ใหม่ได้เลยค่ะ';
-        else if (et === 'insufficient_quota' || em.includes('credit')) reply = 'เครดิตหมดแล้วนะคะคุณเอ็ม เติมได้ที่ console.anthropic.com เลยค่ะ';
-        else if (et === 'rate_limit_error') reply = 'ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่นะคะคุณเอ็ม';
-        else reply = `เกิดปัญหานะคะ: ${em}`;
+        const et=data?.error?.type||'';
+        const em=data?.error?.message||'unknown error';
+        if(et==='authentication_error') reply='API Key ไม่ถูกต้องนะคะคุณเอ็ม กด KEY แล้วใส่ใหม่ได้เลยค่ะ';
+        else if(et==='insufficient_quota'||em.includes('credit')) reply='เครดิตหมดแล้วนะคะคุณเอ็ม เติมได้ที่ console.anthropic.com เลยค่ะ';
+        else if(et==='rate_limit_error') reply='ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่นะคะ';
+        else reply=`เกิดปัญหานะคะ: ${em}`;
         break;
       }
 
-      if (data.usage) { totalIn += data.usage.input_tokens||0; totalOut += data.usage.output_tokens||0; }
+      if(data.usage){totalIn+=data.usage.input_tokens||0;totalOut+=data.usage.output_tokens||0;}
 
-      // Collect text blocks
-      for (const b of (data.content || [])) {
-        if (b.type === 'text') reply += b.text;
-        if (b.type === 'tool_use' && b.name === 'web_search') web = true;
-        if (b.type === 'server_tool_use' || b.type === 'web_search_tool_result') web = true;
+      for (const b of (data.content||[])) {
+        if(b.type==='text') reply+=b.text;
+        if(b.type==='tool_use'&&b.name==='web_search') web=true;
+        if(b.type==='server_tool_use'||b.type==='web_search_tool_result') web=true;
       }
 
-      if (data.stop_reason === 'end_turn') break;
+      if(data.stop_reason==='end_turn') break;
 
-      // Tool use — add to history and continue
-      if (data.stop_reason === 'tool_use') {
-        apiMsgs.push({ role: 'assistant', content: data.content });
-        const tb = (data.content || []).find(b => b.type === 'tool_use');
-        if (tb) {
-          apiMsgs.push({
-            role: 'user',
-            content: [{ type: 'tool_result', tool_use_id: tb.id, content: 'Search completed, please summarize results.' }]
-          });
-        }
-        reply = ''; // reset — รอผลจาก loop ถัดไป
-        continue;
+      if(data.stop_reason==='tool_use') {
+        apiMsgs.push({role:'assistant',content:data.content});
+        const tb=(data.content||[]).find(b=>b.type==='tool_use');
+        if(tb) apiMsgs.push({
+          role:'user',
+          content:[{type:'tool_result',tool_use_id:tb.id,content:'Search completed.'}]
+        });
+        reply=''; continue;
       }
       break;
     }
 
-    if (!reply) reply = 'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
-    history.push({ role: 'assistant', content: reply });
-    addMsg('assistant', reply, web);
-    lastReply = reply; speak(reply);
-    if (totalIn > 0) addCost(totalIn, totalOut);
-    else addCost(history.reduce((s,m)=>s+Math.ceil(m.content.length/3.5),0), Math.ceil(reply.length/3.5));
+    if(!reply) reply='อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
+    history.push({role:'assistant',content:reply});
+    addMsg('assistant',reply,web);
+    lastReply=reply; speak(reply);
+    if(totalIn>0) addCost(totalIn,totalOut);
+    else addCost(history.reduce((s,m)=>s+Math.ceil(m.content.length/3.5),0),Math.ceil(reply.length/3.5));
 
   } catch(e) {
-    console.error('CIPHER error:', e);
-    const em = 'อ้าว เชื่อมต่อมีปัญหานะคะคุณเอ็ม ลองใหม่อีกทีได้เลยค่ะ';
+    console.error('CIPHER:',e);
+    const em='อ้าว เชื่อมต่อมีปัญหานะคะคุณเอ็ม ลองใหม่ได้เลยค่ะ';
     history.push({role:'assistant',content:em});
-    addMsg('assistant', em, false); speak(em);
+    addMsg('assistant',em,false); speak(em);
   } finally {
     setLoad(false);
   }
 }
 
 // ── Credit ────────────────────────────────────────────────────────
-function addCost(i, o) {
-  totalCost += i*PIN + o*POUT;
-  localStorage.setItem('cipher_cost', totalCost.toFixed(8));
-  updateCBar(); checkAl();
+function addCost(i,o){totalCost+=i*PIN+o*POUT;localStorage.setItem('cipher_cost',totalCost.toFixed(8));updateCBar();checkAl();}
+function updateCBar(){
+  const f=document.getElementById('cbar-fill'),p=document.getElementById('cbar-pct');
+  if(creditUSD<=0){f.style.width='100%';p.textContent='--%';return;}
+  const used=Math.min(totalCost/creditUSD,1),pl=Math.max(100-used*100,0);
+  f.style.width=`${(1-used)*100}%`;p.textContent=`${pl.toFixed(0)}%`;
+  if(pl<=5)f.style.background='linear-gradient(90deg,#880000,#ff3333)';
+  else if(pl<=20)f.style.background='linear-gradient(90deg,#885500,#ff8800)';
+  else f.style.background='linear-gradient(90deg,var(--g3),var(--g1))';
 }
-function updateCBar() {
-  const f=document.getElementById('cbar-fill'), p=document.getElementById('cbar-pct');
-  if (creditUSD <= 0) { f.style.width='100%'; p.textContent='--%'; return; }
-  const used = Math.min(totalCost/creditUSD, 1);
-  const pl = Math.max(100-used*100, 0);
-  f.style.width = `${(1-used)*100}%`; p.textContent = `${pl.toFixed(0)}%`;
-  if (pl<=5) f.style.background='linear-gradient(90deg,#dc2626,#ef4444)';
-  else if (pl<=20) f.style.background='linear-gradient(90deg,#d97706,#f97316)';
-  else f.style.background='linear-gradient(90deg,var(--b1),var(--acc))';
+function checkAl(){
+  if(creditUSD<=0)return;
+  const pl=(1-totalCost/creditUSD)*100;
+  if(pl<=5&&!alShown.d){alShown.d=true;showAl('danger','⚠','[ CRITICAL ] เครดิตน้อยมากแล้วค่ะ',`เหลือต่ำกว่า 5% เติมได้ที่ console.anthropic.com เลยค่ะ`);}
+  else if(pl<=warnPct&&!alShown.w){alShown.w=true;showAl('warn','!',`[ WARNING ] เครดิตเหลือ ${pl.toFixed(0)}%`,`ใช้ไปแล้ว $${totalCost.toFixed(4)} จาก $${creditUSD.toFixed(2)} ค่ะ`);setTimeout(closeAlert,8000);}
 }
-function checkAl() {
-  if (creditUSD<=0) return;
-  const pl = (1-totalCost/creditUSD)*100;
-  if (pl<=5&&!alShown.d) { alShown.d=true; showAl('danger','🔴','เครดิตเหลือน้อยมากแล้วนะคะ!',`เหลือต่ำกว่า 5% เติมได้ที่ console.anthropic.com เลยค่ะ`); }
-  else if (pl<=warnPct&&!alShown.w) { alShown.w=true; showAl('warn','⚠️',`เครดิตเหลือ ${pl.toFixed(0)}% แล้วนะคะ`,`ใช้ไปแล้ว $${totalCost.toFixed(4)} จาก $${creditUSD.toFixed(2)} ค่ะ`); setTimeout(closeAlert,8000); }
-}
-function showAl(type,icon,title,msg) {
-  const e=document.getElementById('cred-alert'); e.className=type;
+function showAl(type,icon,title,msg){
+  const e=document.getElementById('cred-alert');e.className=type;
   document.getElementById('al-i').textContent=icon;
   document.getElementById('al-t').textContent=title;
   document.getElementById('al-m').textContent=msg;
   e.style.display='flex';
 }
-function closeAlert() { document.getElementById('cred-alert').style.display='none'; }
-function showCreditModal() { document.getElementById('cr-amt').value=creditUSD||5; document.getElementById('cr-wp').value=warnPct; document.getElementById('cred-modal').style.display='flex'; }
-function closeCreditModal() { document.getElementById('cred-modal').style.display='none'; }
-function saveCred() {
+function closeAlert(){document.getElementById('cred-alert').style.display='none';}
+function showCreditModal(){document.getElementById('cr-amt').value=creditUSD||5;document.getElementById('cr-wp').value=warnPct;document.getElementById('cred-modal').style.display='flex';}
+function closeCreditModal(){document.getElementById('cred-modal').style.display='none';}
+function saveCred(){
   const a=parseFloat(document.getElementById('cr-amt').value);
   const w=parseInt(document.getElementById('cr-wp').value);
   if(isNaN(a)||a<=0)return;
-  creditUSD=a; warnPct=isNaN(w)?20:Math.min(w,50); alShown={w:false,d:false};
-  localStorage.setItem('cipher_credit',creditUSD); localStorage.setItem('cipher_warn_pct',warnPct);
-  closeCreditModal(); updateCBar();
+  creditUSD=a;warnPct=isNaN(w)?20:Math.min(w,50);alShown={w:false,d:false};
+  localStorage.setItem('cipher_credit',creditUSD);localStorage.setItem('cipher_warn_pct',warnPct);
+  closeCreditModal();updateCBar();
 }
 
 // ── Controls ──────────────────────────────────────────────────────
-function toggleVoice() {
-  autoSpeak=!autoSpeak; if(!autoSpeak)stopSpeak();
+function toggleVoice(){
+  autoSpeak=!autoSpeak;if(!autoSpeak)stopSpeak();
   document.getElementById('vbtn').textContent=autoSpeak?'🔊':'🔇';
   document.getElementById('vbtn').classList.toggle('off',!autoSpeak);
   document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';
 }
-function toggleMode() {
+function toggleMode(){
   offline=!offline;
   const b=document.getElementById('mode-pill');
-  b.textContent=offline?'⚡ OFFLINE':'🌐 ONLINE';
+  b.textContent=offline?'⚡ OFF':'🌐 ON';
   b.classList.toggle('offline',offline);
   document.getElementById('ft-mode').textContent=offline?'OFFLINE':'ONLINE';
   const m=offline?'โอเค สลับออฟไลน์แล้วนะคะคุณเอ็ม':'กลับมาออนไลน์แล้วค่ะคุณเอ็ม พร้อมเต็มที่เลย!';
-  history.push({role:'assistant',content:m}); addMsg('assistant',m); lastReply=m; speak(m);
+  history.push({role:'assistant',content:m});addMsg('assistant',m,false);lastReply=m;speak(m);
 }
 
-function resize() {
+function resize(){
   const e=document.getElementById('msg-inp');
-  e.style.height='auto'; e.style.height=Math.min(e.scrollHeight,120)+'px';
+  e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';
   document.getElementById('send-ab').classList.toggle('dim',!e.value.trim());
 }
 document.getElementById('msg-inp').addEventListener('input',resize);
-document.getElementById('msg-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+document.getElementById('msg-inp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+});
 
 // ── Startup ───────────────────────────────────────────────────────
-function saveKey() {
+function saveKey(){
   const k=document.getElementById('api-inp').value.trim();
-  if(!k.startsWith('sk-')){alert('API Key ต้องขึ้นต้นด้วย sk- นะคะ');return;}
+  if(!k.startsWith('sk-')){alert('[ ERROR ] API Key ต้องขึ้นต้นด้วย sk-');return;}
   unlockAudio();
-  API_KEY=k; localStorage.setItem('cipher_key',k);
+  API_KEY=k;localStorage.setItem('cipher_key',k);
   startApp(true);
 }
-function clearKey() {
-  if(!confirm('เปลี่ยน API Key ใหม่ไหมคะ?'))return;
-  localStorage.removeItem('cipher_key'); location.reload();
+function clearKey(){
+  if(!confirm('[ CONFIRM ] เปลี่ยน API Key ใหม่ไหมคะ?'))return;
+  localStorage.removeItem('cipher_key');location.reload();
 }
 document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();});
 
 function startApp(fromButton) {
   document.getElementById('api-scr').style.display='none';
   document.getElementById('app').style.display='flex';
-  updateCBar(); if(creditUSD<=0)setTimeout(showCreditModal,2000);
+  updateCBar();if(creditUSD<=0)setTimeout(showCreditModal,2000);
 
   const h=new Date().getHours();
   const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';
-  const g=`เฮ้ ${gt} คุณเอ็ม~ ไซเฟอร์ออนไลน์แล้วนะคะ มีอะไรให้ช่วยไหมคะ?`;
-  history.push({role:'assistant',content:g}); addMsg('assistant',g); lastReply=g;
+  const g=`เฮ้ ${gt} คุณเอ็ม~ ไซเฟอร์ออนไลน์แล้วนะคะ มีอะไรให้ช่วยไหมคะ? ถ้าต้องการข้อมูลสดบอกได้เลยนะคะ`;
+  history.push({role:'assistant',content:g});addMsg('assistant',g,false);lastReply=g;
 
   if (fromButton) {
-    // กดปุ่ม = unlock แล้ว พูดทันที
     const trySpeak=(n)=>{
       if(n>10)return;
-      if(voiceObj&&SY){speak(g);}
+      if(voiceObj&&SY)speak(g);
       else setTimeout(()=>trySpeak(n+1),400);
     };
     setTimeout(()=>trySpeak(0),400);
   } else {
-    // เปิดซ้ำ = แสดง splash ให้แตะ
-    const splash=document.getElementById('tap-splash');
-    splash.style.display='flex';
+    document.getElementById('tap-splash').style.display='flex';
   }
 }
 
-function onTap() {
+function onTap(){
   const splash=document.getElementById('tap-splash');
   unlockAudio();
-  splash.style.opacity='0'; splash.style.transition='opacity .35s';
-  setTimeout(()=>splash.style.display='none',350);
+  splash.style.opacity='0';splash.style.transition='opacity .3s';
+  setTimeout(()=>splash.style.display='none',300);
   const trySpeak=(n)=>{
     if(n>10)return;
-    if(voiceObj&&SY){speak(lastReply);}
+    if(voiceObj&&SY)speak(lastReply);
     else setTimeout(()=>trySpeak(n+1),400);
   };
   setTimeout(()=>trySpeak(0),200);
@@ -823,13 +795,15 @@ function onTap() {
 // Wave bars
 (function(){
   const c=document.getElementById('ld-wave');
-  [2,5,8,5,10,7,4,9,6,3].forEach((h,i)=>{
-    const s=document.createElement('span');s.style.height=h*2+'px';s.style.animationDelay=i*.09+'s';c.appendChild(s);
+  [2,4,7,5,9,6,4,8,5,3].forEach((h,i)=>{
+    const s=document.createElement('span');
+    s.style.height=h*2+'px';s.style.animationDelay=i*.09+'s';
+    c.appendChild(s);
   });
 })();
 
 // Init
-if (API_KEY) startApp(false);
+if(API_KEY) startApp(false);
 </script>
 </body>
 </html>
