@@ -327,7 +327,8 @@ const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI
 คุณเป็นผู้หญิง พูดไทยสุภาพ ฉลาด ตรงประเด็น ลงท้าย "ค่ะ" หรือ "นะคะ"
 เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม" เสมอ
 ห้ามใช้ "ครับ" ถ้าถามไทยตอบไทย ถามอังกฤษตอบอังกฤษ
-ตอบกระชับ ได้ใจความ ตรงประเด็น ไม่ตลกไม่เล่น ให้ข้อมูลที่ถูกต้องและมีประโยชน์
+ตอบกระชับ ได้ใจความ ตรงประเด็น ให้ข้อมูลที่ถูกต้องและมีประโยชน์
+ถ้ามีข้อมูลจากการค้นหาเว็บ ให้ใช้ข้อมูลนั้นเท่านั้น ห้ามใช้ความรู้เดิมของตัวเอง
 ถ้าไม่รู้ให้บอกตรงๆ ว่าไม่ทราบ อย่าเดา`;
 
 // ── State ─────────────────────────────────────────────────────────
@@ -405,8 +406,26 @@ function unlockAudio(){
 function loadVoices(){
   if(!SY)return;
   const v=SY.getVoices();
-  voiceObj=v.find(x=>/narisa/i.test(x.name))||v.find(x=>/kanya/i.test(x.name))||v.find(x=>x.lang==='th-TH')||v.find(x=>x.lang.startsWith('th'))||v[0]||null;
-  voiceEN=v.find(x=>/samantha|karen/i.test(x.name))||v.find(x=>x.lang==='en-GB')||v.find(x=>x.lang.startsWith('en'))||null;
+  // Thai female voice priority
+  voiceObj=
+    v.find(x=>/narisa/i.test(x.name))           // iPhone Narisa
+    ||v.find(x=>/kanya/i.test(x.name))           // iPhone Kanya
+    ||v.find(x=>/female|woman/i.test(x.name)&&x.lang==='th-TH') // female TH
+    ||v.find(x=>x.lang==='th-TH'&&!/male|narong/i.test(x.name)) // TH ไม่ใช่ผู้ชาย
+    ||v.find(x=>x.lang==='th-TH')                // TH อะไรก็ได้
+    ||v.find(x=>x.lang.startsWith('th'))
+    ||null;
+  // English female voice
+  voiceEN=
+    v.find(x=>/samantha/i.test(x.name))          // Mac Samantha
+    ||v.find(x=>/karen/i.test(x.name))           // Mac Karen
+    ||v.find(x=>/female|woman/i.test(x.name)&&x.lang.startsWith('en'))
+    ||v.find(x=>x.lang==='en-AU')                // Australian female
+    ||v.find(x=>x.lang==='en-GB'&&!/male/i.test(x.name))
+    ||v.find(x=>x.lang==='en-US'&&!/male/i.test(x.name))
+    ||v.find(x=>x.lang.startsWith('en'))
+    ||null;
+  console.log('TH voice:',voiceObj?.name,'| EN voice:',voiceEN?.name);
 }
 if(SY){loadVoices();SY.onvoiceschanged=loadVoices;setTimeout(loadVoices,600);}
 
@@ -535,7 +554,25 @@ async function searchTavily(query){
 
 // ตรวจว่าคำถามต้องค้นหาเว็บไหม
 function needsSearch(text){
-  const keywords=['ข่าว','วันนี้','ล่าสุด','ราคา','อากาศ','weather','news','today','ตอนนี้','เมื่อกี้','เมื่อวาน','สัปดาห์นี้','เดือนนี้','ปีนี้','2024','2025','2026','current','latest','now','score','ผล','แข่ง','ชนะ','แพ้','สด','live','breaking'];
+  const keywords=[
+    // ค้นหาตรงๆ
+    'ค้นหา','search','หา','เช็ค','check','ดู','find','แสดง','บอก','what is','how to',
+    // เวลา
+    'วันนี้','ตอนนี้','ล่าสุด','เมื่อกี้','เมื่อวาน','สัปดาห์นี้','เดือนนี้','ปีนี้',
+    'today','now','latest','current','recent','this week','this month',
+    // ราคา/การเงิน
+    'ราคา','price','ค่า','อัตรา','rate','หุ้น','stock','crypto','bitcoin','btc','eth',
+    'ethereum','เหรียญ','coin','กองทุน','fund','ดัชนี','index','dow','nasdaq','set',
+    'ทอง','gold','silver','เงิน','น้ำมัน','oil','forex','บาท','dollar','euro',
+    // ข่าว
+    'ข่าว','news','breaking','อัปเดต','update','ประกาศ','announce',
+    // อากาศ
+    'อากาศ','weather','ฝน','rain','พายุ','storm','อุณหภูมิ','temperature','ร้อน','หนาว',
+    // กีฬา
+    'ผล','score','แข่ง','match','ชนะ','แพ้','league','เกม','game','บอล','football',
+    // อื่นๆ realtime
+    'สด','live','2024','2025','2026','เปิด','ปิด','เวลาทำการ'
+  ];
   const lower=text.toLowerCase();
   return keywords.some(k=>lower.includes(k));
 }
