@@ -931,59 +931,54 @@ async function sendMsg() {
     let reply='', web=false, totalIn=0, totalOut=0;
     const apiMsgs=history.slice(-20).map(m=>({role:m.role,content:m.content}));
 
-    // Agentic loop — รองรับ web_search
-    for (let turn=0; turn<6; turn++) {
-      const res=await fetch(WORKER, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':API_KEY},
-        body:JSON.stringify({
-          model:MODEL,
-          max_tokens:1024,
-          system:SYSTEM,
-          messages:apiMsgs,
-          tools:[{type:'web_search_20250305',name:'web_search'}]
-        })
-      });
-
-      const data=await res.json();
-
-      if (!res.ok) {
-        const et=data?.error?.type||'';
-        const em=data?.error?.message||'unknown error';
-        if(et==='authentication_error') reply='API Key ไม่ถูกต้องนะคะคุณเอ็ม กด KEY แล้วใส่ใหม่ได้เลยค่ะ';
-        else if(et==='insufficient_quota'||em.includes('credit')) reply='เครดิตหมดแล้วนะคะคุณเอ็ม เติมได้ที่ console.anthropic.com เลยค่ะ';
-        else if(et==='rate_limit_error') reply='ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่นะคะ';
-        else reply=`เกิดปัญหานะคะ: ${em}`;
+    if (useGemini && GEMINI_KEY) {
+      // ── Gemini ──────────────────────────────────
+      const result = await callGemini(apiMsgs, SYSTEM);
+      if (result.error) {
+        reply = result.error;
+      } else {
+        reply = result.text || 'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ';
+        web = result.hasSearch || false;
+        totalTokIn  += result.inputTok  || 0;
+        totalTokOut += result.outputTok || 0;
+        lastTokIn    = result.inputTok  || 0;
+        lastTokOut   = result.outputTok || 0;
+        updateTokDisplay();
+      }
+    } else {
+      // ── Anthropic ────────────────────────────────
+      for (let turn=0; turn<6; turn++) {
+        const res=await fetch(WORKER, {
+          method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':API_KEY},
+          body:JSON.stringify({model:MODEL,max_tokens:1024,system:SYSTEM,messages:apiMsgs,tools:[{type:'web_search_20250305',name:'web_search'}]})
+        });
+        const data=await res.json();
+        if (!res.ok) {
+          const et=data?.error?.type||'';const em=data?.error?.message||'error';
+          if(et==='authentication_error') reply='API Key ไม่ถูกต้องนะคะคุณเอ็ม';
+          else if(et==='insufficient_quota'||em.includes('credit')) reply='เครดิตหมดแล้วนะคะ เติมได้ที่ console.anthropic.com ค่ะ';
+          else if(et==='rate_limit_error') reply='ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่ค่ะ';
+          else reply=`เกิดปัญหานะคะ: ${em}`;
+          break;
+        }
+        if(data.usage){totalIn+=data.usage.input_tokens||0;totalOut+=data.usage.output_tokens||0;}
+        for(const b of(data.content||[])){
+          if(b.type==='text')reply+=b.text;
+          if(b.type==='tool_use'&&b.name==='web_search')web=true;
+          if(b.type==='server_tool_use'||b.type==='web_search_tool_result')web=true;
+        }
+        if(data.stop_reason==='end_turn')break;
+        if(data.stop_reason==='tool_use'){
+          apiMsgs.push({role:'assistant',content:data.content});
+          const tb=(data.content||[]).find(b=>b.type==='tool_use');
+          if(tb)apiMsgs.push({role:'user',content:[{type:'tool_result',tool_use_id:tb.id,content:'Search completed.'}]});
+          reply='';continue;
+        }
         break;
       }
-
-      if(data.usage){totalIn+=data.usage.input_tokens||0;totalOut+=data.usage.output_tokens||0;}
-
-      for (const b of (data.content||[])) {
-        if(b.type==='text') reply+=b.text;
-        if(b.type==='tool_use'&&b.name==='web_search') web=true;
-        if(b.type==='server_tool_use'||b.type==='web_search_tool_result') web=true;
-      }
-
-      if(data.stop_reason==='end_turn') break;
-
-      if(data.stop_reason==='tool_use') {
-        apiMsgs.push({role:'assistant',content:data.content});
-        const tb=(data.content||[]).find(b=>b.type==='tool_use');
-        if(tb) apiMsgs.push({
-          role:'user',
-          content:[{type:'tool_result',tool_use_id:tb.id,content:'Search completed.'}]
-        });
-        reply=''; continue;
-      }
-      break;
+      if(totalIn>0) addCost(totalIn,totalOut);
     }
-
-    if(!reply) reply='อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
-    history.push({role:'assistant',content:reply});
-    addMsg('assistant',reply,web);
-    lastReply=reply; speak(reply);
-    if(totalIn>0) addCost(totalIn,totalOut);
     else addCost(history.reduce((s,m)=>s+Math.ceil(m.content.length/3.5),0),Math.ceil(reply.length/3.5));
 
   } catch(e) {
