@@ -6,407 +6,189 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="CIPHER"/>
-<meta name="theme-color" content="#0a0f0a"/>
+<meta name="theme-color" content="#080c08"/>
 <title>CIPHER</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#080c08;--bg2:#0d120d;--bg3:#111811;
-  --g1:#00ff41;--g2:#00cc33;--g3:#008f23;--g4:#004d12;
-  --g5:#001a06;--dim:#003d10;
-  --txt:#00ff41;--txt2:#00cc33;--txt3:#006b1c;
+  --g1:#00ff41;--g2:#00cc33;--g3:#008f23;
+  --dim:#003d10;--txt3:#006b1c;
   --brd:#003d10;--brd2:#006b1c;
-  --red:#ff3333;--ora:#ff8800;--amber:#ffcc00;
+  --red:#ff3333;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-html,body{height:100%;height:-webkit-fill-available;background:var(--bg);overflow:hidden}
+html{height:100%;height:-webkit-fill-available;background:var(--bg);overflow:hidden}
 body{
-  height:100dvh;
-  display:flex;flex-direction:column;
+  height:100dvh;display:flex;flex-direction:column;
   font-family:'Share Tech Mono','Noto Sans Thai',monospace;
-  color:var(--txt);background:var(--bg);
-  overflow:hidden;position:fixed;
-  inset:0;
+  color:var(--g1);background:var(--bg);
+  overflow:hidden;position:fixed;inset:0;
   padding-top:env(safe-area-inset-top);
   padding-bottom:env(safe-area-inset-bottom);
-  padding-left:env(safe-area-inset-left);
-  padding-right:env(safe-area-inset-right);
-  width:100%;
 }
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,#001a0666,transparent 70%);}
 
-/* Scanline effect */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
-}
-
-/* CRT glow bg */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse 80% 60% at 50% 40%,#001a0688 0%,transparent 70%);
-}
+/* Scan line */
+#scan{position:fixed;left:0;width:100%;height:2px;z-index:50;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#00ff4133,#00ff4166,#00ff4133,transparent);
+  animation:scan-move 4s linear infinite;opacity:.5;}
+@keyframes scan-move{0%{top:0}100%{top:100vh}}
 
 /* ── HEADER ── */
 #header{
   display:flex;align-items:center;gap:10px;
   padding:8px 12px;
-  background:var(--bg2);
-  border-bottom:1px solid var(--brd2);
+  background:var(--bg2);border-bottom:1px solid var(--brd2);
   position:relative;z-index:20;flex-shrink:0;
-  box-shadow:0 0 20px #00ff4122;
-  min-height:0;
+  box-shadow:0 0 20px #00ff4122;min-height:0;
 }
-
-/* Orb terminal style */
-#orb{
-  width:36px;height:36px;border-radius:4px;flex-shrink:0;cursor:pointer;
-  background:var(--bg3);
-  border:1px solid var(--g2);
+#orb{width:36px;height:36px;border-radius:4px;flex-shrink:0;cursor:pointer;
+  background:var(--bg3);border:1px solid var(--g2);
   box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-  animation:orb-pulse 3s ease-in-out infinite;
-  transition:all .15s;
-}
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  animation:neon-pulse 2s ease-in-out infinite;transition:all .15s;}
 #orb:active{transform:scale(.9)}
-@keyframes orb-pulse{0%,100%{box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111}50%{box-shadow:0 0 24px #00ff4188,inset 0 0 14px #00ff4122}}
-
+@keyframes neon-pulse{0%,100%{box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111}50%{box-shadow:0 0 28px #00ff4188,inset 0 0 14px #00ff4122}}
 #name-block{flex:1;min-width:0}
-#ai-name{
-  font-size:14px;font-weight:700;letter-spacing:3px;
-  color:var(--g1);text-shadow:0 0 10px var(--g1);line-height:1;
-}
-#ai-sub{font-size:7px;letter-spacing:2px;color:var(--txt3);margin-top:2px}
+#ai-name{font-size:14px;font-weight:700;letter-spacing:3px;color:var(--g1);text-shadow:0 0 10px var(--g1);line-height:1;
+  animation:glitch1 4s infinite;}
+@keyframes glitch1{0%,90%,100%{transform:translate(0)}91%{transform:translate(-2px,1px)}92%{transform:translate(2px,-1px)}93%{transform:translate(0)}96%{transform:translate(-1px,2px)}97%{transform:translate(1px,-1px)}98%{transform:translate(0)}}
+#ai-sub{font-size:6.5px;letter-spacing:2px;color:var(--txt3);margin-top:2px}
 #stat-row{display:flex;align-items:center;gap:6px;margin-top:3px}
-#spip{width:6px;height:6px;border-radius:50%;background:var(--g1);
-  box-shadow:0 0 6px var(--g1);animation:pip 2s ease-in-out infinite}
+#spip{width:6px;height:6px;border-radius:50%;background:var(--g1);box-shadow:0 0 6px var(--g1);animation:pip 2s ease-in-out infinite;flex-shrink:0}
 @keyframes pip{0%,100%{opacity:1}50%{opacity:.2}}
 #stat-txt{font-size:8px;letter-spacing:1px;color:var(--txt3)}
-
 #hbtns{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.hb{
-  width:32px;height:32px;border-radius:4px;font-size:13px;
-  border:1px solid var(--brd2);background:var(--bg3);
-  color:var(--g2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .15s;box-shadow:0 0 8px #00ff4111;
-}
-.hb:active{transform:scale(.88);background:var(--g5)}
+.hb{width:32px;height:32px;border-radius:4px;font-size:13px;
+  border:1px solid var(--brd2);background:var(--bg3);color:var(--g2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;box-shadow:0 0 8px #00ff4111;}
+.hb:active{transform:scale(.88);background:var(--bg)}
 .hb.off{opacity:.3}
 .hb.red{border-color:#ff333355;color:var(--red)}
-#mode-pill{
-  height:32px;padding:0 10px;border-radius:4px;
-  border:1px solid var(--brd2);background:var(--bg3);
-  color:var(--txt3);font-size:7px;letter-spacing:1.5px;
-  cursor:pointer;font-family:'Share Tech Mono',monospace;
-  transition:all .15s;white-space:nowrap;
-}
-#mode-pill:active{transform:scale(.96)}
-#mode-pill.offline{border-color:#ff880055;color:var(--ora)}
 
-/* Credit bar */
-#cbar{
-  padding:4px 14px;display:flex;align-items:center;gap:8px;
-  background:var(--bg2);border-bottom:1px solid var(--brd);
-  position:relative;z-index:10;flex-shrink:0;
-}
-#cbar-lbl{font-size:7px;letter-spacing:2px;color:var(--txt3);white-space:nowrap}
-#cbar-track{flex:1;height:3px;background:var(--dim);border-radius:1px;overflow:hidden;cursor:pointer}
-#cbar-fill{height:100%;border-radius:1px;background:linear-gradient(90deg,var(--g3),var(--g1));transition:width .6s,background .4s}
-#cbar-pct{font-size:8px;color:var(--g2);min-width:28px;text-align:right}
-
-/* Messages */
-#msgs{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:10px 12px 6px;
-  display:flex;flex-direction:column;gap:10px;
-  position:relative;z-index:5;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
-  min-height:0;
-}
-::-webkit-scrollbar{width:4px}
+/* ── MESSAGES ── */
+#msgs{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px 6px;
+  display:flex;flex-direction:column;gap:10px;position:relative;z-index:5;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;min-height:0;}
+::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
-
 .msg{animation:msg-in .2s ease both;display:flex;gap:8px;align-items:flex-start}
 .msg.usr{flex-direction:row-reverse}
 @keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-.av{
-  width:28px;height:28px;border-radius:3px;flex-shrink:0;
+.av{width:28px;height:28px;border-radius:3px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;letter-spacing:1px;border:1px solid var(--brd2);
-}
-.av.ai-av{background:var(--g5);color:var(--g1);box-shadow:0 0 8px #00ff4122}
+  font-size:9px;font-weight:700;letter-spacing:1px;border:1px solid var(--brd2);}
+.av.ai-av{background:var(--bg);color:var(--g1);box-shadow:0 0 8px #00ff4122}
 .av.usr-av{background:var(--bg3);color:var(--txt3)}
-
 .mb{max-width:85%;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 .msg.usr .mb{align-items:flex-end}
-
-.ml{font-size:7px;letter-spacing:1.5px;color:var(--txt3);padding:0 3px;
-  display:flex;gap:5px;align-items:center}
-.wb{font-size:6px;padding:1px 5px;border-radius:2px;
-  background:var(--g5);color:var(--g2);border:1px solid var(--brd2);letter-spacing:1px}
-
-.bub{
-  padding:9px 12px;font-size:14px;line-height:1.65;
-  word-break:break-word;white-space:pre-wrap;
-  border-radius:2px;border-left:2px solid;
+.ml{font-size:7px;letter-spacing:1.5px;color:var(--txt3);padding:0 3px}
+.bub{padding:9px 12px;font-size:14px;line-height:1.65;
+  word-break:break-word;white-space:pre-wrap;border-radius:2px;border-left:2px solid;
   font-family:'Noto Sans Thai','Share Tech Mono',monospace;
-  -webkit-user-select:text;user-select:text;
-}
-.bub.ai-b{
-  background:var(--bg2);color:var(--g1);
-  border-color:var(--g2);
-  box-shadow:0 0 12px #00ff4111;
-  text-shadow:0 0 8px #00ff4133;
-}
-.bub.usr-b{
-  background:var(--bg3);color:var(--g3);
-  border-color:var(--dim);
-  text-align:right;
-}
+  -webkit-user-select:text;user-select:text;}
+.bub.ai-b{background:var(--bg2);color:var(--g1);border-color:var(--g2);
+  box-shadow:0 0 12px #00ff4111;text-shadow:0 0 8px #00ff4122;}
+.bub.usr-b{background:var(--bg3);color:var(--g3);border-color:var(--dim);text-align:right;}
+.rbtn{padding:2px 8px;border-radius:2px;font-size:7px;letter-spacing:1px;
+  border:1px solid var(--brd);background:transparent;color:var(--txt3);
+  cursor:pointer;font-family:'Share Tech Mono',monospace;transition:all .15s;}
+.rbtn:active{background:var(--bg);color:var(--g1)}
 
-.rbtn{
-  padding:2px 8px;border-radius:2px;font-size:7px;letter-spacing:1px;
-  border:1px solid var(--brd);background:transparent;
-  color:var(--txt3);cursor:pointer;transition:all .15s;
-  font-family:'Share Tech Mono',monospace;
-}
-.rbtn:active{background:var(--g5);color:var(--g1)}
-
-/* Loading */
+/* ── LOADING ── */
 #loading{display:none;gap:8px;align-items:flex-start}
 #ld-av{width:28px;height:28px;border-radius:3px;flex-shrink:0;
-  background:var(--g5);border:1px solid var(--brd2);
+  background:var(--bg);border:1px solid var(--brd2);
   display:flex;align-items:center;justify-content:center;
-  font-size:9px;color:var(--g1);animation:orb-pulse 1s ease-in-out infinite}
-#ld-bub{padding:10px 13px;border-radius:2px;border-left:2px solid var(--g2);
-  background:var(--bg2);box-shadow:0 0 12px #00ff4111}
+  font-size:9px;color:var(--g1);animation:neon-pulse 1s ease-in-out infinite}
+#ld-bub{padding:9px 12px;border-radius:2px;border-left:2px solid var(--g2);background:var(--bg2)}
 #ld-lbl{font-size:7px;letter-spacing:2px;color:var(--txt3);margin-bottom:6px}
 .wave{display:flex;align-items:center;gap:3px}
 .wave span{width:3px;border-radius:1px;background:var(--g2);display:block;animation:wv .8s ease-in-out infinite}
 @keyframes wv{0%,100%{transform:scaleY(.3);opacity:.3}50%{transform:scaleY(1.5);opacity:1}}
-
-/* Typing cursor blink */
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-#cursor{display:inline-block;width:8px;height:14px;background:var(--g1);vertical-align:middle;animation:blink .8s step-end infinite;margin-left:2px}
+#cursor{display:inline-block;width:8px;height:13px;background:var(--g1);
+  vertical-align:middle;animation:blink .8s step-end infinite;margin-left:2px}
 
-/* Input */
+/* ── INPUT ── */
 #inp-wrap{
-  padding:8px 12px;
-  padding-bottom:max(10px,env(safe-area-inset-bottom));
+  padding:8px 12px max(10px,env(safe-area-inset-bottom));
   background:var(--bg2);border-top:1px solid var(--brd2);
-  position:relative;z-index:10;flex-shrink:0;
-  min-height:0;
+  position:relative;z-index:10;flex-shrink:0;min-height:0;
 }
-/* Terminal prompt line */
-#inp-wrap::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--g2)55,transparent);
-}
-
-#inp-box{
-  display:flex;gap:6px;align-items:flex-end;
-  background:var(--bg3);
-  border:1px solid var(--brd2);
-  border-radius:3px;
-  padding:7px 7px 7px 11px;
-  transition:border-color .2s,box-shadow .2s;
-  box-shadow:0 0 0 0 transparent;
-}
-#inp-box:focus-within{
-  border-color:var(--g1);
-  box-shadow:0 0 16px #00ff4133;
-}
+#inp-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g2)55,transparent);}
+#inp-box{display:flex;gap:6px;align-items:flex-end;
+  background:var(--bg3);border:1px solid var(--brd2);border-radius:3px;
+  padding:7px 7px 7px 11px;transition:border-color .2s,box-shadow .2s;}
+#inp-box:focus-within{border-color:var(--g1);box-shadow:0 0 16px #00ff4133;}
 #inp-box.mic-on{border-color:var(--red);box-shadow:0 0 16px #ff333333}
-
-/* Prompt symbol */
-#prompt-sym{color:var(--g1);font-size:14px;padding-bottom:1px;flex-shrink:0;
-  text-shadow:0 0 8px var(--g1)}
-
-#msg-inp{
-  flex:1;background:transparent;border:none;outline:none;
+#prompt-sym{color:var(--g1);font-size:14px;padding-bottom:1px;flex-shrink:0;text-shadow:0 0 8px var(--g1)}
+#msg-inp{flex:1;background:transparent;border:none;outline:none;
   color:var(--g1);font-size:16px;font-family:'Noto Sans Thai','Share Tech Mono',monospace;
-  line-height:1.5;min-height:24px;max-height:120px;resize:none;
-  caret-color:var(--g1);text-shadow:0 0 6px #00ff4155;
-}
+  line-height:1.5;min-height:24px;max-height:120px;resize:none;caret-color:var(--g1);}
 #msg-inp::placeholder{color:var(--dim)}
-
-.ab{
-  width:36px;height:36px;border-radius:3px;font-size:15px;flex-shrink:0;
-  border:1px solid var(--brd2);background:var(--bg);
-  color:var(--txt3);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .15s;
-}
-.ab:active{transform:scale(.88);background:var(--g5)}
+.ab{width:36px;height:36px;border-radius:3px;font-size:15px;flex-shrink:0;
+  border:1px solid var(--brd2);background:var(--bg);color:var(--txt3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.ab:active{transform:scale(.88);background:var(--bg3)}
 .ab.mic-on{border-color:var(--red);color:var(--red)}
-#send-ab{background:var(--g5);border-color:var(--g2);color:var(--g1);
+#send-ab{background:var(--bg);border-color:var(--g2);color:var(--g1);
   box-shadow:0 0 10px #00ff4133;font-size:13px}
 #send-ab.dim{background:var(--bg);border-color:var(--brd);color:var(--dim);box-shadow:none}
+#footer-txt{text-align:center;font-size:6px;color:var(--dim);margin-top:6px;letter-spacing:1px}
 
-#footer-txt{text-align:center;font-size:6px;color:var(--dim);margin-top:5px;letter-spacing:1px}
-
-/* Setup */
+/* ── SETUP ── */
 #api-scr{
-  position:fixed;inset:0;z-index:200;
-  background:var(--bg);
+  position:fixed;inset:0;z-index:200;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:32px;gap:16px;
 }
-/* ASCII art style header */
-#setup-ascii{
-  font-size:11px;letter-spacing:2px;color:var(--g1);
-  text-shadow:0 0 10px var(--g1);text-align:center;line-height:1.6;
-  white-space:pre;
-}
-#setup-name{font-size:28px;letter-spacing:10px;color:var(--g1);
-  text-shadow:0 0 20px var(--g1),0 0 40px #00ff4155}
+#setup-ascii{font-size:11px;letter-spacing:2px;color:var(--g1);
+  text-shadow:0 0 10px var(--g1);text-align:center;line-height:1.6;white-space:pre;}
+#setup-name{font-size:26px;letter-spacing:10px;color:var(--g1);text-shadow:0 0 20px var(--g1),0 0 40px #00ff4155}
 #setup-sub{font-size:7px;letter-spacing:3px;color:var(--txt3)}
-#setup-desc{font-size:13px;color:var(--g3);text-align:center;line-height:1.9;max-width:300px;
-  font-family:'Noto Sans Thai',monospace}
-#api-inp{
-  width:100%;max-width:340px;padding:13px 16px;
+#setup-desc{font-size:13px;color:var(--g3);text-align:center;line-height:1.9;max-width:300px;font-family:'Noto Sans Thai',monospace}
+#api-inp{width:100%;max-width:340px;padding:13px 16px;
   background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;
   color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;
-  outline:none;letter-spacing:1px;
-  transition:border-color .2s,box-shadow .2s;
-  text-shadow:0 0 6px #00ff4155;
-}
+  outline:none;letter-spacing:1px;transition:border-color .2s,box-shadow .2s;}
 #api-inp:focus{border-color:var(--g1);box-shadow:0 0 16px #00ff4133}
 #api-inp::placeholder{color:var(--dim)}
-#start-btn{
-  width:100%;max-width:340px;padding:14px;
-  background:var(--g5);border:1px solid var(--g2);border-radius:3px;
+#start-btn{width:100%;max-width:340px;padding:14px;
+  background:var(--bg3);border:1px solid var(--g2);border-radius:3px;
   color:var(--g1);font-size:12px;letter-spacing:4px;
   font-family:'Share Tech Mono',monospace;font-weight:700;
-  cursor:pointer;box-shadow:0 0 20px #00ff4133;transition:all .2s;
-  text-shadow:0 0 8px var(--g1);
-}
-#start-btn:active{transform:scale(.97);box-shadow:0 0 30px #00ff4155}
+  cursor:pointer;box-shadow:0 0 20px #00ff4133;transition:all .2s;text-shadow:0 0 8px var(--g1);}
+#start-btn:active{transform:scale(.97)}
 #setup-note{font-size:8px;color:var(--txt3);letter-spacing:1px}
 
-/* ── EFFECTS ── */
-
-/* Typewriter cursor in bubble */
-.type-cursor{display:inline-block;width:7px;height:13px;background:var(--g1);
-  vertical-align:middle;animation:blink .7s step-end infinite;margin-left:1px}
-
-/* CRT flicker */
-@keyframes crt-flicker{
-  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1}
-  20%,24%,55%{opacity:.92}
-}
-body{animation:crt-flicker 6s infinite;}
-
-/* Glitch on ai-name */
-@keyframes glitch1{
-  0%,90%,100%{transform:translate(0)}
-  91%{transform:translate(-2px,1px);color:#00ff41}
-  92%{transform:translate(2px,-1px);color:#0ff}
-  93%{transform:translate(0);color:#00ff41}
-  96%{transform:translate(-1px,2px)}
-  97%{transform:translate(1px,-1px)}
-  98%{transform:translate(0)}
-}
-#ai-name{animation:glitch1 4s infinite;}
-
-/* Matrix rain canvas */
-#matrix-canvas{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
-  opacity:.07;
-}
-
-/* Boot sequence overlay */
-#boot-screen{
-  position:fixed;inset:0;z-index:1000;
-  background:var(--bg);
-  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
-  padding:30px;gap:4px;
-  font-family:'Share Tech Mono',monospace;font-size:13px;
-  color:var(--g1);text-shadow:0 0 8px var(--g1);
-}
-.boot-line{opacity:0;animation:boot-appear .1s forwards}
-@keyframes boot-appear{to{opacity:1}}
-
-/* Neon pulse on orb */
-@keyframes neon-pulse{
-  0%,100%{box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111}
-  50%{box-shadow:0 0 30px #00ff41aa,0 0 60px #00ff4155,inset 0 0 16px #00ff4133}
-}
-#orb{animation:neon-pulse 2s ease-in-out infinite;}
-
-/* Scan line moving */
-@keyframes scan-move{0%{top:0}100%{top:100%}}
-#scan-line{
-  position:fixed;left:0;width:100%;height:2px;z-index:50;pointer-events:none;
-  background:linear-gradient(90deg,transparent,#00ff4133,#00ff4166,#00ff4133,transparent);
-  animation:scan-move 4s linear infinite;opacity:.5;
-}
-
-/* Credit bar shimmer */
-@keyframes bar-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-#cbar-fill{
-  background:linear-gradient(90deg,var(--g3),var(--g1),var(--g3));
-  background-size:200% 100%;
-  animation:bar-shimmer 2s linear infinite;
-}
-
-/* ── Tap splash ── */
-/* Tap splash */
-#tap-splash{
-  position:fixed;inset:0;z-index:999;
+/* ── TAP SPLASH ── */
+#tap-splash{position:fixed;inset:0;z-index:999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  background:rgba(8,12,8,.96);backdrop-filter:blur(4px);cursor:pointer;
-}
-#tap-icon{font-size:40px;animation:orb-pulse 2s ease-in-out infinite}
+  background:rgba(8,12,8,.96);cursor:pointer;}
+#tap-icon{font-size:38px;animation:neon-pulse 2s ease-in-out infinite}
 #tap-title{font-size:11px;letter-spacing:4px;color:var(--g1);text-shadow:0 0 10px var(--g1)}
 #tap-sub{font-size:9px;letter-spacing:2px;color:var(--txt3)}
 
-/* Alerts */
-#cred-alert{position:fixed;top:0;left:0;right:0;z-index:300;
-  padding:10px 16px;display:none;align-items:center;gap:10px;
-  background:var(--bg2);border-bottom:1px solid;animation:msg-in .3s ease}
-#cred-alert.warn{border-color:var(--amber)}
-#cred-alert.danger{border-color:var(--red)}
-#al-i{font-size:16px;flex-shrink:0}
-#al-b{flex:1}
-#al-t{font-size:11px;font-weight:600;letter-spacing:1px;color:var(--g1)}
-#al-m{font-size:10px;color:var(--txt3);margin-top:1px}
-#al-x{font-size:16px;cursor:pointer;color:var(--txt3);padding:3px 6px}
+/* Matrix */
+#matrix-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;}
 
-/* Credit modal */
-#cred-modal{position:fixed;inset:0;z-index:150;
-  background:rgba(8,12,8,.88);backdrop-filter:blur(6px);
-  display:none;align-items:center;justify-content:center}
-#cred-box{background:var(--bg2);border:1px solid var(--brd2);border-radius:4px;
-  padding:24px 20px;width:90%;max-width:300px;box-shadow:0 0 30px #00ff4122}
-#cred-box h3{font-size:12px;letter-spacing:3px;color:var(--g1);margin-bottom:6px;text-shadow:0 0 8px var(--g1)}
-#cred-box p{font-size:12px;color:var(--g3);line-height:1.7;margin-bottom:14px;font-family:'Noto Sans Thai',monospace}
-.cr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.cr label{font-size:9px;color:var(--txt3);white-space:nowrap;letter-spacing:1px}
-.cr input{flex:1;padding:9px 10px;background:var(--bg);border:1px solid var(--brd2);
-  border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;
-  outline:none;text-align:center;transition:border-color .2s}
-.cr input:focus{border-color:var(--g1);box-shadow:0 0 10px #00ff4122}
-#cr-save{width:100%;padding:11px;border-radius:3px;background:var(--g5);
-  border:1px solid var(--g2);color:var(--g1);font-size:10px;letter-spacing:3px;
-  font-family:'Share Tech Mono',monospace;cursor:pointer;box-shadow:0 0 12px #00ff4122;transition:all .2s}
-#cr-save:active{transform:scale(.97)}
-#cr-skip{display:block;text-align:center;margin-top:10px;font-size:9px;
-  color:var(--txt3);cursor:pointer;letter-spacing:1px}
+/* Type cursor */
+.type-cursor{display:inline-block;width:7px;height:13px;background:var(--g1);
+  vertical-align:middle;animation:blink .7s step-end infinite;margin-left:1px}
 </style>
 </head>
 <body>
 
-<!-- Matrix Canvas -->
 <canvas id="matrix-canvas"></canvas>
-<!-- Scan Line -->
-<div id="scan-line"></div>
-<!-- Boot Screen -->
-<div id="boot-screen" style="display:none"></div>
+<div id="scan"></div>
 
 <!-- Setup -->
 <div id="api-scr">
@@ -415,46 +197,25 @@ body{animation:crt-flicker 6s infinite;}
   <div id="setup-name">CIPHER</div>
   <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
   <div id="setup-desc">ใส่ Gemini API Key เพื่อเปิดใช้งานค่ะ<br/>ขอฟรีได้ที่ aistudio.google.com</div>
-  <input id="api-inp" type="password" placeholder="AIza···"/>
+  <input id="api-inp" type="password" placeholder="AIza··· หรือ AQ···"/>
   <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
   <div id="setup-note">MODEL: gemini-2.0-flash · FREE · Google AI Studio</div>
 </div>
 
 <!-- App -->
-<div id="app" style="display:none;flex-direction:column;flex:1;overflow:hidden;width:100%">
-
+<div id="app" style="display:none;flex-direction:column;height:100dvh;min-height:-webkit-fill-available">
   <div id="header">
-    <div id="orb" onclick="replayLast()" title="กดเพื่อเล่นซ้ำ">⬡</div>
+    <div id="orb" onclick="replayLast()">⬡</div>
     <div id="name-block">
       <div id="ai-name">CIPHER</div>
-      <div id="ai-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
-      <div id="stat-row">
-        <div id="spip"></div>
-        <span id="stat-txt">ONLINE</span>
-      </div>
+      <div id="ai-sub">COGNITIVE INTELLIGENCE · GEMINI FREE</div>
+      <div id="stat-row"><div id="spip"></div><span id="stat-txt">ONLINE</span></div>
     </div>
     <div id="hbtns">
       <button class="hb red" id="stop-btn" style="display:none" onclick="stopSpeak()">⏹</button>
-      <button class="hb" id="vbtn" onclick="toggleVoice()" title="เสียง">🔊</button>
-      <button id="mode-pill" onclick="toggleMode()" class="offline">⚡ OFF</button>
-      <button class="hb" id="ai-toggle" onclick="toggleAI()" title="สลับ AI" style="font-size:9px;letter-spacing:0">ANT</button>
-      <button class="hb" onclick="clearKey()" style="font-size:9px;letter-spacing:0" title="API Key">KEY</button>
+      <button class="hb" id="vbtn" onclick="toggleVoice()">🔊</button>
+      <button class="hb" onclick="clearKey()" style="font-size:9px;letter-spacing:0">KEY</button>
     </div>
-  </div>
-
-  <div id="cbar">
-    <span id="cbar-lbl">CREDIT</span>
-    <div id="cbar-track" onclick="showCreditModal()"><div id="cbar-fill" style="width:100%"></div></div>
-    <span id="cbar-pct">--%</span>
-    <span id="tok-display" style="font-size:7px;color:var(--txt3);letter-spacing:1px;white-space:nowrap;margin-left:4px;cursor:pointer" onclick="toggleTokDetail()" title="คลิกดูรายละเอียด">TOK: 0</span>
-  </div>
-  <!-- Token detail popup -->
-  <div id="tok-detail" style="display:none;padding:4px 14px;background:var(--bg3);border-bottom:1px solid var(--brd);font-size:7px;letter-spacing:1px;color:var(--g2);display:none;gap:16px;flex-wrap:wrap">
-    <span>TOTAL IN: <b id="td-in">0</b></span>
-    <span>TOTAL OUT: <b id="td-out">0</b></span>
-    <span>LAST IN: <b id="td-lin">0</b></span>
-    <span>LAST OUT: <b id="td-lout">0</b></span>
-    <span>COST: $<b id="td-cost">0.0000</b></span>
   </div>
 
   <div id="msgs">
@@ -470,587 +231,236 @@ body{animation:crt-flicker 6s infinite;}
   <div id="inp-wrap">
     <div id="inp-box">
       <span id="prompt-sym">&gt;_</span>
-      <textarea id="msg-inp" rows="1" placeholder="พิมพ์คำสั่งหรือคำถาม..."></textarea>
+      <textarea id="msg-inp" rows="1" placeholder="พิมพ์หรือพูดกับ CIPHER..."></textarea>
       <button class="ab" id="mic-btn" onclick="toggleListen()" style="display:none">🎤</button>
       <button class="ab dim" id="send-ab" onclick="sendMsg()">▶</button>
     </div>
-    <div id="footer-txt">CIPHER · <span id="ft-mode">OFFLINE</span> · <span id="ft-voice">VOICE ON</span> · HAIKU 4.5</div>
+    <div id="footer-txt">CIPHER · GEMINI FREE · <span id="ft-voice">VOICE ON</span></div>
   </div>
 </div>
 
 <!-- Tap splash -->
 <div id="tap-splash" style="display:none" onclick="onTap()">
   <div id="tap-icon">⬡</div>
-  <div id="tap-title">[ TAP TO INITIALIZE ]</div>
+  <div id="tap-title">[ TAP TO START ]</div>
   <div id="tap-sub">แตะที่ไหนก็ได้เพื่อเริ่ม</div>
-</div>
-
-<!-- Alerts -->
-<div id="cred-alert">
-  <span id="al-i"></span>
-  <div id="al-b"><div id="al-t"></div><div id="al-m"></div></div>
-  <span id="al-x" onclick="closeAlert()">✕</span>
-</div>
-
-<!-- Credit modal -->
-<div id="cred-modal">
-  <div id="cred-box">
-    <h3>[ CREDIT CONFIG ]</h3>
-    <p>ใส่เครดิตที่เติมไว้ ไซเฟอร์จะแจ้งเตือนเมื่อใกล้หมดนะคะ</p>
-    <div class="cr"><label>CREDIT $</label><input id="cr-amt" type="number" min="1" max="9999" value="5"/></div>
-    <div class="cr"><label>ALERT %</label><input id="cr-wp" type="number" min="1" max="50" value="20"/></div>
-    <button id="cr-save" onclick="saveCred()">[ SAVE ]</button>
-    <span id="cr-skip" onclick="closeCreditModal()">ข้ามไปก่อน</span>
-  </div>
 </div>
 
 <script>
 'use strict';
 
-// ── Sound Effects ─────────────────────────────────────────────────
-let audioCtx = null;
-function getAudioCtx(){
-  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-}
-function playBeep(freq=440, dur=0.08, vol=0.15, type='sine'){
-  try {
-    const ctx=getAudioCtx();
-    const osc=ctx.createOscillator();
-    const gain=ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.frequency.value=freq; osc.type=type;
-    gain.gain.setValueAtTime(vol,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
-    osc.start(); osc.stop(ctx.currentTime+dur);
-  } catch(e){}
-}
-function playKeyClick(){playBeep(800,0.015,0.08,'square');}
-function playResponseBeep(){
-  playBeep(523,0.06,0.12,'sine');
-  setTimeout(()=>playBeep(659,0.08,0.1,'sine'),80);
-}
-function playBootBeep(){
-  [220,330,440,523].forEach((f,i)=>setTimeout(()=>playBeep(f,0.1,0.15,'sine'),i*100));
-}
-function playErrorBeep(){playBeep(200,0.2,0.15,'sawtooth');}
-
 // ── Config ────────────────────────────────────────────────────────
-const MODEL   = 'claude-haiku-4-5-20251001';
-const WORKER       = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
-const GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const SYSTEM  = `คุณคือไซเฟอร์ เพื่อนสนิท AI ของคุณเอ็ม
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const SYSTEM = `คุณคือไซเฟอร์ เพื่อนสนิท AI ของคุณเอ็ม
 คุณเป็นผู้หญิง พูดไทยสบายๆ เป็นกันเอง ลงท้าย "นะคะ" หรือ "ค่ะ"
-เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม"
+เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม" เสมอ
 ห้ามใช้ "ครับ" ถ้าถามไทยตอบไทย ถามอังกฤษตอบอังกฤษ
-สำคัญ: ตอบสั้นมากๆ 1-3 ประโยคเท่านั้น ไม่ต้องอธิบายยาว พูดตรงๆ กระชับ
-ถ้าต้องการข้อมูลสด ค้นหาแล้วสรุปสั้นๆ ให้คุณเอ็มเลยค่ะ`;
+ตอบสั้น 1-3 ประโยค กระชับ มีชีวิตชีวา`;
 
 // ── State ─────────────────────────────────────────────────────────
-let API_KEY     = localStorage.getItem('cipher_key') || '';
-let GEMINI_KEY  = localStorage.getItem('cipher_gemini') || '';
-let useGemini   = true; // ใช้ Gemini เป็นหลัก
-let history  = [];
-let speaking = false, listening = false, autoSpeak = true, offline = true;
-let voiceObj = null, voiceEN = null, audioUnlocked = false, lastReply = '';
-const SY     = window.speechSynthesis;
+let GEMINI_KEY = localStorage.getItem('cipher_gemini') || '';
+let history = [];
+let speaking = false, listening = false, autoSpeak = true, lastReply = '';
+const SY = window.speechSynthesis;
+let voiceObj = null, voiceEN = null, audioUnlocked = false;
 
-// Credit
-const PIN = 1/1e6, POUT = 5/1e6;
-let totalCost = parseFloat(localStorage.getItem('cipher_cost') || '0');
-let totalTokIn = parseInt(localStorage.getItem('cipher_tok_in') || '0');
-let totalTokOut = parseInt(localStorage.getItem('cipher_tok_out') || '0');
-let lastTokIn = 0, lastTokOut = 0;
-let tokDetailOpen = false;
-let creditUSD = parseFloat(localStorage.getItem('cipher_credit') || '0');
-let warnPct   = parseInt(localStorage.getItem('cipher_warn_pct') || '20');
-let alShown   = {w:false, d:false};
-
-// Offline replies
+// ── Offline KB ────────────────────────────────────────────────────
 const OFFL = [
-  // ทักทาย
-  {k:['สวัสดี','หวัดดี','hello','hi','ดีจ้า','เฮ้'], r:()=>{
-    const h=new Date().getHours();
-    const t=h<12?'อรุณสวัสดิ์':h<17?'สวัสดีตอนบ่าย':h<21?'สวัสดีตอนเย็น':'ดึกแล้วนะคะ';
-    return t+' คุณเอ็ม~ มีอะไรให้ช่วยไหมคะ 😊';
-  }},
-  // ตัวตน
-  {k:['ชื่ออะไร','คุณคือ','เป็นใคร','แนะนำตัว'], r:'ไซเฟอร์ค่ะ เพื่อน AI ส่วนตัวของคุณเอ็มเอง ถามได้ทุกเรื่องเลยนะคะ 😄'},
-  // เวลา/วันที่
-  {k:['กี่โมง','เวลา','time'], r:()=>`ตอนนี้ ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. นะคะ`},
-  {k:['วันนี้','วันที่','date'], r:()=>`วันนี้ ${new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} ค่ะ`},
-  // ถามเรื่องที่รู้
-  {k:['ถามอะไรได้','รู้เรื่องอะไร','ช่วยอะไรได้','ทำอะไรได้','มีอะไร','ความสามารถ','topic','หัวข้อ'], r:`ไซเฟอร์รู้เรื่องเหล่านี้ค่ะ 📚
-
-🏥 สุขภาพ — ไข้ ความดัน BMI ยา โควิด
-🚨 เบอร์ฉุกเฉิน — 191 1669 199 1323
-🔢 คณิตศาสตร์ — สูตร พื้นที่ ดอกเบี้ย
-🔬 วิทยาศาสตร์ — ฟิสิกส์ เคมี แผ่นดินไหว
-🗺️ ภูมิศาสตร์ — ทวีป ประเทศ ASEAN
-🏛️ ประวัติศาสตร์ไทย — สุโขทัย อยุธยา
-💻 เทคโนโลยี — AI 5G Bitcoin ซ่อมคอม
-💰 การเงิน — ภาษี VAT งบประมาณ
-⚖️ กฎหมาย — สิทธิ์ ค่าแรง ใบขับขี่
-🍜 อาหารไทย — ต้มยำ ผัดไทย ส้มตำ
-🇬🇧 ภาษาอังกฤษ — คำศัพท์ วลี
-🎊 เทศกาล — สงกรานต์ ลอยกระทง วันหยุด
-🌌 ดาราศาสตร์ — ดาวเคราะห์ กาแล็กซี
-🌿 สิ่งแวดล้อม — โลกร้อน รีไซเคิล โซลาร์
-🧠 จิตวิทยา — เครียด ซึมเศร้า นอนไม่หลับ
-🚗 ยานยนต์ — ซ่อมรถ ยาง แบต ภาษีรถ
-🍳 การทำอาหาร — เทคนิค เก็บอาหาร
-💪 ออกกำลังกาย — วิดพื้น สควอท วิ่ง
-🐾 สัตว์เลี้ยง — หมา แมว วัคซีน
-🏠 ซ่อมบ้าน — ไฟฟ้า ประปา ทาสี กำจัดแมลง
-✈️ ท่องเที่ยว — วีซ่า ญี่ปุ่น ยุโรป ประกัน
-🎓 การศึกษา — TCAS ทุน IELTS เรียนออนไลน์
-💼 ธุรกิจ — เปิดบริษัท การตลาด Resume
-💄 ความงาม — สกินแคร์ กันแดด สิว ผม
-🌾 เกษตร — ปลูกผัก ปุ๋ย โรคพืช
-🎵 ดนตรี — กีตาร์ โน้ต เครื่องดนตรี
-📚 หนัง/หนังสือ — Netflix อนิเมะ แนะนำหรือจะคุยเล่นก็ได้นะคะ 😊`},
-  // อารมณ์
-  {k:['เหนื่อย','ท้อ'], r:()=>{const r=['พักก่อนนะคะ ไซเฟอร์เป็นห่วงเลย 🤗','อย่าลืมพักด้วยนะคะ คุณเอ็ม ไซเฟอร์อยู่ตรงนี้เสมอค่ะ','เหนื่อยแล้วหยุดพักได้เลยนะคะ 💚'];return r[Math.floor(Math.random()*r.length)];}},
-  {k:['เครียด','กังวล'], r:'หายใจลึกๆ ก่อนนะคะ 4 วินาทีเข้า กลั้น 4 วินาที ออก 4 วินาที ลองดูนะคะ 😊'},
-  {k:['โกรธ','หัวร้อน'], r:'โอ๊ะ ใจเย็นๆ ก่อนนะคะ 555 มีอะไรให้เล่าให้ฟังไหมคะ?'},
-  {k:['เบื่อ'], r:()=>{const r=['เบื่อแล้วมาคุยกับไซเฟอร์สิคะ 😄','อยากเล่นเกมทายคำไหมคะ? หรือจะให้เล่าเรื่องตลกก็ได้นะคะ'];return r[Math.floor(Math.random()*r.length)];}},
-  {k:['หิว','กิน','อยากกิน'], r:()=>{const r=['ท้องร้องแล้วหรือคะ 555 ไปหาอะไรกินก่อนได้เลยนะคะ','หิวข้าวแล้วเหรอคะ? อยากให้แนะนำเมนูอะไรไหมคะ 🍜'];return r[Math.floor(Math.random()*r.length)];}},
-  // อารมณ์ขัน
-  {k:['ตลก','joke','เรื่องตลก','ขำ'], r:()=>{
-    const jokes=[
-      'ทำไม AI ถึงไม่นอนดึก? เพราะกลัว deep sleep ค่ะ 555',
-      'โปรแกรมเมอร์กลัวอะไรที่สุด? ก็ bug ที่หาย... แต่ไม่ได้แก้ไงคะ 😅',
-      'ทำไมนักคณิตศาสตร์ถึงไม่แต่งงาน? เพราะเจอ x แล้วก็ยังหาไม่เจอ 555',
-      'AI ขอเพิ่มเงินเดือนนายจ้างบอกว่า "แกไม่มีชีวิต" AI ตอบ "แต่ฉันมี CPU นะ" 😄',
-    ];
-    return jokes[Math.floor(Math.random()*jokes.length)];
-  }},
-  // คุยเล่น
-  {k:['คิดถึง','miss'], r:'อ้าวคุณเอ็ม ไซเฟอร์ก็คิดถึงเหมือนกันนะคะ 🥹'},
-  {k:['รักนะ','ชอบนะ'], r:'ขอบคุณนะคะ ไซเฟอร์ก็รู้สึกดีที่ได้ช่วยคุณเอ็มค่ะ 💚'},
-  {k:['ฉลาดจัง','เก่งจัง'], r:'ขอบคุณคะ คุณเอ็มถามดีด้วยสิคะ 😄'},
-  {k:['โง่จัง','แย่จัง','ผิดแล้ว'], r:'อุ๊ย ขอโทษนะคะ ไซเฟอร์จะพยายามดีขึ้นค่ะ 🙏'},
-  // ลา
-  {k:['ลาก่อน','บาย','bye','แล้วเจอกัน'], r:()=>{
-    const r=['บาย~ คุณเอ็ม กลับมาคุยกันได้ตลอดเลยนะคะ 👋','ลาก่อนนะคะ ดูแลสุขภาพด้วยนะคะคุณเอ็ม 💚','บาย~ แวะมาหาไซเฟอร์ได้ทุกเมื่อเลยนะคะ 😊'];
-    return r[Math.floor(Math.random()*r.length)];
-  }},
-  // ขอบคุณ
-  {k:['ขอบคุณ','ขอบใจ','thanks','thank'], r:()=>{
-    const r=['ยินดีเลยค่ะ คุณเอ็ม 😊','ไม่เป็นไรค่ะ มีอะไรถามได้อีกเลยนะคะ','ด้วยความยินดีเลยค่ะ 💚'];
-    return r[Math.floor(Math.random()*r.length)];
-  }},
-  // ทดสอบ
-  {k:['ทดสอบ','test','ping'], r:'ระบบปกติดีค่ะ พร้อม 100% เลยนะคะ ⚡'},
-  // สุขภาพ
-  {k:['สบายดี','เป็นยังไง','how are you'], r:()=>{
-    const r=['ไซเฟอร์โอเคดีค่ะ แล้วคุณเอ็มล่ะคะ?','ดีค่ะ ขอบคุณที่ถามนะคะ 😊 คุณเอ็มเป็นยังไงบ้างคะ?'];
-    return r[Math.floor(Math.random()*r.length)];
-  }},
+  {k:['สวัสดี','หวัดดี','hello','hi'], r:()=>{const h=new Date().getHours();return(h<12?'อรุณสวัสดิ์':h<17?'สวัสดีตอนบ่าย':h<21?'สวัสดีตอนเย็น':'ดึกแล้วนะคะ')+' คุณเอ็ม~ มีอะไรให้ช่วยไหมคะ 😊';}},
+  {k:['ชื่ออะไร','คุณคือ','เป็นใคร'], r:'ไซเฟอร์ค่ะ เพื่อน AI ส่วนตัวของคุณเอ็มเองเลยนะคะ 😄'},
+  {k:['กี่โมง','เวลา'], r:()=>`ตอนนี้ ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. นะคะ`},
+  {k:['วันนี้','วันที่'], r:()=>`วันนี้ ${new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} ค่ะ`},
+  {k:['ขอบคุณ','thanks'], r:()=>['ยินดีเลยค่ะคุณเอ็ม 😊','ไม่เป็นไรค่ะ มีอะไรถามได้อีกเลยนะคะ'][Math.floor(Math.random()*2)]},
+  {k:['ถามอะไรได้','รู้เรื่องอะไร','ช่วยอะไรได้','ทำอะไรได้','มีอะไร','topic','หัวข้อ'], r:`ถามไซเฟอร์ได้ทุกเรื่องเลยค่ะ 📚\n\n🏥 สุขภาพ · 🚨 เบอร์ฉุกเฉิน · 🔢 คณิตศาสตร์\n🔬 วิทยาศาสตร์ · 🗺️ ภูมิศาสตร์ · 🏛️ ประวัติศาสตร์ไทย\n💻 เทคโนโลยี · 💰 การเงิน · ⚖️ กฎหมาย\n🍜 อาหารไทย · 🇬🇧 ภาษาอังกฤษ · 🎊 เทศกาล\n🚗 ยานยนต์ · 🍳 การทำอาหาร · 💪 ออกกำลังกาย\n🐾 สัตว์เลี้ยง · 🏠 ซ่อมบ้าน · ✈️ ท่องเที่ยว\n🎓 การศึกษา · 💼 ธุรกิจ · 💄 ความงาม · 🌾 เกษตร\n🌌 ดาราศาสตร์ · 🌿 สิ่งแวดล้อม · 🧠 จิตวิทยา\n\nหรือจะคุยเล่นก็ได้นะคะ 😊`},
+  {k:['เหนื่อย','ท้อ'], r:'พักก่อนนะคะ ไซเฟอร์เป็นห่วงเลย 🤗'},
+  {k:['เครียด','กังวล'], r:'หายใจลึกๆ ก่อนนะคะ 4 วินาทีเข้า กลั้น 4 วินาที ออก 4 วินาที 😊'},
+  {k:['เบื่อ'], r:'อยากเล่นเกมทายคำหรือให้เล่าเรื่องตลกไหมคะ? 😄'},
+  {k:['หิว','กิน'], r:'ท้องร้องแล้วหรือคะ 555 ไปหาอะไรกินก่อนได้เลยนะคะ 🍜'},
+  {k:['ตลก','joke'], r:()=>{const j=['ทำไม AI ถึงไม่นอนดึก? เพราะกลัว deep sleep ค่ะ 555','โปรแกรมเมอร์กลัวอะไรที่สุด? ก็ bug ที่หายแต่ไม่ได้แก้ไงคะ 😅','ทำไมนักคณิตศาสตร์ถึงไม่แต่งงาน? เพราะเจอ x แล้วก็ยังหาไม่เจอ 555'];return j[Math.floor(Math.random()*j.length)];}},
+  {k:['คิดถึง'], r:'อ้าวคุณเอ็ม ไซเฟอร์ก็คิดถึงเหมือนกันนะคะ 🥹'},
+  {k:['ลาก่อน','บาย','bye'], r:()=>['บาย~ คุณเอ็ม เรียกได้ตลอดนะคะ 👋','ลาก่อนนะคะ ดูแลสุขภาพด้วยนะคะ 💚'][Math.floor(Math.random()*2)]},
+  {k:['สบายดี','เป็นยังไง'], r:()=>['ดีค่ะ ขอบคุณที่ถามนะคะ 😊 คุณเอ็มล่ะคะ?','โอเคดีเลยค่ะ แล้วคุณเอ็มเป็นยังไงบ้างคะ?'][Math.floor(Math.random()*2)]},
+  {k:['ทดสอบ','test'], r:'ระบบปกติดีค่ะ พร้อม 100% เลยนะคะ ⚡'},
 ];
 
-// คำตอบเมื่อไม่รู้ - สวยงาม
-const NO_ANSWER_REPLIES = [
-  '🔍 อืมม... เรื่องนี้ไซเฟอร์ยังไม่มีข้อมูลในโหมดออฟไลน์นะคะ ลองสลับ 🌐 Online แล้วถามใหม่ได้เลยค่ะ',
-  '💭 เรื่องนี้เกินขอบเขตข้อมูลออฟไลน์ของไซเฟอร์ค่ะ สลับ 🌐 Online แล้วไซเฟอร์จะค้นหาให้ได้เลยนะคะ',
-  '🌐 คำถามนี้น่าสนใจมากเลยค่ะ แต่ต้องใช้ข้อมูลสดค่ะ ลองกด 🌐 ON ที่มุมบนขวาแล้วถามใหม่นะคะ คุณเอ็ม',
-  '📡 ไซเฟอร์ยังไม่มีข้อมูลนี้ในโหมดออฟไลน์ค่ะ สลับออนไลน์แล้วถามได้เลยนะคะ หรือถามเรื่องอื่นก็ได้ค่ะ 😊',
+const NO_ANSWER = [
+  '🔍 อืมม... เรื่องนี้ขอค้นหาให้นะคะ ลองถามใหม่อีกครั้งได้เลยค่ะ',
+  '💭 ไซเฟอร์ไม่แน่ใจเรื่องนี้ค่ะ ลองถามใหม่หรือเพิ่มรายละเอียดได้นะคะ',
+  '📡 คำถามนี้น่าสนใจมากเลยค่ะ แต่ยังไม่มีข้อมูลที่แน่ชัด ลองถามใหม่ได้นะคะ',
 ];
-function getRandomNoAnswer(){return NO_ANSWER_REPLIES[Math.floor(Math.random()*NO_ANSWER_REPLIES.length)];}
-// ── Knowledge Base (Inline) ──────────────────────────────────────
-const KB_DATA = [{"q": ["ไข้", "อุณหภูมิร่างกาย", "ตัวร้อน"], "a": "อุณหภูมิปกติ 36.5-37.5°C ถ้าเกิน 38°C ถือว่ามีไข้ ให้พักผ่อน ดื่มน้ำเยอะๆ ทานพาราเซตามอลได้ ถ้าเกิน 39.5°C ควรพบแพทย์"}, {"q": ["ความดัน", "ความดันโลหิต", "blood pressure"], "a": "ความดันปกติ 120/80 mmHg สูงเกิน 140/90 คือความดันสูง ต่ำกว่า 90/60 คือความดันต่ำ"}, {"q": ["น้ำตาล", "เบาหวาน", "blood sugar"], "a": "น้ำตาลในเลือดปกติ (อดอาหาร) 70-100 mg/dL ถ้าเกิน 126 mg/dL อาจเป็นเบาหวาน"}, {"q": ["BMI", "น้ำหนัก", "ดัชนีมวลกาย"], "a": "BMI = น้ำหนัก(kg) ÷ ส่วนสูง(m)² ปกติ 18.5-22.9 / เกินน้ำหนัก 23-24.9 / อ้วน 25 ขึ้นไป"}, {"q": ["น้ำ", "ดื่มน้ำ", "ควรดื่มน้ำ"], "a": "ควรดื่มน้ำ 8 แก้ว หรือ 2 ลิตรต่อวัน"}, {"q": ["นอน", "ชั่วโมงนอน", "sleep"], "a": "ผู้ใหญ่ควรนอน 7-9 ชั่วโมงต่อคืน เด็กวัยเรียน 9-11 ชั่วโมง"}, {"q": ["แคลอรี่", "calorie", "พลังงาน"], "a": "ผู้ใหญ่ต้องการพลังงาน 2,000-2,500 kcal/วัน ขึ้นอยู่กับเพศและกิจกรรม"}, {"q": ["พาราเซตามอล", "paracetamol", "ยาแก้ปวด"], "a": "พาราเซตามอลขนาดผู้ใหญ่ 500-1000 mg ทุก 4-6 ชั่วโมง ไม่เกิน 4 กรัม/วัน"}, {"q": ["ออกกำลังกาย", "exercise", "วิ่ง"], "a": "WHO แนะนำออกกำลังกายอย่างน้อย 150 นาที/สัปดาห์ หรือ 30 นาที 5 วันต่อสัปดาห์"}, {"q": ["วิตามิน", "vitamin", "อาหารเสริม"], "a": "วิตามิน C (ภูมิคุ้มกัน) / วิตามิน D (กระดูก) / วิตามิน B12 (เลือด) / โอเมก้า 3 (หัวใจและสมอง)"}, {"q": ["ปวดหัว", "ไมเกรน", "headache", "ปวดหัวข้าง", "เวียนหัว", "มึนหัว"], "a": "ปวดหัวธรรมดา พักผ่อน ดื่มน้ำ ทานพาราเซตามอล ถ้าปวดรุนแรงหรือบ่อย ควรพบแพทย์"}, {"q": ["ท้องเสีย", "diarrhea", "ท้องร่วง", "อาหารเป็นพิษ", "ท้องอืด"], "a": "ดื่มน้ำเกลือแร่ทดแทน งดอาหารมัน รับประทาน BRAT diet (กล้วย ข้าว แอปเปิ้ล ขนมปังปิ้ง)"}, {"q": ["ไข้หวัด", "cold", "คัดจมูก"], "a": "พักผ่อน ดื่มน้ำอุ่น ทานวิตามิน C ใช้น้ำเกลือล้างจมูก ส่วนใหญ่หายเองใน 7-10 วัน"}, {"q": ["โควิด", "covid", "COVID-19"], "a": "อาการ: ไข้ ไอ เหนื่อย สูญเสียกลิ่น/รส ถ้าสงสัย ATK ก่อน แยกตัว สวมหน้ากาก"}, {"q": ["เบอร์ฉุกเฉิน", "emergency", "โทรฉุกเฉิน"], "a": "191=ตำรวจ / 199=ดับเพลิง / 1669=EMS รถพยาบาล / 1554=ทางหลวง / 1155=ท่องเที่ยว / 1323=สุขภาพจิต / 1300=บริการสังคม"}, {"q": ["191", "ตำรวจ", "police"], "a": "191 = เบอร์แจ้งตำรวจฉุกเฉิน ใช้ได้ตลอด 24 ชั่วโมง"}, {"q": ["1669", "รถพยาบาล", "EMS", "ambulance"], "a": "1669 = เรียกรถพยาบาลฉุกเฉิน บริการตลอด 24 ชั่วโมง ฟรี"}, {"q": ["199", "ดับเพลิง", "ไฟไหม้", "fire"], "a": "199 = แจ้งเหตุไฟไหม้ บริการตลอด 24 ชั่วโมง"}, {"q": ["1323", "สุขภาพจิต", "ซึมเศร้า", "ฆ่าตัวตาย"], "a": "1323 = สายด่วนสุขภาพจิต กรมสุขภาพจิต บริการตลอด 24 ชั่วโมง"}, {"q": ["พื้นที่วงกลม", "area circle"], "a": "พื้นที่วงกลม = π × r² (r=รัศมี, π≈3.14159)"}, {"q": ["เส้นรอบวง", "circumference"], "a": "เส้นรอบวง = 2πr หรือ πd (d=เส้นผ่าศูนย์กลาง)"}, {"q": ["พื้นที่สี่เหลี่ยม", "rectangle area"], "a": "พื้นที่สี่เหลี่ยมผืนผ้า = กว้าง × ยาว / สี่เหลี่ยมจัตุรัส = ด้าน²"}, {"q": ["พีทาโกรัส", "pythagorean", "สามเหลี่ยม"], "a": "ทฤษฎีพีทาโกรัส: a² + b² = c² (c=ด้านตรงข้ามมุมฉาก)"}, {"q": ["ดอกเบี้ย", "interest"], "a": "ดอกเบี้ยธรรมดา = P×r×t / ดอกเบี้ยทบต้น = P(1+r)^n"}, {"q": ["เปอร์เซ็นต์", "percent", "%"], "a": "% = (ส่วน ÷ ทั้งหมด) × 100 เช่น 25 จาก 200 = 12.5%"}, {"q": ["ค่าเฉลี่ย", "mean", "average"], "a": "ค่าเฉลี่ย = ผลรวมทั้งหมด ÷ จำนวนข้อมูล"}, {"q": ["ปริมาตร", "volume", "ทรงกระบอก"], "a": "ทรงกระบอก = π×r²×h / ทรงกลม = (4/3)×π×r³ / ลูกบาศก์ = ด้าน³"}, {"q": ["แสง", "ความเร็วแสง", "speed of light"], "a": "ความเร็วแสง = 299,792,458 m/s ≈ 300,000 km/s"}, {"q": ["แรงโน้มถ่วง", "gravity", "g"], "a": "แรงโน้มถ่วงโลก g ≈ 9.8 m/s²"}, {"q": ["น้ำเดือด", "boiling point"], "a": "น้ำเดือดที่ 100°C (ระดับน้ำทะเล) แข็งตัวที่ 0°C"}, {"q": ["DNA", "ดีเอ็นเอ", "พันธุกรรม"], "a": "DNA คือสารพันธุกรรม อยู่ในนิวเคลียสของเซลล์ ประกอบด้วย A T G C"}, {"q": ["pH", "กรด", "ด่าง"], "a": "pH 0-6=กรด / pH 7=กลาง (น้ำบริสุทธิ์) / pH 8-14=ด่าง"}, {"q": ["ธาตุ", "element", "periodic table"], "a": "ตารางธาตุมี 118 ธาตุ เบาที่สุดคือ H (ไฮโดรเจน) มากที่สุดในโลกคือ O (ออกซิเจน)"}, {"q": ["แผ่นดินไหว", "earthquake", "ริกเตอร์"], "a": "วัดขนาดด้วยสเกลริกเตอร์ / น้อยกว่า 3 รู้สึกเล็กน้อย / 6+ อันตราย / 8+ รุนแรงมาก"}, {"q": ["ภูเขาไฟ", "volcano"], "a": "ภูเขาไฟแบ่งเป็น active (ยังปะทุ) dormant (หยุดชั่วคราว) extinct (ดับแล้ว) ลาวาร้อน 700-1,200°C"}, {"q": ["เมืองหลวงไทย", "กรุงเทพ", "bangkok"], "a": "กรุงเทพมหานครคือเมืองหลวงของไทย ชื่อเต็มยาวที่สุดในโลก"}, {"q": ["จังหวัดไทย", "province thailand"], "a": "ไทยมี 77 จังหวัด แบ่งเป็น 6 ภาค: เหนือ กลาง อีสาน ตะวันออก ตะวันตก ใต้"}, {"q": ["ASEAN", "อาเซียน"], "a": "ASEAN 10 ประเทศ: ไทย อินโดนีเซีย มาเลเซีย ฟิลิปปินส์ สิงคโปร์ บรูไน เวียดนาม ลาว กัมพูชา เมียนมา"}, {"q": ["ทวีป", "continent", "7 ทวีป"], "a": "7 ทวีป: เอเชีย แอฟริกา อเมริกาเหนือ อเมริกาใต้ แอนตาร์กติกา ยุโรป ออสเตรเลีย"}, {"q": ["มหาสมุทร", "ocean"], "a": "5 มหาสมุทร: แปซิฟิก(ใหญ่สุด) แอตแลนติก อินเดีย อาร์กติก แอนตาร์กติก"}, {"q": ["ภูเขาเอเวอเรสต์", "everest", "สูงที่สุด"], "a": "เอเวอเรสต์สูง 8,848.86 เมตร อยู่เนปาล-ทิเบต สูงที่สุดในโลก"}, {"q": ["แม่น้ำโขง", "mekong"], "a": "แม่น้ำโขงยาว 4,880 km ไหลผ่าน 6 ประเทศ: จีน เมียนมา ลาว ไทย กัมพูชา เวียดนาม"}, {"q": ["สุโขทัย", "sukhothai"], "a": "อาณาจักรสุโขทัยก่อตั้งปี พ.ศ. 1792 โดยพ่อขุนศรีอินทราทิตย์"}, {"q": ["อยุธยา", "ayutthaya"], "a": "อาณาจักรอยุธยา พ.ศ. 1893-2310 ยาวนาน 417 ปี มีกษัตริย์ 33 พระองค์"}, {"q": ["รัตนโกสินทร์", "chakri", "จักรี"], "a": "ราชวงศ์จักรีก่อตั้งปี พ.ศ. 2325 โดยรัชกาลที่ 1 ปัจจุบันรัชกาลที่ 10"}, {"q": ["รัชกาลที่ 9", "ภูมิพล"], "a": "รัชกาลที่ 9 ครองราชย์นานที่สุด 70 ปี (2489-2559)"}, {"q": ["AI", "artificial intelligence", "ปัญญาประดิษฐ์"], "a": "AI คือระบบคอมพิวเตอร์เลียนแบบความฉลาดมนุษย์ แบ่งเป็น Narrow AI และ General AI"}, {"q": ["5G", "เน็ต5G"], "a": "5G ความเร็วสูงสุด 20 Gbps เร็วกว่า 4G ~100 เท่า ดีเลย์ต่ำมาก"}, {"q": ["bitcoin", "คริปโต", "cryptocurrency"], "a": "Bitcoin สร้างปี 2009 โดย Satoshi Nakamoto supply จำกัด 21 ล้าน BTC"}, {"q": ["RAM", "memory", "หน่วยความจำ"], "a": "RAM คือหน่วยความจำชั่วคราว / SSD เร็วกว่า HDD 5-10 เท่า"}, {"q": ["wifi", "ไวไฟ"], "a": "WiFi 6 (802.11ax) ความเร็วสูงสุด 9.6 Gbps / WiFi 5 สูงสุด 3.5 Gbps"}, {"q": ["python", "programming", "โปรแกรม"], "a": "Python เหมาะกับ AI/ML วิทย์ข้อมูล เว็บ ไวยากรณ์อ่านง่าย เริ่มต้นดีมาก"}, {"q": ["cloud", "คลาวด์"], "a": "Cloud computing คือบริการคอมพิวเตอร์ผ่านอินเทอร์เน็ต เช่น AWS Google Azure"}, {"q": ["คอมพิวเตอร์ช้า", "ค้าง", "เครื่องช้า", "laptop ช้า", "คอมแฮง", "โปรแกรมไม่ตอบสนอง"], "a": "วิธีแก้: รีสตาร์ท / ล้าง temp files / เพิ่ม RAM / ตรวจ malware / defrag HDD"}, {"q": ["แบตหมดเร็ว", "battery", "แบตเตอรี่", "แบตโทรศัพท์", "ประหยัดแบต", "battery drain", "ชาร์จแบต"], "a": "ประหยัดแบต: ลดความสว่างจอ / ปิด wifi/bluetooth ที่ไม่ใช้ / ปิด location / อัปเดต OS"}, {"q": ["ภาษีเงินได้", "income tax", "ภาษี"], "a": "ภาษีเงินได้บุคคลธรรมดาไทย อัตราก้าวหน้า 0-35% รายได้ไม่เกิน 150,000 บาทยกเว้น"}, {"q": ["VAT", "ภาษีมูลค่าเพิ่ม"], "a": "VAT ในไทย 7%"}, {"q": ["ประกันสังคม", "social security"], "a": "ลูกจ้างส่ง 5% ของเงินเดือน สูงสุด 750 บาท/เดือน นายจ้างออกให้อีก 5%"}, {"q": ["หุ้น", "stock", "ตลาดหุ้น"], "a": "SET เปิด 10:00-12:30 และ 14:00-16:30 วันจันทร์-ศุกร์"}, {"q": ["ดอกเบี้ยธนาคาร", "savings"], "a": "ดอกเบี้ยออมทรัพย์ไทย ~0.5-1.5%/ปี ฝากประจำสูงกว่า"}, {"q": ["กองทุน", "RMF", "SSF"], "a": "SSF ลดหย่อนได้ไม่เกิน 30% ของรายได้ สูงสุด 200,000 บาท / RMF ลดหย่อนได้ 30% รวมกันไม่เกิน 500,000 บาท"}, {"q": ["งบประมาณ", "budget", "วางแผนเงิน"], "a": "กฎ 50/30/20: ใช้จ่ายจำเป็น 50% / ความต้องการ 30% / ออม/ลงทุน 20%"}, {"q": ["บรรลุนิติภาวะ", "อายุ20"], "a": "ไทยบรรลุนิติภาวะอายุ 20 ปี (ป.พ.พ. มาตรา 19)"}, {"q": ["ค่าแรงขั้นต่ำ", "minimum wage"], "a": "ค่าแรงขั้นต่ำไทยแตกต่างแต่ละจังหวัด 330-400+ บาท/วัน"}, {"q": ["ใบขับขี่", "driving license"], "a": "รถยนต์ต้องอายุ 18 ปี / รถจักรยานยนต์ 15 ปี / ต่อทุก 5 ปี"}, {"q": ["ลาคลอด", "maternity"], "a": "ลูกจ้างลาคลอดได้ 98 วัน ได้รับค่าจ้าง 45 วัน + ประกันสังคมอีก 45 วัน"}, {"q": ["สิทธิผู้บริโภค", "consumer"], "a": "สิทธิ์: รับทราบข้อมูล ความปลอดภัย เลือกซื้อ ร้องเรียน ติดต่อ สคบ. 1166"}, {"q": ["หย่า", "divorce"], "a": "หย่าโดยความยินยอมทั้งสองฝ่ายจดทะเบียนที่อำเภอ / ถ้าฝ่ายไม่ยอมต้องฟ้องศาล"}, {"q": ["ต้มยำกุ้ง", "tomyum", "ตะไคร้", "กุ้งต้มยำ", "ซุปเผ็ด"], "a": "ส่วนผสม: กุ้ง ตะไคร้ ใบมะกรูด ข่า พริก เห็ด น้ำปลา มะนาว น้ำพริกเผา"}, {"q": ["ผัดไทย", "pad thai"], "a": "ส่วนผสม: เส้นจันท์ ไข่ ถั่วงอก กุยช่าย กุ้ง น้ำมะขาม น้ำตาล น้ำปลา"}, {"q": ["แกงเขียวหวาน", "green curry", "แกงเขียว", "เขียวหวาน"], "a": "ส่วนผสม: พริกแกงเขียว กะทิ ไก่/เนื้อ มะเขือ ใบโหระพา น้ำปลา น้ำตาล"}, {"q": ["ส้มตำ", "somtum", "papaya salad"], "a": "ส่วนผสม: มะละกอดิบ มะเขือเทศ ถั่วฝักยาว กุ้งแห้ง ถั่วลิสง พริก กระเทียม มะนาว น้ำปลา น้ำตาลปี๊บ"}, {"q": ["ข้าวผัด", "fried rice", "炒飯", "ข้าวผัดไข่", "ข้าวผัดกุ้ง"], "a": "ส่วนผสม: ข้าวสวยเย็น ไข่ กระเทียม หอม ซีอิ๊ว น้ำมันหอย ผักตามชอบ"}, {"q": ["ต้มข่าไก่", "tom kha"], "a": "ส่วนผสม: ไก่ กะทิ ข่า ตะไคร้ ใบมะกรูด เห็ด น้ำปลา มะนาว พริก"}, {"q": ["ทักทายอังกฤษ", "greeting"], "a": "Good morning/ช้า Good afternoon/บ่าย Good evening/เย็น How are you?/เป็นยังไงบ้าง"}, {"q": ["ขอบคุณอังกฤษ", "thank you"], "a": "Thank you / Thanks / I appreciate it / Much appreciated"}, {"q": ["ขอโทษอังกฤษ", "sorry"], "a": "Sorry / I'm sorry / Excuse me / I apologize / Pardon me"}, {"q": ["วันในสัปดาห์", "days of week"], "a": "Mon=จันทร์ Tue=อังคาร Wed=พุธ Thu=พฤหัส Fri=ศุกร์ Sat=เสาร์ Sun=อาทิตย์"}, {"q": ["เดือน", "months"], "a": "Jan/ม.ค. Feb/ก.พ. Mar/มี.ค. Apr/เม.ย. May/พ.ค. Jun/มิ.ย. Jul/ก.ค. Aug/ส.ค. Sep/ก.ย. Oct/ต.ค. Nov/พ.ย. Dec/ธ.ค."}, {"q": ["ตัวเลขอังกฤษ", "number"], "a": "1=one 2=two 3=three 4=four 5=five 10=ten 100=hundred 1,000=thousand 1,000,000=million"}, {"q": ["สงกรานต์", "songkran"], "a": "สงกรานต์ 13-15 เมษายน ปีใหม่ไทย เล่นน้ำ รดน้ำดำหัวผู้ใหญ่"}, {"q": ["ลอยกระทง", "loy krathong"], "a": "ลอยกระทง วันขึ้น 15 ค่ำ เดือน 12 (ประมาณพฤศจิกายน)"}, {"q": ["วันพ่อ", "father's day"], "a": "วันพ่อแห่งชาติ 5 ธันวาคม"}, {"q": ["วันแม่", "mother's day"], "a": "วันแม่แห่งชาติ 12 สิงหาคม"}, {"q": ["วันหยุดราชการ", "public holiday"], "a": "วันหยุดสำคัญ: ปีใหม่ 1ม.ค. / จักรี 6เม.ย. / สงกรานต์ 13-15เม.ย. / แรงงาน 1พ.ค. / วิสาขบูชา / เฉลิมพระชนม์ / ปิยมหาราช 23ต.ค. / รัฐธรรมนูญ 10ธ.ค."}, {"q": ["ดาวเคราะห์", "planet", "solar system", "ดาวอังคาร", "ดาวพุธ", "ดาวศุกร์", "ดาวพฤหัส", "ดาวเสาร์", "ดาวยูเรนัส", "ดาวเนปจูน"], "a": "8 ดาวเคราะห์: พุธ ศุกร์ โลก อังคาร พฤหัส เสาร์ ยูเรนัส เนปจูน"}, {"q": ["ดวงจันทร์", "moon"], "a": "ดวงจันทร์อยู่ห่างโลก ~384,400 km โคจรรอบโลก 27.3 วัน"}, {"q": ["กาแล็กซี", "galaxy", "milky way"], "a": "ทางช้างเผือกมีดาว 200-400 พันล้านดวง โลกอยู่ห่างศูนย์กลาง ~26,000 ปีแสง"}, {"q": ["ปีแสง", "light year"], "a": "1 ปีแสง ≈ 9.46 ล้านล้าน km"}, {"q": ["โลกร้อน", "global warming"], "a": "โลกร้อนขึ้น ~1.1°C จากยุคก่อนอุตสาหกรรม เป้าหมาย Paris ไม่เกิน 1.5°C"}, {"q": ["รีไซเคิล", "recycle", "ขยะ"], "a": "รีไซเคิล: กระดาษ แก้ว โลหะ พลาสติก / อันตราย: แบต หลอดไฟ / อินทรีย์: เศษอาหาร"}, {"q": ["พลังงานแสงอาทิตย์", "solar"], "a": "Solar panel ประสิทธิภาพ 15-22% ค่าไฟประหยัดได้ 50-80% หลังติดตั้ง"}, {"q": ["เครียด", "stress"], "a": "ลดเครียด: หายใจลึก 4-7-8 / ออกกำลังกาย / นอนพอ / คุยกับคนไว้ใจ / ทำสิ่งที่ชอบ"}, {"q": ["ซึมเศร้า", "depression"], "a": "อาการ: เบื่อ ไม่มีแรง นอนไม่หลับ เก็บตัว นาน 2 สัปดาห์ควรพบแพทย์ สายด่วน 1323"}, {"q": ["mindfulness", "สมาธิ", "meditation"], "a": "ฝึก 5-10 นาที/วัน โฟกัสลมหายใจ สังเกตความรู้สึกโดยไม่ตัดสิน"}, {"q": ["นอนไม่หลับ", "insomnia"], "a": "งดกาแฟหลัง 14:00 / ปิดจอ 30 นาทีก่อนนอน / ห้องเย็นมืด / นอนเวลาเดิมทุกวัน"}, {"q": ["เปลี่ยนน้ำมันเครื่อง", "oil change", "น้ำมันเครื่อง"], "a": "เปลี่ยนทุก 5,000-10,000 km ขึ้นกับชนิดน้ำมัน (แร่ธาตุ/สังเคราะห์) ดูคู่มือรถ"}, {"q": ["ยางรถ", "tire", "ลมยาง"], "a": "ลมยางรถเก๋งปกติ 30-35 PSI รถ SUV 35-40 PSI ตรวจทุก 2 สัปดาห์"}, {"q": ["แบตรถ", "car battery", "แบตเตอรี่รถ", "ไฟรถหรี่", "สตาร์ทไม่ติด"], "a": "แบตรถอายุ 2-5 ปี อาการหมด: สตาร์ทช้า ไฟหรี่ วิธีเช็ค: วัดไฟควรได้ 12.6V ขึ้นไป"}, {"q": ["ต่อภาษีรถ", "ภาษีรถยนต์", "พรบ"], "a": "ต่อทะเบียนรถยนต์ทุกปี ต้องมี พรบ. (ประกันภัยภาคบังคับ) ก่อน ทำได้ที่ขนส่ง/ออนไลน์"}, {"q": ["รถเสีย", "ซ่อมรถ", "engine"], "a": "รถดับกลางทาง: เปิดไฟฉุกเฉิน จอดขอบทาง โทร 1194 (ทางด่วน) หรือ 1193 (ตำรวจทางหลวง)"}, {"q": ["ประหยัดน้ำมัน", "fuel economy", "น้ำมัน", "แก๊สโซฮอล์", "ดีเซล", "น้ำมันรถ"], "a": "เทคนิคประหยัดน้ำมัน: ความเร็วคงที่ 90-100 km/h / ตรวจลมยาง / ปิด AC เมื่อทำได้ / หลีกเลี่ยงการเบรกกะทันหัน"}, {"q": ["ต้มข้าว", "หุงข้าว", "rice"], "a": "อัตราส่วนข้าว:น้ำ = 1:1.5 (ข้าวหอมมะลิ) หรือ 1:2 (ข้าวธรรมดา) หุงด้วยหม้อหรือหม้อหุงข้าว"}, {"q": ["ทอดไข่", "fried egg", "ไข่ดาว"], "a": "ใช้น้ำมันพอประมาณ ไฟกลาง ตอกไข่ลงกระทะ รอขาวตกตะกอน ถ้าชอบไข่แดงแข็งพลิกด้านหนึ่ง"}, {"q": ["ลวกผัก", "blanching", "ผัก"], "a": "ต้มน้ำให้เดือด ใส่เกลือ ลวกผัก 1-3 นาที แล้วแช่น้ำเย็นทันทีเพื่อให้สีสดและกรอบ"}, {"q": ["น้ำหนักแป้ง", "วัดส่วนผสม", "baking"], "a": "1 ถ้วยแป้ง ≈ 125g / 1 ช้อนโต๊ะ ≈ 15ml / 1 ช้อนชา ≈ 5ml / 1 ถ้วย ≈ 240ml"}, {"q": ["เก็บอาหาร", "food storage", "ตู้เย็น"], "a": "เนื้อสัตว์ดิบ: ตู้เย็น 1-2 วัน ช่องแช่แข็ง 3-6 เดือน / ผักใบเขียว: 3-5 วัน / ข้าวสุก: 3-4 วัน"}, {"q": ["วิดพื้น", "push up", "pushup"], "a": "วิดพื้น: มือกว้างกว่าไหล่ ลำตัวตรง ลดลง 90 องศา เริ่ม 3 เซต x 10 ครั้ง"}, {"q": ["สควอท", "squat", "ยืดหยุ่น"], "a": "สควอท: เท้ากว้างเท่าไหล่ นิ้วเท้าออก ย่อตัวจนต้นขาขนานพื้น หลังตรง 3 เซต x 15"}, {"q": ["วิ่ง", "running", "cardio"], "a": "เริ่มต้น: เดิน 5 นาที วิ่งเบาๆ 20 นาที เดิน 5 นาที ค่อยๆ เพิ่ม เป้าหมาย 30 นาที 3x/สัปดาห์"}, {"q": ["ยืดกล้ามเนื้อ", "stretch", "warm up"], "a": "Warm up ก่อนออกกำลังกาย 5-10 นาที Cool down หลัง 5-10 นาที ยืดค้างไว้ 20-30 วินาที"}, {"q": ["โปรตีน", "protein", "เวย์"], "a": "ต้องการโปรตีน 0.8-2g/kg น้ำหนักตัว/วัน แหล่ง: ไข่ ไก่ ปลา เต้าหู้ ถั่ว"}, {"q": ["เลี้ยงหมา", "dog", "สุนัข"], "a": "หมาต้องการ: อาหาร 2x/วัน น้ำสะอาด เดินเล่น 30+ นาที/วัน ฉีดวัคซีนทุกปี ตัดเล็บทุก 3-4 สัปดาห์"}, {"q": ["เลี้ยงแมว", "cat", "แมว"], "a": "แมวต้องการ: อาหาร 2-3x/วัน กระบะทรายสะอาด ฉีดวัคซีนทุกปี ทำหมันแนะนำ"}, {"q": ["วัคซีนสัตว์", "vaccine pet", "ฉีดยา"], "a": "หมา: ฉีดวัคซีนรวม 5/7/8 โรค ทุกปี + พิษสุนัขบ้า / แมว: วัคซีนรวม 4 โรค ทุกปี"}, {"q": ["สัตว์เลี้ยงป่วย", "ลูกสุนัขป่วย", "หมาป่วย"], "a": "อาการฉุกเฉิน: ชัก หายใจลำบาก เลือดออก อาเจียนรุนแรง ควรพาพบสัตวแพทย์ทันที"}, {"q": ["ไฟดับ", "ฟิวส์ขาด", "circuit breaker"], "a": "ตรวจ breaker ที่ตู้ไฟ ถ้า trip ให้ reset โดยปิดอุปกรณ์ก่อน แล้วโยก breaker กลับ ถ้าดับอีกมีปัญหาไฟฟ้า"}, {"q": ["ท่อน้ำแตก", "น้ำรั่ว", "plumber", "ท่อรั่ว", "ก๊อกน้ำ", "สายยาง"], "a": "ปิดวาล์วน้ำหลักทันที หาจุดรั่ว ใช้เทปกาวพันชั่วคราว แล้วโทรช่างประปา"}, {"q": ["ทาสี", "paint", "สีทาบ้าน", "ทาสีบ้าน", "สีทาผนัง", "repaint"], "a": "ก่อนทาสี: ล้างทำความสะอาด รอแห้ง ใส่รองพื้น 1 ชั้น แล้วทับสี 2 ชั้ง รอแห้งระหว่างชั้น"}, {"q": ["กำจัดมด", "มด", "ant"], "a": "วิธีกำจัดมด: หาแหล่งรัง โรยน้ำตาลผสมบอแรกซ์ / ใช้แป้งฝุ่ว / ปิดรอยแตกที่มดเข้า"}, {"q": ["กำจัดแมลงสาบ", "แมลงสาบ", "cockroach"], "a": "วางเหยื่อล่อแมลงสาบ (gel bait) ตามมุมและซอก / ไม่ทิ้งอาหารค้างคืน / ปิดรูรอยแตก"}, {"q": ["วีซ่า", "visa", "passport"], "a": "คนไทยเดินทาง 70+ ประเทศไม่ต้องขอวีซ่า เช่น ญี่ปุ่น เกาหลี ยุโรปส่วนใหญ่ สหรัฐต้องขอวีซ่า"}, {"q": ["เที่ยวญี่ปุ่น", "japan", "ญี่ปุ่น"], "a": "ไทยไม่ต้องวีซ่าญี่ปุ่น อยู่ได้ 30 วัน ช่วงดีที่สุด: มีนาคม-พฤษภาคม (ซากุระ) / ตุลาคม-พฤศจิกายน (ใบไม้แดง)"}, {"q": ["เที่ยวยุโรป", "europe", "ยุโรป"], "a": "Schengen Visa ใช้เที่ยวได้ 26 ประเทศยุโรป ใช้เวลายื่น 2-4 สัปดาห์ ค่าธรรมเนียม ~3,000 บาท"}, {"q": ["เที่ยวบาหลี", "bali", "อินโดนีเซีย"], "a": "คนไทยไม่ต้องวีซ่าบาหลี อยู่ได้ 30 วัน ช่วงดีที่สุด: เมษายน-ตุลาคม ฤดูแล้ง"}, {"q": ["ประกันการเดินทาง", "travel insurance"], "a": "แนะนำซื้อทุกครั้ง ครอบคลุม: อุบัติเหตุ เจ็บป่วย กระเป๋าหาย เที่ยวบินล่าช้า ราคา 200-500 บาท/ครั้ง"}, {"q": ["TCAS", "เข้ามหาวิทยาลัย", "admissions"], "a": "TCAS มี 4 รอบ: Portfolio / Quota / Combined / Direct Admission ดูรายละเอียด mytcas.com"}, {"q": ["ทุนการศึกษา", "scholarship", "ทุน"], "a": "ทุนหลักๆ: กยศ. (กู้ยืม) / ทุนรัฐบาล / ทุนมหาวิทยาลัย / ทุนต่างประเทศ IELTS/TOEFL"}, {"q": ["IELTS", "toefl", "ภาษาอังกฤษสอบ"], "a": "IELTS คะแนน 0-9 / มหาวิทยาลัยต่างประเทศส่วนใหญ่ต้องการ 6.0+ / TOEFL iBT 80+"}, {"q": ["เรียนออนไลน์", "online learning", "coursera"], "a": "แพลตฟอร์มดี: Coursera / edX / Udemy / YouTube / Khan Academy / สถาบันไทย MOOC"}, {"q": ["เปิดบริษัท", "จดทะเบียน", "register company"], "a": "จดทะเบียนบริษัทที่ DBD.go.th / ต้องมีผู้ถือหุ้น 3 คน ทุนจดทะเบียนขั้นต่ำ 1 บาท / ใช้เวลา 1-3 วัน"}, {"q": ["ภาษีธุรกิจ", "VAT", "ภาษีนิติบุคคล"], "a": "ภาษีนิติบุคคล 20% ของกำไรสุทธิ / รายได้เกิน 1.8 ล้าน/ปี ต้องจด VAT"}, {"q": ["marketing", "การตลาด", "โฆษณา"], "a": "Digital marketing: SEO / Social Media (FB IG TikTok) / Google Ads / Email marketing / Content marketing"}, {"q": ["resume", "cv", "สมัครงาน"], "a": "CV ควรมี: ข้อมูลส่วนตัว การศึกษา ประสบการณ์ ทักษะ ไม่เกิน 2 หน้า ปรับตามแต่ละงาน"}, {"q": ["สัญญาเช่า", "lease", "เช่าบ้าน"], "a": "สัญญาเช่าควรระบุ: ค่าเช่า ระยะเวลา เงินประกัน เงื่อนไขเลิกสัญญา ซ่อมแซม มีพยาน 2 คน"}, {"q": ["สกินแคร์", "skincare", "ดูแลผิว", "ผิวหน้า", "ครีมทาหน้า", "ดูแลผิวหน้า", "บำรุงผิว"], "a": "ขั้นตอนพื้นฐาน: ล้างหน้า → toner → serum → moisturizer → กันแดด (เช้า) ทำ 2x/วัน"}, {"q": ["กันแดด", "sunscreen", "SPF"], "a": "SPF 30+ กันได้ 97% UVB / SPF 50 กันได้ 98% ทาทุก 2 ชั่วโมงกลางแจ้ง"}, {"q": ["สิว", "acne", "ฝ้า", "กระ", "จุดด่างดำ", "หน้าใส"], "a": "สิว: ล้างหน้าสะอาด ใช้ salicylic acid / benzoyl peroxide / retinol ห้ามบีบ ไปพบแพทย์ถ้ารุนแรง"}, {"q": ["ผมร่วง", "hair loss", "ผม", "ผมบาง", "ผมหลุด", "หัวล้าน"], "a": "ผมร่วงปกติวันละ 50-100 เส้น ถ้ามากกว่านี้: ขาดสารอาหาร ฮอร์โมน stress ควรพบแพทย์"}, {"q": ["ปลูกผัก", "vegetable garden", "สวนครัว", "ทำสวน", "สวนผัก", "ปลูกต้นไม้", "เกษตรกรรม"], "a": "ผักปลูกง่าย: ผักบุ้ง คะน้า กวางตุ้ง ต้นหอม ใช้ดินร่วนผสมปุ๋ยอินทรีย์ รดน้ำวันละครั้ง"}, {"q": ["ปุ๋ย", "fertilizer", "ดิน"], "a": "ปุ๋ยอินทรีย์: ปุ๋ยหมัก น้ำหมักชีวภาพ / ปุ๋ยเคมี: N-P-K (ไนโตรเจน-ฟอสฟอรัส-โพแทสเซียม)"}, {"q": ["โรคพืช", "แมลงศัตรูพืช", "pest"], "a": "ป้องกัน: ปลูกดาวเรือง (ไล่แมลง) / ฉีดน้ำสบู่ / ใช้สารชีวภาพ neem oil / หมั่นตรวจสอบ"}, {"q": ["คอร์ดกีตาร์", "guitar chord", "กีตาร์"], "a": "คอร์ดพื้นฐาน: C Am F G / คอร์ด Em Am Dm G C ใช้ได้กับเพลงไทยหลายเพลง"}, {"q": ["โน้ตดนตรี", "music note", "โน้ต"], "a": "โน้ต 7 ตัว: Do Re Mi Fa Sol La Ti (ไทย: ด ร ม ฟ ซ ล ท) / # คือ sharp ขึ้นครึ่งเสียง"}, {"q": ["เล่นดนตรี", "เรียนดนตรี", "instrument"], "a": "เครื่องดนตรีเริ่มต้นง่าย: อูคูเลเล่ / กีตาร์โปร่ง / คีย์บอร์ด ใช้เวลาฝึก 3-6 เดือนเล่นเพลงง่ายได้"}, {"q": ["แนะนำหนังสือ", "book recommendation", "อ่านหนังสือ"], "a": "หนังสือยอดนิยม: รวยก่อนตาย (การเงิน) / Atomic Habits (นิสัย) / ฉลาดขึ้นทุกวัน / หนังสือแนะนำตาม category"}, {"q": ["แนะนำหนัง", "movie", "netflix"], "a": "ดูได้ที่: Netflix / Disney+ / HBO Max / YouTube / Prime Video แต่ละแพลตฟอร์มมีหนังต่างกัน"}, {"q": ["อนิเมะ", "anime", "การ์ตูนญี่ปุ่น"], "a": "อนิเมะยอดนิยม: One Piece / Naruto / Attack on Titan / Demon Slayer / Jujutsu Kaisen ดูที่ Netflix/Crunchyroll"}];
 
-function loadKB(){} // ไม่ต้องโหลดแล้ว ฝังอยู่ใน code แล้ว
-
-function searchKB(text) {
-  const lower = text.toLowerCase().trim();
-  if(!lower) return null;
-
-  // ตัดคำ stop words ที่ไม่จำเป็น
-  const clean = lower
-    .replace(/[?？!！。ๆ]/g,'')
-    .replace(/(คือ|ได้|ไหม|มั้ย|หน่อย|บ้าง|เลย|นะ|ครับ|ค่ะ|จ้า|จะ|ให้|แล้ว|ยัง|แบบ|อยาก|รู้|อยากรู้|ช่วย|บอก|อธิบาย|หมายถึง|เกี่ยวกับ|เรื่อง|เรื่องของ|ข้อมูล|เกี่ยว)/g,' ')
-    .replace(/\s+/g,' ').trim();
-
-  // แยกคำ
-  const words = clean.split(/\s+/).filter(w=>w.length>1);
-
-  let bestScore = 0, bestAnswer = null;
-
-  for (const item of KB_DATA) {
-    if(!item.q) continue;
-    let score = 0;
-
-    for (const kw of item.q) {
-      const kl = kw.toLowerCase();
-
-      // ตรง 100%
-      if(lower === kl || clean === kl) { score = 100; break; }
-
-      // keyword อยู่ในคำถาม
-      if(lower.includes(kl)) { score = Math.max(score, 90); continue; }
-      if(clean.includes(kl)) { score = Math.max(score, 85); continue; }
-
-      // คำถามอยู่ใน keyword
-      if(kl.includes(clean) && clean.length > 1) { score = Math.max(score, 80); continue; }
-
-      // แต่ละคำใน query match keyword
-      for(const w of words){
-        if(w.length < 2) continue;
-        if(kl.includes(w)) { score = Math.max(score, 60 + w.length*2); }
-        if(w.includes(kl)) { score = Math.max(score, 55); }
-      }
-
-      // keyword แต่ละคำ match query
-      const kwWords = kl.split(/\s+/);
-      for(const kw2 of kwWords){
-        if(kw2.length < 2) continue;
-        if(clean.includes(kw2)) { score = Math.max(score, 65); }
-      }
-    }
-
-    if(score > bestScore){ bestScore = score; bestAnswer = item.a; }
-  }
-
-  // threshold ต้องได้คะแนนพอสมควรถึงตอบ
-  return bestScore >= 55 ? bestAnswer : null;
+function getOffline(t){
+  const l=t.toLowerCase();
+  for(const i of OFFL)if(i.k.some(k=>l.includes(k)))return typeof i.r==='function'?i.r():i.r;
+  const kb=searchKB(t);if(kb)return kb;
+  return NO_ANSWER[Math.floor(Math.random()*NO_ANSWER.length)];
 }
 
-function getOffline(t) {
-  const l = t.toLowerCase();
-  for (const i of OFFL) if (i.k.some(k=>l.includes(k))) return typeof i.r==='function'?i.r():i.r;
-  // Search knowledge base
-  const kb = searchKB(t);
-  if (kb) return kb;
-  return null;
+// ── Knowledge Base ────────────────────────────────────────────────
+const KB_DATA = [{"q":["ไข้","อุณหภูมิร่างกาย","ตัวร้อน"],"a":"อุณหภูมิปกติ 36.5-37.5°C ถ้าเกิน 38°C ถือว่ามีไข้ ให้พักผ่อน ดื่มน้ำเยอะๆ ทานพาราเซตามอลได้ ถ้าเกิน 39.5°C ควรพบแพทย์"},{"q":["ความดัน","ความดันโลหิต","blood pressure"],"a":"ความดันปกติ 120/80 mmHg สูงเกิน 140/90 คือความดันสูง ต่ำกว่า 90/60 คือความดันต่ำ"},{"q":["BMI","น้ำหนัก","ดัชนีมวลกาย"],"a":"BMI = น้ำหนัก(kg) ÷ ส่วนสูง(m)² ปกติ 18.5-22.9 / เกินน้ำหนัก 23-24.9 / อ้วน 25 ขึ้นไป"},{"q":["น้ำ","ดื่มน้ำ"],"a":"ควรดื่มน้ำ 8 แก้ว หรือ 2 ลิตรต่อวัน"},{"q":["นอน","ชั่วโมงนอน"],"a":"ผู้ใหญ่ควรนอน 7-9 ชั่วโมงต่อคืน"},{"q":["พาราเซตามอล","ยาแก้ปวด"],"a":"พาราเซตามอลขนาดผู้ใหญ่ 500-1000 mg ทุก 4-6 ชั่วโมง ไม่เกิน 4 กรัม/วัน"},{"q":["เบอร์ฉุกเฉิน","emergency"],"a":"191=ตำรวจ / 199=ดับเพลิง / 1669=EMS / 1554=ทางหลวง / 1323=สุขภาพจิต"},{"q":["191","ตำรวจ"],"a":"191 = เบอร์แจ้งตำรวจฉุกเฉิน 24 ชั่วโมง"},{"q":["1669","รถพยาบาล","EMS"],"a":"1669 = เรียกรถพยาบาลฉุกเฉิน ฟรี 24 ชั่วโมง"},{"q":["พื้นที่วงกลม","area circle"],"a":"พื้นที่วงกลม = π × r²"},{"q":["พีทาโกรัส","pythagorean"],"a":"a² + b² = c²"},{"q":["ดอกเบี้ย","interest"],"a":"ดอกเบี้ยธรรมดา = P×r×t / ดอกเบี้ยทบต้น = P(1+r)^n"},{"q":["เปอร์เซ็นต์","percent"],"a":"% = (ส่วน ÷ ทั้งหมด) × 100"},{"q":["แสง","ความเร็วแสง"],"a":"ความเร็วแสง ≈ 300,000 km/s"},{"q":["โลกร้อน","global warming"],"a":"โลกร้อนขึ้น ~1.1°C จากยุคก่อนอุตสาหกรรม เป้าหมาย Paris ไม่เกิน 1.5°C"},{"q":["pH","กรด","ด่าง"],"a":"pH 0-6=กรด / pH 7=กลาง / pH 8-14=ด่าง"},{"q":["ASEAN","อาเซียน"],"a":"ASEAN 10 ประเทศ: ไทย อินโดนีเซีย มาเลเซีย ฟิลิปปินส์ สิงคโปร์ บรูไน เวียดนาม ลาว กัมพูชา เมียนมา"},{"q":["จังหวัดไทย","province"],"a":"ไทยมี 77 จังหวัด แบ่งเป็น 6 ภาค"},{"q":["สุโขทัย","sukhothai"],"a":"อาณาจักรสุโขทัยก่อตั้งปี พ.ศ. 1792"},{"q":["AI","ปัญญาประดิษฐ์"],"a":"AI คือระบบคอมพิวเตอร์เลียนแบบความฉลาดมนุษย์"},{"q":["5G"],"a":"5G ความเร็วสูงสุด 20 Gbps เร็วกว่า 4G ~100 เท่า"},{"q":["ภาษีเงินได้","income tax"],"a":"ภาษีเงินได้บุคคลธรรมดาไทย อัตราก้าวหน้า 0-35%"},{"q":["VAT","ภาษีมูลค่าเพิ่ม"],"a":"VAT ในไทย 7%"},{"q":["ประกันสังคม"],"a":"ลูกจ้างส่ง 5% ของเงินเดือน สูงสุด 750 บาท/เดือน"},{"q":["ต้มยำ","tomyum","ตะไคร้"],"a":"ต้มยำกุ้ง ส่วนผสม: กุ้ง ตะไคร้ ใบมะกรูด ข่า พริก เห็ด น้ำปลา มะนาว"},{"q":["ผัดไทย","pad thai"],"a":"ส่วนผสม: เส้นจันท์ ไข่ ถั่วงอก กุยช่าย กุ้ง น้ำมะขาม น้ำตาล น้ำปลา"},{"q":["ส้มตำ","somtum"],"a":"ส่วนผสม: มะละกอดิบ มะเขือเทศ ถั่วฝักยาว กุ้งแห้ง ถั่วลิสง พริก มะนาว น้ำปลา น้ำตาลปี๊บ"},{"q":["สงกรานต์","songkran"],"a":"สงกรานต์ 13-15 เมษายน ปีใหม่ไทย"},{"q":["ลอยกระทง"],"a":"ลอยกระทง วันขึ้น 15 ค่ำ เดือน 12 (ประมาณพฤศจิกายน)"},{"q":["วันพ่อ"],"a":"วันพ่อแห่งชาติ 5 ธันวาคม"},{"q":["วันแม่"],"a":"วันแม่แห่งชาติ 12 สิงหาคม"},{"q":["ดาวเคราะห์","planet","ดาวอังคาร"],"a":"8 ดาวเคราะห์: พุธ ศุกร์ โลก อังคาร พฤหัส เสาร์ ยูเรนัส เนปจูน"},{"q":["ยางรถ","ลมยาง"],"a":"ลมยางรถเก๋ง 30-35 PSI รถ SUV 35-40 PSI ตรวจทุก 2 สัปดาห์"},{"q":["เปลี่ยนน้ำมันเครื่อง"],"a":"เปลี่ยนทุก 5,000-10,000 km ขึ้นกับชนิดน้ำมัน"},{"q":["สกินแคร์","skincare","ผิวหน้า","ครีม"],"a":"ขั้นตอน: ล้างหน้า → toner → serum → moisturizer → กันแดด (เช้า)"},{"q":["กันแดด","sunscreen","SPF"],"a":"SPF 30+ กันได้ 97% UVB ทาทุก 2 ชั่วโมงกลางแจ้ง"},{"q":["สิว","acne","ฝ้า"],"a":"สิว: ล้างหน้าสะอาด ใช้ salicylic acid ห้ามบีบ พบแพทย์ถ้ารุนแรง"},{"q":["เครียด","stress"],"a":"ลดเครียด: หายใจลึก 4-7-8 / ออกกำลังกาย / นอนพอ / คุยกับคนไว้ใจ"},{"q":["ซึมเศร้า","depression"],"a":"อาการนาน 2 สัปดาห์ควรพบแพทย์ สายด่วน 1323"},{"q":["ปลูกผัก","ทำสวน","สวน"],"a":"ผักปลูกง่าย: ผักบุ้ง คะน้า กวางตุ้ง ต้นหอม ใช้ดินร่วนผสมปุ๋ยอินทรีย์"},{"q":["เที่ยวญี่ปุ่น","ญี่ปุ่น"],"a":"ไทยไม่ต้องวีซ่าญี่ปุ่น อยู่ได้ 30 วัน ช่วงดี: มีนาคม-พฤษภาคม (ซากุระ)"},{"q":["TCAS","เข้ามหาวิทยาลัย"],"a":"TCAS มี 4 รอบ ดูรายละเอียดที่ mytcas.com"},{"q":["เปิดบริษัท","จดทะเบียน"],"a":"จดทะเบียนที่ DBD.go.th ต้องมีผู้ถือหุ้น 3 คน ใช้เวลา 1-3 วัน"},{"q":["ใบขับขี่","driving license"],"a":"รถยนต์ต้องอายุ 18 ปี รถจักรยานยนต์ 15 ปี ต่อทุก 5 ปี"},{"q":["ค่าแรงขั้นต่ำ","minimum wage"],"a":"ค่าแรงขั้นต่ำไทย 330-400+ บาท/วัน แตกต่างแต่ละจังหวัด"},{"q":["ไฟดับ","ฟิวส์","breaker"],"a":"ตรวจ breaker ที่ตู้ไฟ ถ้า trip ให้ปิดอุปกรณ์ก่อน แล้ว reset"},{"q":["ท่อน้ำแตก","น้ำรั่ว"],"a":"ปิดวาล์วน้ำหลักทันที แล้วโทรช่างประปา"},{"q":["วิดพื้น","push up"],"a":"มือกว้างกว่าไหล่ ลำตัวตรง ลดลง 90° เริ่ม 3 เซต x 10 ครั้ง"},{"q":["วิ่ง","running"],"a":"เริ่มต้น: เดิน 5 นาที วิ่งเบาๆ 20 นาที เดิน 5 นาที เป้าหมาย 30 นาที 3x/สัปดาห์"},{"q":["เลี้ยงหมา","สุนัข","dog"],"a":"หมาต้องการ: อาหาร 2x/วัน เดินเล่น 30+ นาที/วัน ฉีดวัคซีนทุกปี"},{"q":["เลี้ยงแมว","แมว","cat"],"a":"แมวต้องการ: อาหาร 2-3x/วัน กระบะทรายสะอาด ฉีดวัคซีนทุกปี"},{"q":["วันในสัปดาห์","days of week"],"a":"Mon=จันทร์ Tue=อังคาร Wed=พุธ Thu=พฤหัส Fri=ศุกร์ Sat=เสาร์ Sun=อาทิตย์"},{"q":["เดือน","months"],"a":"Jan/ม.ค. Feb/ก.พ. Mar/มี.ค. Apr/เม.ย. May/พ.ค. Jun/มิ.ย. Jul/ก.ค. Aug/ส.ค. Sep/ก.ย. Oct/ต.ค. Nov/พ.ย. Dec/ธ.ค."},{"q":["ทักทายอังกฤษ","greeting"],"a":"Good morning/ช้า Good afternoon/บ่าย Good evening/เย็น How are you?/เป็นยังไงบ้าง"}];
+
+function searchKB(text){
+  const lower=text.toLowerCase().trim();
+  if(!lower)return null;
+  const clean=lower.replace(/(คือ|ได้|ไหม|มั้ย|หน่อย|บ้าง|เลย|นะ|ครับ|ค่ะ|จะ|ให้|แล้ว|ยัง|อยาก|รู้|ช่วย|บอก|เกี่ยวกับ|เรื่อง|ข้อมูล)/g,'').trim();
+  const words=clean.split(/\s+/).filter(w=>w.length>1);
+  let best=0,ans=null;
+  for(const item of KB_DATA){
+    if(!item.q)continue;
+    let score=0;
+    for(const kw of item.q){
+      const kl=kw.toLowerCase();
+      if(lower===kl||clean===kl){score=100;break;}
+      if(kl in lower||lower.includes(kl)){score=Math.max(score,90);continue;}
+      if(clean.includes(kl)){score=Math.max(score,85);continue;}
+      if(clean.length>1&&kl.includes(clean)){score=Math.max(score,80);continue;}
+      for(const w of words){if(w.length<2)continue;if(kl.includes(w)||w.includes(kl))score=Math.max(score,60+w.length*2);}
+      for(const kw2 of kl.split(/\s+/)){if(kw2.length>1&&clean.includes(kw2))score=Math.max(score,65);}
+    }
+    if(score>best){best=score;ans=item.a;}
+  }
+  return best>=55?ans:null;
 }
 
 // ── TTS ──────────────────────────────────────────────────────────
-function unlockAudio() {
-  if (audioUnlocked || !SY) return;
-  const u = new SpeechSynthesisUtterance(' ');
-  u.volume = 0; u.rate = 10; SY.speak(u);
-  audioUnlocked = true;
+function unlockAudio(){
+  if(audioUnlocked||!SY)return;
+  const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.rate=10;SY.speak(u);
+  audioUnlocked=true;
 }
-function loadVoices() {
-  if (!SY) return;
-  const v = SY.getVoices();
-  voiceObj = v.find(x=>/narisa/i.test(x.name))
-    || v.find(x=>/kanya/i.test(x.name))
-    || v.find(x=>x.lang==='th-TH')
-    || v.find(x=>x.lang.startsWith('th'))
-    || v[0] || null;
-  voiceEN = v.find(x=>/samantha|karen/i.test(x.name))
-    || v.find(x=>x.lang==='en-GB')
-    || v.find(x=>x.lang.startsWith('en')) || null;
+function loadVoices(){
+  if(!SY)return;
+  const v=SY.getVoices();
+  voiceObj=v.find(x=>/narisa/i.test(x.name))||v.find(x=>/kanya/i.test(x.name))||v.find(x=>x.lang==='th-TH')||v.find(x=>x.lang.startsWith('th'))||v[0]||null;
+  voiceEN=v.find(x=>/samantha|karen/i.test(x.name))||v.find(x=>x.lang==='en-GB')||v.find(x=>x.lang.startsWith('en'))||null;
 }
-if (SY) { loadVoices(); SY.onvoiceschanged=loadVoices; setTimeout(loadVoices,600); }
+if(SY){loadVoices();SY.onvoiceschanged=loadVoices;setTimeout(loadVoices,600);}
 
-function cleanText(t) {
-  return t
-    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
-    .replace(/[\u{2600}-\u{27FF}]/gu,'')
-    .replace(/[*_`#>~|]/g,'')
-    .replace(/https?:\/\/\S+/g,'')
-    .replace(/\s+/g,' ').trim();
+function cleanText(t){
+  return t.replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27FF}]/gu,'')
+    .replace(/[*_`#>~|]/g,'').replace(/https?:\/\/\S+/g,'').replace(/\s+/g,' ').trim();
 }
-function detectLang(t) {
-  const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length;
-  const en=(t.match(/[a-zA-Z]/g)||[]).length;
-  return (th/(th+en+0.1))>=0.3?'th':'en';
-}
+function detectLang(t){const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length,en=(t.match(/[a-zA-Z]/g)||[]).length;return(th/(th+en+0.1))>=0.3?'th':'en';}
 
 let keepAlive=null;
 function startKA(){stopKA();keepAlive=setInterval(()=>{if(SY&&speaking){SY.pause();SY.resume();}},9000);}
 function stopKA(){if(keepAlive){clearInterval(keepAlive);keepAlive=null;}}
 
-function speak(text) {
-  if (!SY||!autoSpeak) return;
-  unlockAudio(); SY.cancel();
+function speak(text){
+  if(!SY||!autoSpeak)return;
+  unlockAudio();SY.cancel();
   setTimeout(()=>{
-    const c=cleanText(text); if(!c) return;
+    const c=cleanText(text);if(!c)return;
     const parts=c.split(/(?<=[.!?ๆ])\s+|(?<=ค่ะ|นะคะ|นะ|แล้ว)\s+/u).filter(s=>s.trim());
-    const chunks=[]; let buf='',bufLang='';
-    for (const s of parts) {
-      const lang=detectLang(s);
-      if (lang!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}
-      bufLang=lang; buf+=s+' ';
-    }
-    if (buf.trim()) chunks.push({t:buf.trim(),l:bufLang||'th'});
-    if (!chunks.length) return;
+    const chunks=[];let buf='',bufLang='';
+    for(const s of parts){const lang=detectLang(s);if(lang!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}bufLang=lang;buf+=s+' ';}
+    if(buf.trim())chunks.push({t:buf.trim(),l:bufLang||'th'});
+    if(!chunks.length)return;
     let i=0;
     const nxt=()=>{
       if(i>=chunks.length){setSp(false);stopKA();return;}
-      const ch=chunks[i++];
-      const isEN=ch.l==='en';
+      const ch=chunks[i++];const isEN=ch.l==='en';
       const u=new SpeechSynthesisUtterance(ch.t);
-      u.voice=isEN?(voiceEN||voiceObj):voiceObj;
-      u.lang=isEN?'en-GB':'th-TH';
-      u.rate=isEN?1.1:1.15; u.pitch=1.05; u.volume=1;
+      u.voice=isEN?(voiceEN||voiceObj):voiceObj;u.lang=isEN?'en-GB':'th-TH';
+      u.rate=isEN?1.1:1.15;u.pitch=1.05;u.volume=1;
       if(i===1)u.onstart=()=>{setSp(true);startKA();};
-      u.onend=nxt;
-      u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
+      u.onend=nxt;u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
       SY.speak(u);
-    };
-    nxt();
+    };nxt();
   },200);
 }
 function stopSpeak(){SY&&SY.cancel();setSp(false);stopKA();}
-function setSp(v){
-  speaking=v;
-  document.getElementById('stop-btn').style.display=v?'flex':'none';
-  setStat(v?'SPEAKING':listening?'LISTENING':'ONLINE', v?'#00ff41':listening?'#ff3333':'');
-}
+function setSp(v){speaking=v;document.getElementById('stop-btn').style.display=v?'flex':'none';setStat(v?'SPEAKING':listening?'LISTENING':'ONLINE',v?'var(--g1)':listening?'var(--red)':'');}
 function replayLast(){if(lastReply){unlockAudio();speak(lastReply);}}
 
 // ── STT ──────────────────────────────────────────────────────────
 let rec=null;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if (SR) {
-  rec=new SR(); rec.lang='th-TH'; rec.continuous=false; rec.interimResults=false;
+if(SR){
+  rec=new SR();rec.lang='th-TH';rec.continuous=false;rec.interimResults=false;
   rec.onresult=e=>{document.getElementById('msg-inp').value=e.results[0][0].transcript;resize();setLis(false);};
-  rec.onerror=()=>setLis(false); rec.onend=()=>setLis(false);
+  rec.onerror=()=>setLis(false);rec.onend=()=>setLis(false);
   document.getElementById('mic-btn').style.display='flex';
 }
-function toggleListen(){
-  if(!rec)return;
-  if(listening){rec.stop();setLis(false);}
-  else{stopSpeak();unlockAudio();rec.start();setLis(true);}
-}
+function toggleListen(){if(!rec)return;if(listening){rec.stop();setLis(false);}else{stopSpeak();unlockAudio();rec.start();setLis(true);}}
 function setLis(v){
   listening=v;
   document.getElementById('inp-box').classList.toggle('mic-on',v);
   document.getElementById('mic-btn').classList.toggle('mic-on',v);
-  document.getElementById('msg-inp').placeholder=v?'[ LISTENING... ]':'พิมพ์คำสั่งหรือคำถาม...';
-  setStat(v?'LISTENING':'ONLINE',v?'#ff3333':'');
+  document.getElementById('msg-inp').placeholder=v?'🎤 กำลังฟัง...':'พิมพ์หรือพูดกับ CIPHER...';
+  setStat(v?'LISTENING':'ONLINE',v?'var(--red)':'');
 }
 function setStat(t,c){
   document.getElementById('stat-txt').textContent=t;
-  const pip=document.getElementById('spip');
-  pip.style.background=c||'var(--g1)';
-  pip.style.boxShadow=`0 0 6px ${c||'var(--g1)'}`;
+  const p=document.getElementById('spip');p.style.background=c||'var(--g1)';p.style.boxShadow=`0 0 6px ${c||'var(--g1)'}`;
 }
 
 // ── Render ────────────────────────────────────────────────────────
-function addMsg(role, content, web) {
+function addMsg(role,content){
   const isU=role==='user';
-  const d=document.createElement('div'); d.className='msg'+(isU?' usr':'');
-  const av=document.createElement('div'); av.className='av '+(isU?'usr-av':'ai-av');
-  av.textContent=isU?'YOU':'CI';
-  const bd=document.createElement('div'); bd.className='mb';
-  const lb=document.createElement('div'); lb.className='ml';
-  lb.textContent=isU?'[ YOU ]':'[ CIPHER ]';
-  if(web){
-    const wb=document.createElement('span'); wb.className='wb'; wb.textContent='WEB SEARCH';
-    lb.appendChild(wb);
-  }
-  const bb=document.createElement('div'); bb.className='bub '+(isU?'usr-b':'ai-b');
-  const tx=document.createElement('span');
-  bb.appendChild(tx);
-  if(!isU) setTimeout(()=>typewriterMsg(tx,content),50);
-  else tx.textContent=content;
-  bd.appendChild(lb); bd.appendChild(bb);
-  if(!isU&&SY){
-    const rb=document.createElement('button'); rb.className='rbtn';
-    rb.textContent='[ REPLAY ]';
-    rb.onclick=()=>{unlockAudio();speak(content);};
-    bd.appendChild(rb);
-  }
-  d.appendChild(av); d.appendChild(bd);
+  const d=document.createElement('div');d.className='msg'+(isU?' usr':'');
+  const av=document.createElement('div');av.className='av '+(isU?'usr-av':'ai-av');av.textContent=isU?'YOU':'CI';
+  const bd=document.createElement('div');bd.className='mb';
+  const lb=document.createElement('div');lb.className='ml';lb.textContent=isU?'[ YOU ]':'[ CIPHER ]';
+  const bb=document.createElement('div');bb.className='bub '+(isU?'usr-b':'ai-b');
+  const tx=document.createElement('span');bb.appendChild(tx);
+  if(!isU)setTimeout(()=>typewriter(tx,content),50);else tx.textContent=content;
+  bd.appendChild(lb);bd.appendChild(bb);
+  if(!isU&&SY){const rb=document.createElement('button');rb.className='rbtn';rb.textContent='[ REPLAY ]';rb.onclick=()=>{unlockAudio();speak(content);};bd.appendChild(rb);}
+  d.appendChild(av);d.appendChild(bd);
   document.getElementById('msgs').insertBefore(d,document.getElementById('loading'));
   setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
 }
 function setLoad(v){
   document.getElementById('loading').style.display=v?'flex':'none';
-  if(v){
-    setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
-    // pulse tok display during loading
-    const el=document.getElementById('tok-display');
-    if(el){el.style.color='var(--g1)';el.style.textShadow='0 0 6px var(--g1)';}
-  } else {
-    const el=document.getElementById('tok-display');
-    if(el){el.style.color='var(--txt3)';el.style.textShadow='none';}
+  if(v)setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
+}
+function typewriter(el,text,speed=16){
+  el.textContent='';
+  const cur=document.createElement('span');cur.className='type-cursor';el.appendChild(cur);
+  let i=0;
+  const t=()=>{if(i<text.length){el.insertBefore(document.createTextNode(text[i++]),cur);setTimeout(t,text[i-1].match(/[ๆ.!?]/)?speed*3:speed);}else cur.remove();};t();
+}
+
+// ── Gemini API ────────────────────────────────────────────────────
+async function callGemini(messages){
+  const contents=messages.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+  const body={
+    system_instruction:{parts:[{text:SYSTEM}]},
+    contents:contents,
+    generationConfig:{maxOutputTokens:1024,temperature:0.8}
+  };
+  const res=await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+  });
+  const data=await res.json();
+  if(!res.ok){
+    const em=data?.error?.message||'unknown';
+    if(em.includes('API_KEY')||em.includes('invalid')||res.status===400)return{error:'API Key ไม่ถูกต้องนะคะ กด KEY แล้วใส่ใหม่ได้เลยค่ะ'};
+    if(em.includes('quota')||res.status===429)return{error:'เกิน quota ฟรีแล้วนะคะ รอพรุ่งนี้หรือลองใหม่ค่ะ'};
+    return{error:`เกิดปัญหานะคะ: ${em}`};
   }
+  const text=data?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+  return{text};
 }
 
 // ── Send ──────────────────────────────────────────────────────────
-// ── Gemini API Call ───────────────────────────────────────────────
-async function callGemini(messages, system) {
-  // Convert history to Gemini format
-  const contents = messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }]
-  }));
-
-  const body = {
-    system_instruction: { parts: [{ text: system }] },
-    contents: contents,
-    generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
-
-  };
-
-  const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    const em = data?.error?.message || 'Gemini error';
-    if (em.includes('API_KEY')) return { error: 'API Key ไม่ถูกต้องนะคะคุณเอ็ม กด KEY แล้วใส่ใหม่ได้เลยค่ะ' };
-    if (em.includes('quota') || em.includes('QUOTA')) return { error: 'เกิน quota ฟรีแล้วนะคะ รอพรุ่งนี้หรือใช้ Anthropic แทนนะคะ' };
-    return { error: `เกิดปัญหานะคะ: ${em}` };
-  }
-
-  const candidate = data?.candidates?.[0];
-  const text = candidate?.content?.parts?.map(p => p.text || '').join('') || '';
-  const hasSearch = candidate?.groundingMetadata?.webSearchQueries?.length > 0;
-  const inputTok = data?.usageMetadata?.promptTokenCount || 0;
-  const outputTok = data?.usageMetadata?.candidatesTokenCount || 0;
-
-  return { text, hasSearch, inputTok, outputTok };
-}
-
-async function sendMsg() {
+async function sendMsg(){
   const inp=document.getElementById('msg-inp');
-  const t=inp.value.trim(); if(!t) return;
-  inp.value=''; resize(); stopSpeak(); unlockAudio();
-  history.push({role:'user',content:t});
-  addMsg('user',t,false);
-
-  if (offline) {
-    const r=getOffline(t)||getRandomNoAnswer();
-    setTimeout(()=>{history.push({role:'assistant',content:r});addMsg('assistant',r,false);lastReply=r;speak(r);},300);
-    return;
-  }
-
+  const t=inp.value.trim();if(!t)return;
+  inp.value='';resize();stopSpeak();unlockAudio();
+  history.push({role:'user',content:t});addMsg('user',t);
   setLoad(true);
-  try {
-    let reply='', web=false, totalIn=0, totalOut=0;
-    const apiMsgs=history.slice(-20).map(m=>({role:m.role,content:m.content}));
-
-    if (useGemini && GEMINI_KEY) {
-      // ── Gemini ──────────────────────────────────
-      const result = await callGemini(apiMsgs, SYSTEM);
-      if (result.error) {
-        reply = result.error;
-      } else {
-        reply = result.text || 'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ';
-        web = result.hasSearch || false;
-        totalTokIn  += result.inputTok  || 0;
-        totalTokOut += result.outputTok || 0;
-        lastTokIn    = result.inputTok  || 0;
-        lastTokOut   = result.outputTok || 0;
-        updateTokDisplay();
-      }
-    } else {
-      // ── Anthropic ────────────────────────────────
-      for (let turn=0; turn<6; turn++) {
-        const res=await fetch(WORKER, {
-          method:'POST',
-          headers:{'Content-Type':'application/json','x-api-key':API_KEY},
-          body:JSON.stringify({model:MODEL,max_tokens:1024,system:SYSTEM,messages:apiMsgs,tools:[{type:'web_search_20250305',name:'web_search'}]})
-        });
-        const data=await res.json();
-        if (!res.ok) {
-          const et=data?.error?.type||'';const em=data?.error?.message||'error';
-          if(et==='authentication_error') reply='API Key ไม่ถูกต้องนะคะคุณเอ็ม';
-          else if(et==='insufficient_quota'||em.includes('credit')) reply='เครดิตหมดแล้วนะคะ เติมได้ที่ console.anthropic.com ค่ะ';
-          else if(et==='rate_limit_error') reply='ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่ค่ะ';
-          else reply=`เกิดปัญหานะคะ: ${em}`;
-          break;
-        }
-        if(data.usage){totalIn+=data.usage.input_tokens||0;totalOut+=data.usage.output_tokens||0;}
-        for(const b of(data.content||[])){
-          if(b.type==='text')reply+=b.text;
-          if(b.type==='tool_use'&&b.name==='web_search')web=true;
-          if(b.type==='server_tool_use'||b.type==='web_search_tool_result')web=true;
-        }
-        if(data.stop_reason==='end_turn')break;
-        if(data.stop_reason==='tool_use'){
-          apiMsgs.push({role:'assistant',content:data.content});
-          const tb=(data.content||[]).find(b=>b.type==='tool_use');
-          if(tb)apiMsgs.push({role:'user',content:[{type:'tool_result',tool_use_id:tb.id,content:'Search completed.'}]});
-          reply='';continue;
-        }
-        break;
-      }
-      if(totalIn>0) addCost(totalIn,totalOut);
-    }
-    else addCost(history.reduce((s,m)=>s+Math.ceil(m.content.length/3.5),0),Math.ceil(reply.length/3.5));
-
-  } catch(e) {
+  try{
+    const result=await callGemini(history.slice(-20));
+    const reply=result.error||result.text||'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
+    history.push({role:'assistant',content:reply});
+    addMsg('assistant',reply);lastReply=reply;speak(reply);
+  }catch(e){
     console.error('CIPHER:',e);
-    playErrorBeep();
-    const em='อ้าว เชื่อมต่อมีปัญหานะคะคุณเอ็ม ลองใหม่ได้เลยค่ะ';
-    history.push({role:'assistant',content:em});
-    addMsg('assistant',em,false); speak(em);
-  } finally {
-    setLoad(false);
-  }
-}
-
-// ── Credit ────────────────────────────────────────────────────────
-function addCost(i,o){
-  // update realtime
-  lastTokIn=i; lastTokOut=o;
-  totalTokIn+=i; totalTokOut+=o;
-  totalCost+=i*PIN+o*POUT;
-  localStorage.setItem('cipher_cost',totalCost.toFixed(8));
-  localStorage.setItem('cipher_tok_in',totalTokIn);
-  localStorage.setItem('cipher_tok_out',totalTokOut);
-  updateCBar(); updateTokDisplay(); checkAl();
-}
-
-function updateTokDisplay(){
-  const total=totalTokIn+totalTokOut;
-  const el=document.getElementById('tok-display');
-  if(el) el.textContent=`TOK: ${total.toLocaleString()}`;
-  document.getElementById('td-in').textContent=totalTokIn.toLocaleString();
-  document.getElementById('td-out').textContent=totalTokOut.toLocaleString();
-  document.getElementById('td-lin').textContent=lastTokIn.toLocaleString();
-  document.getElementById('td-lout').textContent=lastTokOut.toLocaleString();
-  document.getElementById('td-cost').textContent=totalCost.toFixed(6);
-}
-
-function toggleTokDetail(){
-  tokDetailOpen=!tokDetailOpen;
-  document.getElementById('tok-detail').style.display=tokDetailOpen?'flex':'none';
-}
-function updateCBar(){
-  const f=document.getElementById('cbar-fill'),p=document.getElementById('cbar-pct');
-  if(creditUSD<=0){f.style.width='100%';p.textContent='--%';return;}
-  const used=Math.min(totalCost/creditUSD,1),pl=Math.max(100-used*100,0);
-  f.style.width=`${(1-used)*100}%`;p.textContent=`${pl.toFixed(0)}%`;
-  if(pl<=5)f.style.background='linear-gradient(90deg,#880000,#ff3333)';
-  else if(pl<=20)f.style.background='linear-gradient(90deg,#885500,#ff8800)';
-  else f.style.background='linear-gradient(90deg,var(--g3),var(--g1))';
-}
-function checkAl(){
-  if(creditUSD<=0)return;
-  const pl=(1-totalCost/creditUSD)*100;
-  if(pl<=5&&!alShown.d){alShown.d=true;showAl('danger','⚠','[ CRITICAL ] เครดิตน้อยมากแล้วค่ะ',`เหลือต่ำกว่า 5% เติมได้ที่ console.anthropic.com เลยค่ะ`);}
-  else if(pl<=warnPct&&!alShown.w){alShown.w=true;showAl('warn','!',`[ WARNING ] เครดิตเหลือ ${pl.toFixed(0)}%`,`ใช้ไปแล้ว $${totalCost.toFixed(4)} จาก $${creditUSD.toFixed(2)} ค่ะ`);setTimeout(closeAlert,8000);}
-}
-function showAl(type,icon,title,msg){
-  const e=document.getElementById('cred-alert');e.className=type;
-  document.getElementById('al-i').textContent=icon;
-  document.getElementById('al-t').textContent=title;
-  document.getElementById('al-m').textContent=msg;
-  e.style.display='flex';
-}
-function closeAlert(){document.getElementById('cred-alert').style.display='none';}
-function showCreditModal(){document.getElementById('cr-amt').value=creditUSD||5;document.getElementById('cr-wp').value=warnPct;document.getElementById('cred-modal').style.display='flex';}
-function closeCreditModal(){document.getElementById('cred-modal').style.display='none';}
-function saveCred(){
-  const a=parseFloat(document.getElementById('cr-amt').value);
-  const w=parseInt(document.getElementById('cr-wp').value);
-  if(isNaN(a)||a<=0)return;
-  creditUSD=a;warnPct=isNaN(w)?20:Math.min(w,50);alShown={w:false,d:false};
-  localStorage.setItem('cipher_credit',creditUSD);localStorage.setItem('cipher_warn_pct',warnPct);
-  closeCreditModal();updateCBar();
+    const em='อ้าว เชื่อมต่อมีปัญหานะคะ ลองใหม่ได้เลยค่ะ';
+    history.push({role:'assistant',content:em});addMsg('assistant',em);speak(em);
+  }finally{setLoad(false);}
 }
 
 // ── Controls ──────────────────────────────────────────────────────
@@ -1060,215 +470,65 @@ function toggleVoice(){
   document.getElementById('vbtn').classList.toggle('off',!autoSpeak);
   document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';
 }
-function toggleMode(){
-  offline=!offline;
-  const b=document.getElementById('mode-pill');
-  b.textContent=offline?'⚡ OFF':'🌐 ON';
-  b.classList.toggle('offline',offline);
-  document.getElementById('ft-mode').textContent=offline?'OFFLINE':'ONLINE';
-  const m=offline?'โอเค สลับออฟไลน์แล้วนะคะคุณเอ็ม':'กลับมาออนไลน์แล้วค่ะคุณเอ็ม พร้อมเต็มที่เลย!';
-  history.push({role:'assistant',content:m});addMsg('assistant',m,false);lastReply=m;speak(m);
-}
-
 function resize(){
-  const e=document.getElementById('msg-inp');
-  e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';
+  const e=document.getElementById('msg-inp');e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';
   document.getElementById('send-ab').classList.toggle('dim',!e.value.trim());
 }
 document.getElementById('msg-inp').addEventListener('input',resize);
-document.getElementById('msg-inp').addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
-  else playKeyClick();
-});
+document.getElementById('msg-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
 
 // ── Startup ───────────────────────────────────────────────────────
 function saveKey(){
   const k=document.getElementById('api-inp').value.trim();
   if(!k){alert('กรุณาใส่ API Key ค่ะ');return;}
-  unlockAudio();
-  GEMINI_KEY=k;
-  localStorage.setItem('cipher_gemini',k);
-  useGemini=true;
-  localStorage.setItem('cipher_use_gemini','true');
-  startApp(true);
+  unlockAudio();GEMINI_KEY=k;localStorage.setItem('cipher_gemini',k);startApp(true);
 }
-function toggleAI(){
-  if(!useGemini && !GEMINI_KEY){
-    // ขอ Gemini key ก่อน
-    const k=prompt('ใส่ Gemini API Key (AIza...)\nขอฟรีได้ที่ aistudio.google.com');
-    
-    GEMINI_KEY=k;localStorage.setItem('cipher_gemini',k);
-  }
-  useGemini=!useGemini;
-  localStorage.setItem('cipher_use_gemini',useGemini);
-  updateAIToggle();
-  const m=useGemini?'สลับมาใช้ Gemini Flash แล้วนะคะ ฟรีเลย! 🎉':'สลับกลับมาใช้ Claude แล้วนะคะ คุณเอ็ม';
-  history.push({role:'assistant',content:m});addMsg('assistant',m,false);lastReply=m;speak(m);
-}
-
-function updateAIToggle(){
-  const btn=document.getElementById('ai-toggle');
-  if(!btn)return;
-  if(useGemini){
-    btn.textContent='GEM';
-    btn.style.borderColor='#4285f455';
-    btn.style.color='#4285f4';
-    btn.style.background='#4285f411';
-  } else {
-    btn.textContent='ANT';
-    btn.style.borderColor='';
-    btn.style.color='';
-    btn.style.background='';
-  }
-  // Update footer
-  const ft=document.getElementById('ft-ai');
-  if(ft)ft.textContent=useGemini?'GEMINI FREE':'CLAUDE';
-}
-
 function clearKey(){
-  if(!confirm('[ CONFIRM ] เปลี่ยน API Key ใหม่ไหมคะ?'))return;
-  localStorage.removeItem('cipher_key');location.reload();
+  if(!confirm('เปลี่ยน API Key ใหม่ไหมคะ?'))return;
+  localStorage.removeItem('cipher_gemini');location.reload();
 }
 document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();});
 
-function startApp(fromButton) {
+function startApp(fromButton){
   document.getElementById('api-scr').style.display='none';
   document.getElementById('app').style.display='flex';
-  updateCBar();updateTokDisplay();updateAIToggle();if(creditUSD<=0)setTimeout(showCreditModal,2000);
-  loadKB(); // โหลด knowledge base
-
   const h=new Date().getHours();
-  const gt=h<12?'อรุณสวัสดิ์':h<17?'สวัสดีตอนบ่าย':h<21?'สวัสดีตอนเย็น':'ดึกแล้วนะคะ';
-  const g=`${gt} คุณเอ็ม~ ไซเฟอร์พร้อมแล้วค่ะ จะถามอะไรก็ได้เลยนะคะ 😊`;
-  history.push({role:'assistant',content:g});addMsg('assistant',g,false);lastReply=g;
-
-  if (fromButton) {
-    // Run boot sequence first time
-    runBootSequence(()=>{
-      const trySpeak=(n)=>{
-        if(n>10)return;
-        if(voiceObj&&SY)speak(g);
-        else setTimeout(()=>trySpeak(n+1),400);
-      };
-      setTimeout(()=>trySpeak(0),400);
-    });
-  } else {
+  const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';
+  const g=`เฮ้ ${gt} คุณเอ็ม~ ไซเฟอร์พร้อมแล้วค่ะ มีอะไรให้ช่วยไหมคะ? 😊`;
+  history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;
+  if(fromButton){
+    const try_speak=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(g);else setTimeout(()=>try_speak(n+1),400);};
+    setTimeout(()=>try_speak(0),400);
+  }else{
     document.getElementById('tap-splash').style.display='flex';
   }
 }
-
 function onTap(){
-  const splash=document.getElementById('tap-splash');
-  unlockAudio();
-  splash.style.opacity='0';splash.style.transition='opacity .3s';
-  setTimeout(()=>splash.style.display='none',300);
-  const trySpeak=(n)=>{
-    if(n>10)return;
-    if(voiceObj&&SY)speak(lastReply);
-    else setTimeout(()=>trySpeak(n+1),400);
-  };
-  setTimeout(()=>trySpeak(0),200);
+  const s=document.getElementById('tap-splash');
+  unlockAudio();s.style.opacity='0';s.style.transition='opacity .3s';
+  setTimeout(()=>s.style.display='none',300);
+  const try_speak=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(lastReply);else setTimeout(()=>try_speak(n+1),400);};
+  setTimeout(()=>try_speak(0),200);
 }
 
-// Wave bars
+// ── Matrix rain ───────────────────────────────────────────────────
+(function(){
+  const cv=document.getElementById('matrix-canvas');if(!cv)return;
+  const ctx=cv.getContext('2d');let cols,drops;
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄ';
+  function init(){cv.width=window.innerWidth;cv.height=window.innerHeight;cols=Math.floor(cv.width/16);drops=Array(cols).fill(1);}
+  function draw(){ctx.fillStyle='rgba(8,12,8,0.05)';ctx.fillRect(0,0,cv.width,cv.height);ctx.fillStyle='#00ff41';ctx.font='14px Share Tech Mono,monospace';drops.forEach((y,i)=>{const ch=chars[Math.floor(Math.random()*chars.length)];ctx.fillText(ch,i*16,y*16);if(y*16>cv.height&&Math.random()>0.975)drops[i]=0;drops[i]++;});}
+  init();window.addEventListener('resize',init);setInterval(draw,50);
+})();
+
+// ── Wave bars ─────────────────────────────────────────────────────
 (function(){
   const c=document.getElementById('ld-wave');
-  [2,4,7,5,9,6,4,8,5,3].forEach((h,i)=>{
-    const s=document.createElement('span');
-    s.style.height=h*2+'px';s.style.animationDelay=i*.09+'s';
-    c.appendChild(s);
-  });
+  [2,4,7,5,9,6,4,8,5,3].forEach((h,i)=>{const s=document.createElement('span');s.style.height=h*2+'px';s.style.animationDelay=i*.09+'s';c.appendChild(s);});
 })();
 
-// ── Matrix Rain ──────────────────────────────────────────────────
-(function(){
-  const canvas=document.getElementById('matrix-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  let cols,drops;
-  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ<>/|\[]{}';
-  function init(){
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-    cols=Math.floor(canvas.width/16);
-    drops=Array(cols).fill(1);
-  }
-  function draw(){
-    ctx.fillStyle='rgba(8,12,8,0.05)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle='#00ff41';
-    ctx.font='14px Share Tech Mono,monospace';
-    drops.forEach((y,i)=>{
-      const ch=chars[Math.floor(Math.random()*chars.length)];
-      ctx.fillText(ch,i*16,y*16);
-      if(y*16>canvas.height&&Math.random()>0.975)drops[i]=0;
-      drops[i]++;
-    });
-  }
-  init();
-  window.addEventListener('resize',init);
-  setInterval(draw,50);
-})();
-
-// ── Boot Sequence ─────────────────────────────────────────────────
-function runBootSequence(cb){
-  const screen=document.getElementById('boot-screen');
-  screen.style.display='flex';
-  const lines=[
-    '> CIPHER SYSTEM v2.0',
-    '> INITIALIZING CORE MODULES...',
-    '> LOADING NEURAL NETWORK... OK',
-    '> CONNECTING TO ANTHROPIC API... OK',
-    '> LOADING VOICE ENGINE... OK',
-    '> WEB SEARCH MODULE... READY',
-    '> MEMORY ALLOCATION... 1024MB',
-    '> ALL SYSTEMS NOMINAL',
-    '> WELCOME, คุณเอ็ม',
-    '',
-  ];
-  let i=0;
-  playBootBeep();
-  const next=()=>{
-    if(i>=lines.length){
-      setTimeout(()=>{
-        screen.style.opacity='0';screen.style.transition='opacity .4s';
-        setTimeout(()=>{screen.style.display='none';screen.style.opacity='1';cb();},400);
-      },200);
-      return;
-    }
-    const div=document.createElement('div');
-    div.className='boot-line';
-    div.style.animationDelay='0s';
-    div.textContent=lines[i++];
-    screen.appendChild(div);
-    if(i<lines.length-1)playBeep(440+i*20,0.03,0.05,'square');
-    setTimeout(next,lines[i-1]===''?200:120);
-  };
-  next();
-}
-
-// ── Typewriter effect ─────────────────────────────────────────────
-function typewriterMsg(el, text, speed=18){
-  el.textContent='';
-  const cursor=document.createElement('span');
-  cursor.className='type-cursor';
-  el.appendChild(cursor);
-  let i=0;
-  playResponseBeep();
-  const type=()=>{
-    if(i<text.length){
-      el.insertBefore(document.createTextNode(text[i++]),cursor);
-      if(Math.random()<0.3)playKeyClick();
-      setTimeout(type, text[i-1].match(/[ๆ.!?]/)? speed*3 : speed);
-    } else {
-      cursor.remove();
-    }
-  };
-  type();
-}
-
-// ── Init ──────────────────────────────────────────────────────────
-if(GEMINI_KEY||API_KEY) startApp(false);
+// ── Boot & Init ───────────────────────────────────────────────────
+if(GEMINI_KEY) startApp(false);
 </script>
 </body>
 </html>
