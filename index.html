@@ -436,9 +436,15 @@ async function callGemini(messages){
   const data=await res.json();
   if(!res.ok){
     const em=data?.error?.message||'unknown';
-    if(em.includes('API_KEY')||em.includes('invalid')||res.status===400)return{error:'API Key ไม่ถูกต้องนะคะ กด KEY แล้วใส่ใหม่ได้เลยค่ะ'};
-    if(em.includes('quota')||res.status===429)return{error:'เกิน quota ฟรีแล้วนะคะ รอพรุ่งนี้หรือลองใหม่ค่ะ'};
-    return{error:`เกิดปัญหานะคะ: ${em}`};
+    const status=res.status;
+    console.error('Gemini error',status,em,data);
+    if(status===401||em.toLowerCase().includes('api key')||em.toLowerCase().includes('invalid key'))
+      return{error:'API Key ไม่ถูกต้องนะคะ กด KEY แล้วใส่ใหม่ได้เลยค่ะ'};
+    if(status===429||em.toLowerCase().includes('quota')||em.toLowerCase().includes('rate'))
+      return{error:'ส่งเร็วเกินไปหรือ quota เต็มนะคะ รอ 1 นาทีแล้วลองใหม่ค่ะ'};
+    if(status===400)
+      return{error:`Request error (400): ${em} — ลองใหม่ได้เลยค่ะ`};
+    return{error:`เกิดปัญหา (${status}): ${em}`};
   }
   const text=data?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
   return{text};
