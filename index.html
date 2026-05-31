@@ -1089,9 +1089,12 @@ document.getElementById('msg-inp').addEventListener('keydown',e=>{
 // ── Startup ───────────────────────────────────────────────────────
 function saveKey(){
   const k=document.getElementById('api-inp').value.trim();
-  
+  if(!k){alert('กรุณาใส่ API Key ค่ะ');return;}
   unlockAudio();
-  API_KEY=k;localStorage.setItem('cipher_key',k);
+  GEMINI_KEY=k;
+  localStorage.setItem('cipher_gemini',k);
+  useGemini=true;
+  localStorage.setItem('cipher_use_gemini','true');
   startApp(true);
 }
 function toggleAI(){
