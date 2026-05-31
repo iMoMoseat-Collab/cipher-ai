@@ -248,7 +248,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">TAVILY API KEY (app.tavily.com) — ค้นหาเว็บ</div>
   <input id="tavily-inp" type="password" placeholder="tvly-···" style="width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px"/>
   <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
-  <div id="setup-note">GROQ: llama-3.1-8b · TAVILY: web search · FREE</div>
+  <div id="setup-note">GROQ: llama-3.3-70b · TAVILY: web search · FREE</div>
 </div>
 
 <!-- App -->
@@ -257,7 +257,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div id="orb" onclick="replayLast()">⬡</div>
     <div id="name-block">
       <div id="ai-name">CIPHER</div>
-      <div id="ai-sub">COGNITIVE INTELLIGENCE · GROQ FREE</div>
+      <div id="ai-sub">COGNITIVE INTELLIGENCE · GROQ 70B</div>
       <div id="stat-row"><div id="spip"></div><span id="stat-txt">ONLINE</span></div>
     </div>
     <div id="hbtns">
@@ -581,7 +581,7 @@ async function callGroq(messages){
   const res=await fetch(GROQ_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_KEY}`},
-    body:JSON.stringify({model:'llama-3.1-8b-instant',messages:msgs,max_tokens:1024,temperature:0.8})
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,max_tokens:1024,temperature:0.8})
   });
   const data=await res.json();
   if(!res.ok){
