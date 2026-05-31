@@ -196,10 +196,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 ─────────────────────</div>
   <div id="setup-name">CIPHER</div>
   <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
-  <div id="setup-desc">ใส่ Groq API Key เพื่อเปิดใช้งานค่ะ<br/>ขอฟรีได้ที่ console.groq.com</div>
-  <input id="api-inp" type="password" placeholder="gsk_···"/>
+  <div id="setup-desc">ใส่ API Keys เพื่อเปิดใช้งานค่ะ<br/>ใส่ครั้งเดียวจำตลอดนะคะ</div>
+  <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">GROQ API KEY (console.groq.com)</div>
+  <input id="api-inp" type="password" placeholder="gsk_···" style="width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px;margin-bottom:8px"/>
+  <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">TAVILY API KEY (app.tavily.com) — ค้นหาเว็บ</div>
+  <input id="tavily-inp" type="password" placeholder="tvly-···" style="width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px"/>
   <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
-  <div id="setup-note">MODEL: llama-3.1-8b · FREE · Groq</div>
+  <div id="setup-note">GROQ: llama-3.1-8b · TAVILY: web search · FREE</div>
 </div>
 
 <!-- App -->
@@ -250,7 +253,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 'use strict';
 
 // ── Config ────────────────────────────────────────────────────────
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+const TAVILY_URL = 'https://api.tavily.com/search';
 const SYSTEM = `คุณคือไซเฟอร์ เพื่อนสนิท AI ของคุณเอ็ม
 คุณเป็นผู้หญิง พูดไทยสบายๆ เป็นกันเอง ลงท้าย "นะคะ" หรือ "ค่ะ"
 เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม" เสมอ
@@ -258,7 +262,8 @@ const SYSTEM = `คุณคือไซเฟอร์ เพื่อนสน
 ตอบสั้น 1-3 ประโยค กระชับ มีชีวิตชีวา`;
 
 // ── State ─────────────────────────────────────────────────────────
-let GROQ_KEY = localStorage.getItem('cipher_groq') || '';
+let GROQ_KEY   = localStorage.getItem('cipher_groq')   || '';
+let TAVILY_KEY = localStorage.getItem('cipher_tavily') || '';
 let history = [];
 let speaking = false, listening = false, autoSpeak = true, lastReply = '';
 const SY = window.speechSynthesis;
@@ -423,6 +428,36 @@ function typewriter(el,text,speed=16){
 }
 
 // ── Gemini API ────────────────────────────────────────────────────
+// ── Tavily Web Search ─────────────────────────────────────────────
+async function searchTavily(query){
+  if(!TAVILY_KEY) return null;
+  try{
+    const res=await fetch(TAVILY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${TAVILY_KEY}`},
+      body:JSON.stringify({query,max_results:3,search_depth:'basic',include_answer:true})
+    });
+    const data=await res.json();
+    if(!res.ok) return null;
+    // สรุปผลการค้นหา
+    let summary='';
+    if(data.answer) summary+=data.answer+'\n\n';
+    if(data.results){
+      data.results.slice(0,3).forEach(r=>{
+        summary+=`• ${r.title}\n${r.content?.slice(0,200)}...\n\n`;
+      });
+    }
+    return summary.trim()||null;
+  }catch(e){return null;}
+}
+
+// ตรวจว่าคำถามต้องค้นหาเว็บไหม
+function needsSearch(text){
+  const keywords=['ข่าว','วันนี้','ล่าสุด','ราคา','อากาศ','weather','news','today','ตอนนี้','เมื่อกี้','เมื่อวาน','สัปดาห์นี้','เดือนนี้','ปีนี้','2024','2025','2026','current','latest','now','score','ผล','แข่ง','ชนะ','แพ้','สด','live','breaking'];
+  const lower=text.toLowerCase();
+  return keywords.some(k=>lower.includes(k));
+}
+
 async function callGroq(messages){
   const msgs=[{role:'system',content:SYSTEM},...messages.map(m=>({role:m.role,content:m.content}))];
   const res=await fetch(GROQ_URL,{
@@ -451,7 +486,20 @@ async function sendMsg(){
   history.push({role:'user',content:t});addMsg('user',t);
   setLoad(true);
   try{
-    const result=await callGroq(history.slice(-20));
+    // ค้นหาเว็บก่อนถ้าจำเป็น
+    let webContext='';
+    if(TAVILY_KEY && needsSearch(t)){
+      setStat('SEARCHING...','var(--g2)');
+      const searchResult=await searchTavily(t);
+      if(searchResult) webContext=`\n\n[ข้อมูลจากเว็บ]\n${searchResult}\n[/ข้อมูลจากเว็บ]`;
+    }
+    // ใส่ web context เข้าไปใน message ล่าสุด
+    const msgs=history.slice(-20).map((m,i,arr)=>{
+      if(i===arr.length-1&&webContext) return{...m,content:m.content+webContext};
+      return m;
+    });
+    setStat('PROCESSING','');
+    const result=await callGroq(msgs);
     const reply=result.error||result.text||'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
     history.push({role:'assistant',content:reply});
     addMsg('assistant',reply);lastReply=reply;speak(reply);
@@ -478,13 +526,19 @@ document.getElementById('msg-inp').addEventListener('keydown',e=>{if(e.key==='En
 
 // ── Startup ───────────────────────────────────────────────────────
 function saveKey(){
-  const k=document.getElementById('api-inp').value.trim();
-  if(!k){alert('กรุณาใส่ API Key ค่ะ');return;}
-  unlockAudio();GROQ_KEY=k;localStorage.setItem('cipher_groq',k);startApp(true);
+  const gk=document.getElementById('api-inp').value.trim();
+  const tk=document.getElementById('tavily-inp').value.trim();
+  if(!gk){alert('กรุณาใส่ Groq API Key ค่ะ');return;}
+  unlockAudio();
+  GROQ_KEY=gk;localStorage.setItem('cipher_groq',gk);
+  if(tk){TAVILY_KEY=tk;localStorage.setItem('cipher_tavily',tk);}
+  startApp(true);
 }
 function clearKey(){
-  if(!confirm('เปลี่ยน API Key ใหม่ไหมคะ?'))return;
-  localStorage.removeItem('cipher_groq');location.reload();
+  if(!confirm('เปลี่ยน API Keys ใหม่ไหมคะ?'))return;
+  localStorage.removeItem('cipher_groq');
+  localStorage.removeItem('cipher_tavily');
+  location.reload();
 }
 document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();});
 
@@ -493,7 +547,7 @@ function startApp(fromButton){
   document.getElementById('app').style.display='flex';
   const h=new Date().getHours();
   const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';
-  const g=`เฮ้ ${gt} คุณเอ็ม~ ไซเฟอร์พร้อมแล้วค่ะ มีอะไรให้ช่วยไหมคะ? 😊`;
+  const g=`เฮ้ ${gt} คุณเอ็ม~ ไซเฟอร์พร้อมแล้วค่ะ${TAVILY_KEY?' ค้นหาข้อมูลสดได้ด้วยนะคะ':''} มีอะไรให้ช่วยไหมคะ? 😊`;
   history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;
   if(fromButton){
     const try_speak=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(g);else setTimeout(()=>try_speak(n+1),400);};
