@@ -509,16 +509,24 @@ async function searchTavily(query){
     const res=await fetch(TAVILY_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${TAVILY_KEY}`},
-      body:JSON.stringify({query,max_results:3,search_depth:'basic',include_answer:true})
+      body:JSON.stringify({
+        query,
+        max_results:5,
+        search_depth:'advanced',
+        include_answer:true,
+        include_raw_content:false,
+        include_images:false
+      })
     });
     const data=await res.json();
-    if(!res.ok) return null;
-    // สรุปผลการค้นหา
+    if(!res.ok){console.error('Tavily error:',data);return null;}
     let summary='';
-    if(data.answer) summary+=data.answer+'\n\n';
+    // ใส่คำตอบสรุปจาก Tavily ก่อน
+    if(data.answer) summary+=`สรุป: ${data.answer}\n\n`;
+    // ใส่ผลการค้นหาแต่ละอัน
     if(data.results){
-      data.results.slice(0,3).forEach(r=>{
-        summary+=`• ${r.title}\n${r.content?.slice(0,200)}...\n\n`;
+      data.results.slice(0,5).forEach((r,i)=>{
+        summary+=`[${i+1}] ${r.title}\n${r.content?.slice(0,400)}\nที่มา: ${r.url}\n\n`;
       });
     }
     return summary.trim()||null;
@@ -569,7 +577,9 @@ async function sendMsg(){
     }
     // ใส่ web context เข้าไปใน message ล่าสุด
     const msgs=history.slice(-20).map((m,i,arr)=>{
-      if(i===arr.length-1&&webContext) return{...m,content:m.content+webContext};
+      if(i===arr.length-1&&webContext){
+        return{...m,content:m.content+`\n\n---\nข้อมูลจากการค้นหาเว็บล่าสุด (ใช้ข้อมูลนี้ตอบ อย่าใช้ความรู้เดิม):${webContext}`};
+      }
       return m;
     });
     setStat('PROCESSING','');
