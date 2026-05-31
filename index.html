@@ -437,6 +437,7 @@ body{animation:crt-flicker 6s infinite;}
       <button class="hb red" id="stop-btn" style="display:none" onclick="stopSpeak()">⏹</button>
       <button class="hb" id="vbtn" onclick="toggleVoice()" title="เสียง">🔊</button>
       <button id="mode-pill" onclick="toggleMode()" class="offline">⚡ OFF</button>
+      <button class="hb" id="ai-toggle" onclick="toggleAI()" title="สลับ AI" style="font-size:9px;letter-spacing:0">ANT</button>
       <button class="hb" onclick="clearKey()" style="font-size:9px;letter-spacing:0" title="API Key">KEY</button>
     </div>
   </div>
@@ -536,15 +537,19 @@ function playErrorBeep(){playBeep(200,0.2,0.15,'sawtooth');}
 
 // ── Config ────────────────────────────────────────────────────────
 const MODEL   = 'claude-haiku-4-5-20251001';
-const WORKER  = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
+const WORKER       = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
+const GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const SYSTEM  = `คุณคือไซเฟอร์ เพื่อนสนิท AI ของคุณเอ็ม
 คุณเป็นผู้หญิง พูดไทยสบายๆ เป็นกันเอง ลงท้าย "นะคะ" หรือ "ค่ะ"
 เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม"
 ห้ามใช้ "ครับ" ถ้าถามไทยตอบไทย ถามอังกฤษตอบอังกฤษ
-สำคัญ: ตอบสั้นมากๆ 1-3 ประโยคเท่านั้น ไม่ต้องอธิบายยาว พูดตรงๆ กระชับ ค้นหาแล้วสรุปสั้นๆ ให้คุณเอ็มเลยค่ะ`;
+สำคัญ: ตอบสั้นมากๆ 1-3 ประโยคเท่านั้น ไม่ต้องอธิบายยาว พูดตรงๆ กระชับ
+ถ้าต้องการข้อมูลสด ค้นหาแล้วสรุปสั้นๆ ให้คุณเอ็มเลยค่ะ`;
 
 // ── State ─────────────────────────────────────────────────────────
-let API_KEY  = localStorage.getItem('cipher_key') || '';
+let API_KEY     = localStorage.getItem('cipher_key') || '';
+let GEMINI_KEY  = localStorage.getItem('cipher_gemini') || '';
+let useGemini   = localStorage.getItem('cipher_use_gemini') === 'true';
 let history  = [];
 let speaking = false, listening = false, autoSpeak = true, offline = true;
 let voiceObj = null, voiceEN = null, audioUnlocked = false, lastReply = '';
@@ -570,7 +575,7 @@ const OFFL = [
     return t+' คุณเอ็ม~ มีอะไรให้ช่วยไหมคะ 😊';
   }},
   // ตัวตน
-  {k:['ชื่ออะไร','คุณคือ','เป็นใคร','แนะนำตัว'], r:'ไซเฟอร์ค่ะ AI ส่วนตัวของคุณเอ็มเอง ถามได้ทุกเรื่องเลยนะคะ 😄'},
+  {k:['ชื่ออะไร','คุณคือ','เป็นใคร','แนะนำตัว'], r:'ไซเฟอร์ค่ะ เพื่อน AI ส่วนตัวของคุณเอ็มเอง ถามได้ทุกเรื่องเลยนะคะ 😄'},
   // เวลา/วันที่
   {k:['กี่โมง','เวลา','time'], r:()=>`ตอนนี้ ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. นะคะ`},
   {k:['วันนี้','วันที่','date'], r:()=>`วันนี้ ${new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} ค่ะ`},
@@ -869,6 +874,45 @@ function setLoad(v){
 }
 
 // ── Send ──────────────────────────────────────────────────────────
+// ── Gemini API Call ───────────────────────────────────────────────
+async function callGemini(messages, system) {
+  // Convert history to Gemini format
+  const contents = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const body = {
+    system_instruction: { parts: [{ text: system }] },
+    contents: contents,
+    generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
+    tools: [{ google_search: {} }]
+  };
+
+  const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    const em = data?.error?.message || 'Gemini error';
+    if (em.includes('API_KEY')) return { error: 'API Key ไม่ถูกต้องนะคะคุณเอ็ม กด KEY แล้วใส่ใหม่ได้เลยค่ะ' };
+    if (em.includes('quota') || em.includes('QUOTA')) return { error: 'เกิน quota ฟรีแล้วนะคะ รอพรุ่งนี้หรือใช้ Anthropic แทนนะคะ' };
+    return { error: `เกิดปัญหานะคะ: ${em}` };
+  }
+
+  const candidate = data?.candidates?.[0];
+  const text = candidate?.content?.parts?.map(p => p.text || '').join('') || '';
+  const hasSearch = candidate?.groundingMetadata?.webSearchQueries?.length > 0;
+  const inputTok = data?.usageMetadata?.promptTokenCount || 0;
+  const outputTok = data?.usageMetadata?.candidatesTokenCount || 0;
+
+  return { text, hasSearch, inputTok, outputTok };
+}
+
 async function sendMsg() {
   const inp=document.getElementById('msg-inp');
   const t=inp.value.trim(); if(!t) return;
@@ -1027,7 +1071,7 @@ function toggleMode(){
   b.textContent=offline?'⚡ OFF':'🌐 ON';
   b.classList.toggle('offline',offline);
   document.getElementById('ft-mode').textContent=offline?'OFFLINE':'ONLINE';
-  const m=offline?'โอเค สลับออฟไลน์แล้วนะคะคุณเอ็ม':'กลับมาออนไลน์แล้วค่ะคุณเอ็ม';
+  const m=offline?'โอเค สลับออฟไลน์แล้วนะคะคุณเอ็ม':'กลับมาออนไลน์แล้วค่ะคุณเอ็ม พร้อมเต็มที่เลย!';
   history.push({role:'assistant',content:m});addMsg('assistant',m,false);lastReply=m;speak(m);
 }
 
@@ -1050,6 +1094,39 @@ function saveKey(){
   API_KEY=k;localStorage.setItem('cipher_key',k);
   startApp(true);
 }
+function toggleAI(){
+  if(!useGemini && !GEMINI_KEY){
+    // ขอ Gemini key ก่อน
+    const k=prompt('ใส่ Gemini API Key (AIza...)\nขอฟรีได้ที่ aistudio.google.com');
+    if(!k||!k.startsWith('AIza')){alert('Key ไม่ถูกต้องค่ะ ต้องขึ้นต้นด้วย AIza');return;}
+    GEMINI_KEY=k;localStorage.setItem('cipher_gemini',k);
+  }
+  useGemini=!useGemini;
+  localStorage.setItem('cipher_use_gemini',useGemini);
+  updateAIToggle();
+  const m=useGemini?'สลับมาใช้ Gemini Flash แล้วนะคะ ฟรีเลย! 🎉':'สลับกลับมาใช้ Claude แล้วนะคะ คุณเอ็ม';
+  history.push({role:'assistant',content:m});addMsg('assistant',m,false);lastReply=m;speak(m);
+}
+
+function updateAIToggle(){
+  const btn=document.getElementById('ai-toggle');
+  if(!btn)return;
+  if(useGemini){
+    btn.textContent='GEM';
+    btn.style.borderColor='#4285f455';
+    btn.style.color='#4285f4';
+    btn.style.background='#4285f411';
+  } else {
+    btn.textContent='ANT';
+    btn.style.borderColor='';
+    btn.style.color='';
+    btn.style.background='';
+  }
+  // Update footer
+  const ft=document.getElementById('ft-ai');
+  if(ft)ft.textContent=useGemini?'GEMINI FREE':'CLAUDE';
+}
+
 function clearKey(){
   if(!confirm('[ CONFIRM ] เปลี่ยน API Key ใหม่ไหมคะ?'))return;
   localStorage.removeItem('cipher_key');location.reload();
@@ -1059,7 +1136,7 @@ document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='En
 function startApp(fromButton) {
   document.getElementById('api-scr').style.display='none';
   document.getElementById('app').style.display='flex';
-  updateCBar();updateTokDisplay();if(creditUSD<=0)setTimeout(showCreditModal,2000);
+  updateCBar();updateTokDisplay();updateAIToggle();if(creditUSD<=0)setTimeout(showCreditModal,2000);
   loadKB(); // โหลด knowledge base
 
   const h=new Date().getHours();
