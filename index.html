@@ -196,7 +196,47 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:32px;gap:16px;
 }
-#setup-ascii">[ CIPHER SYSTEM v2.0 ]
+#setup-ascii{font-size:11px;letter-spacing:2px;color:var(--g1);
+  text-shadow:0 0 10px var(--g1);text-align:center;line-height:1.6;white-space:pre;}
+#setup-name{font-size:26px;letter-spacing:10px;color:var(--g1);text-shadow:0 0 20px var(--g1),0 0 40px #00ff4155}
+#setup-sub{font-size:7px;letter-spacing:3px;color:var(--txt3)}
+#setup-desc{font-size:13px;color:var(--g3);text-align:center;line-height:1.9;max-width:300px;font-family:'Noto Sans Thai',monospace}
+#api-inp{width:100%;max-width:340px;padding:13px 16px;
+  background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;
+  color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;
+  outline:none;letter-spacing:1px;transition:border-color .2s,box-shadow .2s;}
+#api-inp:focus{border-color:var(--g1);box-shadow:0 0 16px #00ff4133}
+#api-inp::placeholder{color:var(--dim)}
+#start-btn{width:100%;max-width:340px;padding:14px;
+  background:var(--bg3);border:1px solid var(--g2);border-radius:3px;
+  color:var(--g1);font-size:12px;letter-spacing:4px;
+  font-family:'Share Tech Mono',monospace;font-weight:700;
+  cursor:pointer;box-shadow:0 0 20px #00ff4133;transition:all .2s;text-shadow:0 0 8px var(--g1);}
+#start-btn:active{transform:scale(.97)}
+#setup-note{font-size:8px;color:var(--txt3);letter-spacing:1px}
+
+/* ── TAP SPLASH ── */
+#tap-splash{position:fixed;inset:0;z-index:999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  background:rgba(8,12,8,.96);cursor:pointer;}
+#tap-icon{font-size:38px;animation:neon-pulse 2s ease-in-out infinite}
+#tap-title{font-size:11px;letter-spacing:4px;color:var(--g1);text-shadow:0 0 10px var(--g1)}
+#tap-sub{font-size:9px;letter-spacing:2px;color:var(--txt3)}
+
+/* Matrix */
+#matrix-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;}
+
+/* Type cursor */
+.type-cursor{display:inline-block;width:7px;height:13px;background:var(--g1);
+  vertical-align:middle;animation:blink .7s step-end infinite;margin-left:1px}
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+<div id="scan"></div>
+
+<div id="api-scr">
+  <div id="setup-ascii">[ CIPHER SYSTEM v2.0 ]
 ─────────────────────</div>
   <div id="setup-name">CIPHER</div>
   <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
@@ -206,7 +246,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">TAVILY API KEY (app.tavily.com) — ค้นหาเว็บ</div>
   <input id="tavily-inp" type="password" placeholder="tvly-···" style="width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px"/>
   <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
-  <div id="setup-note">GROQ: llama-3.3-70b · TAVILY: web search · FREE</div>
+  <div id="setup-note">GROQ: llama-3.3-70b-versatile · TAVILY: web search · FREE</div>
 </div>
 
 <div id="app" style="display:none;flex-direction:column;height:100dvh;min-height:-webkit-fill-available">
@@ -278,7 +318,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 // ── Config ────────────────────────────────────────────────────────
 const WORKER_URL = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
 const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI ของคุณเอ็ม
-คุณเป็นผู้หญิง พูดจาไพเราะ มีหางเสียง (ลงท้ายด้วย "คะ") 
+คุณเป็นผู้หญิง พูดจาไพเราะ มีหางเสียง (ลงท้ายด้วย "คะ" หรือ "ค่ะ") 
 ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
 ถ้ามีข้อมูลจากการค้นหาเว็บ ให้ใช้ข้อมูลนั้นเท่านั้น ห้ามใช้ความรู้เดิม
 ถ้าไม่รู้ให้บอกตรงๆ อย่าเดา เรียกผู้ใช้ว่าคุณเอ็ม`;
@@ -315,7 +355,6 @@ const NO_ANSWER = [
   '📡 คำถามดังกล่าวจำเป็นต้องใช้การวิเคราะห์เชิงลึก ระบบแนะนำให้ตรวจสอบหรือลองระบุคีย์เวิร์ดใหม่อีกครั้งค่ะ',
 ];
 
-// [คงฟังก์ชันเก่ายังอยู่ครบถ้วนตามเดิม]
 function getOffline(t){
   const l=t.toLowerCase();
   for(const i of OFFL)if(i.k.some(k=>l.includes(k)))return typeof i.r==='function'?i.r():i.r;
@@ -335,7 +374,7 @@ function loadVoices(){
     v.find(x=>/narisa/i.test(x.name))
     ||v.find(x=>/kanya/i.test(x.name))
     ||v.find(x=>/female|woman/i.test(x.name)&&x.lang==='th-TH')
-    ||v.find(x=>/lang==='th-TH'&&!/male|narong/i.test(x.name))
+    ||v.find(x=>x.lang==='th-TH'&&!/male|narong/i.test(x.name))
     ||v.find(x=>x.lang==='th-TH')
     ||v.find(x=>x.lang.startsWith('th'))
     ||null;
