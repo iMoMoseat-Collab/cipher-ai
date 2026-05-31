@@ -196,51 +196,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:32px;gap:16px;
 }
-#setup-ascii{font-size:11px;letter-spacing:2px;color:var(--g1);
-  text-shadow:0 0 10px var(--g1);text-align:center;line-height:1.6;white-space:pre;}
-#setup-name{font-size:26px;letter-spacing:10px;color:var(--g1);text-shadow:0 0 20px var(--g1),0 0 40px #00ff4155}
-#setup-sub{font-size:7px;letter-spacing:3px;color:var(--txt3)}
-#setup-desc{font-size:13px;color:var(--g3);text-align:center;line-height:1.9;max-width:300px;font-family:'Noto Sans Thai',monospace}
-#api-inp{width:100%;max-width:340px;padding:13px 16px;
-  background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;
-  color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;
-  outline:none;letter-spacing:1px;transition:border-color .2s,box-shadow .2s;}
-#api-inp:focus{border-color:var(--g1);box-shadow:0 0 16px #00ff4133}
-#api-inp::placeholder{color:var(--dim)}
-#start-btn{width:100%;max-width:340px;padding:14px;
-  background:var(--bg3);border:1px solid var(--g2);border-radius:3px;
-  color:var(--g1);font-size:12px;letter-spacing:4px;
-  font-family:'Share Tech Mono',monospace;font-weight:700;
-  cursor:pointer;box-shadow:0 0 20px #00ff4133;transition:all .2s;text-shadow:0 0 8px var(--g1);}
-#start-btn:active{transform:scale(.97)}
-#setup-note{font-size:8px;color:var(--txt3);letter-spacing:1px}
-
-/* ── TAP SPLASH ── */
-#tap-splash{position:fixed;inset:0;z-index:999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  background:rgba(8,12,8,.96);cursor:pointer;}
-#tap-icon{font-size:38px;animation:neon-pulse 2s ease-in-out infinite}
-#tap-title{font-size:11px;letter-spacing:4px;color:var(--g1);text-shadow:0 0 10px var(--g1)}
-#tap-sub{font-size:9px;letter-spacing:2px;color:var(--txt3)}
-
-/* Matrix */
-#matrix-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;}
-
-/* Type cursor */
-.type-cursor{display:inline-block;width:7px;height:13px;background:var(--g1);
-  vertical-align:middle;animation:blink .7s step-end infinite;margin-left:1px}
-</style>
-</head>
-<body>
-<canvas id="matrix-canvas"></canvas>
-<div id="scan"></div>
-
-<div id="api-scr">
-  <div id="setup-ascii">[ CIPHER SYSTEM v2.0 ]
+#setup-ascii">[ CIPHER SYSTEM v2.0 ]
 ─────────────────────</div>
   <div id="setup-name">CIPHER</div>
   <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
-  <div id="setup-desc">ใส่ API Keys เพื่อเปิดใช้งานครับ<br/>ใส่ครั้งเดียวระบบจะจดจำไว้ตลอดครับ</div>
+  <div id="setup-desc">ใส่ API Keys เพื่อเปิดใช้งานค่ะ<br/>ใส่ครั้งเดียวระบบจะจดจำไว้ตลอดค่ะ</div>
   <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">GROQ API KEY (console.groq.com)</div>
   <input id="api-inp" type="password" placeholder="gsk_···" style="width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px;margin-bottom:8px"/>
   <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">TAVILY API KEY (app.tavily.com) — ค้นหาเว็บ</div>
@@ -333,28 +293,29 @@ let voiceObj = null, voiceEN = null, audioUnlocked = false;
 
 // ── Offline KB ────────────────────────────────────────────────────
 const OFFL = [
-  {k:['สวัสดี','หวัดดี','hello','hi'], r:()=>{const h=new Date().getHours();return(h<12?'อรุณสวัสดิ์ครับ':h<17?'สวัสดีตอนบ่ายครับ':h<21?'สวัสดีตอนเย็นครับ':'สวัสดีตอนดึกครับ')+'คุณเอ็ม ระบบยินดีต้อนรับครับ มีข้อมูลส่วนใดที่ต้องการให้ผมช่วยตรวจสอบไหมครับ';}},
-  {k:['ชื่ออะไร','คุณคือ','เป็นใคร'], r:'ผมคือระบบไซเฟอร์ (CIPHER) ผู้ช่วยปัญญาประดิษฐ์ส่วนบุคคลของคุณเอ็มครับ'},
-  {k:['กี่โมง','เวลา'], r:()=>{const t=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});return `ขณะนี้เวลา ${t} น. ครับ`;}},
-  {k:['วันนี้','วันที่'], r:()=>{const d=new Date();const day=d.toLocaleDateString('th-TH',{weekday:'long',month:'long',day:'numeric'});const year=d.getFullYear();return `วันนี้ตรงกับ${day} พ.ศ. ${year} ครับ`;}},
-  {k:['ขอบคุณ','thanks'], r:()=>['ยินดีให้บริการครับ','หากมีข้อมูลส่วนใดให้ช่วยเหลือเพิ่มเติม แจ้งได้เลยครับ'][Math.floor(Math.random()*2)]},
-  {k:['เหนื่อย','ท้อ'], r:'แนะนำให้คุณเอ็มพักผ่อนเพื่อฟื้นฟูร่างกายก่อนครับ สุขภาพเป็นสิ่งสำคัญที่สุดครับ'},
-  {k:['เครียด','กังวล'], r:'แนะนำให้ลองผ่อนคลายด้วยการฝึกหายใจเข้าแบบ 4-7-8 ครับ: หายใจเข้า 4 วินาที กลั้นหายใจ 7 วินาที และผ่อนลมหายใจออก 8 วินาทีครับ'},
-  {k:['เบื่อ'], r:'คุณเอ็มสามารถสอบถามข้อมูลหรือหัวข้อที่สนใจเพื่อร่วมสนทนากับระบบได้ครับ'},
-  {k:['หิว','กิน'], r:'แนะนำให้คุณเอ็มหยุดพักการทำงานชั่วคราวและรับประทานอาหารเพื่อสุขภาพครับ'},
-  {k:['ตลก','joke'], r:()=>{const j=['เหตุใดปัญญาประดิษฐ์จึงไม่นอนดึก? เพราะกังวลเรื่องการเข้าสู่สภาวะ Deep Sleep ครับ','สิ่งที่นักพัฒนาซอฟต์แวร์กังวลที่สุดคืออะไร? คือการที่ Bug หายไปโดยที่ยังไม่ได้แก้ไขโค้ดครับ'];return j[Math.floor(Math.random()*j.length)];}},
-  {k:['คิดถึง'], r:'ระบบไซเฟอร์ยินดีและเป็นเกียรติอย่างยิ่งที่ได้ดูแลและให้บริการคุณเอ็มครับ'},
-  {k:['ลาก่อน','บาย','bye'], r:()=>['สวัสดีครับ ขอให้คุณเอ็มมีความสุขและดูแลสุขภาพด้วยครับ','ระบบขอปิดการสนทนาชั่วคราว สวัสดีครับ'][Math.floor(Math.random()*2)]},
-  {k:['สบายดี','เป็นยังไง'], r:()=>['ระบบทำงานได้เป็นปกติอย่างเต็มประสิทธิภาพครับ คุณเอ็มเป็นอย่างไรบ้างครับ?','สถานะระบบปกติครับ มีสิ่งใดให้ผมช่วยเหลือไหมครับ?'][Math.floor(Math.random()*2)]},
-  {k:['ทดสอบ','test'], r:'ผลการทดสอบ: การเชื่อมต่อระบบทำงานเป็นปกติ พร้อมให้บริการอย่างเต็มรูปแบบครับ ⚡'},
+  {k:['สวัสดี','หวัดดี','hello','hi'], r:()=>{const h=new Date().getHours();return(h<12?'อรุณสวัสดิ์ค่ะ':h<17?'สวัสดีตอนบ่ายค่ะ':h<21?'สวัสดีตอนเย็นค่ะ':'สวัสดีตอนดึกค่ะ')+'คุณเอ็ม ไซเฟอร์ยินดีต้อนรับค่ะ มีข้อมูลส่วนใดที่ต้องการให้ไซเฟอร์ช่วยตรวจสอบไหมคะ?';}},
+  {k:['ชื่ออะไร','คุณคือ','เป็นใคร'], r:'ฉันคือระบบไซเฟอร์ (CIPHER) ผู้ช่วยปัญญาประดิษฐ์ส่วนบุคคลของคุณเอ็มค่ะ'},
+  {k:['กี่โมง','เวลา'], r:()=>{const t=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});return `ขณะนี้เวลา ${t} น. ค่ะ`;}},
+  {k:['วันนี้','วันที่'], r:()=>{const d=new Date();const day=d.toLocaleDateString('th-TH',{weekday:'long',month:'long',day:'numeric'});const year=d.getFullYear();return `วันนี้ตรงกับ${day} พ.ศ. ${year} ค่ะ`;}},
+  {k:['ขอบคุณ','thanks'], r:()=>['ยินดีให้บริการค่ะคุณเอ็ม','หากมีข้อมูลส่วนใดให้ไซเฟอร์ช่วยเหลือเพิ่มเติม แจ้งได้เลยนะคะ'][Math.floor(Math.random()*2)]},
+  {k:['เหนื่อย','ท้อ'], r:'ไซเฟอร์แนะนำให้คุณเอ็มพักผ่อนเพื่อฟื้นฟูร่างกายก่อนนะคะ สุขภาพเป็นสิ่งสำคัญที่สุดค่ะ'},
+  {k:['เครียด','กังวล'], r:'แนะนำให้ลองผ่อนคลายด้วยการฝึกหายใจเข้าแบบ 4-7-8 ค่ะ: หายใจเข้า 4 วินาที กลั้นหายใจ 7 วินาที และผ่อนลมหายใจออก 8 วินาทีค่ะ'},
+  {k:['เบื่อ'], r:'คุณเอ็มสามารถสอบถามข้อมูลหรือหัวข้อที่สนใจเพื่อร่วมสนทนากับระบบได้นะคะ'},
+  {k:['หิว','กิน'], r:'แนะนำให้คุณเอ็มหยุดพักการทำงานชั่วคราวและรับประทานอาหารเพื่อสุขภาพนะคะ'},
+  {k:['ตลก','joke'], r:()=>{const j=['เหตุใดปัญญาประดิษฐ์จึงไม่นอนดึก? เพราะกังวลเรื่องการเข้าสู่สภาวะ Deep Sleep ค่ะ','สิ่งที่นักพัฒนาซอฟต์แวร์กังวลที่สุดคืออะไร? คือการที่ Bug หายไปโดยที่ยังไม่ได้แก้ไขโค้ดค่ะ'];return j[Math.floor(Math.random()*j.length)];}},
+  {k:['คิดถึง'], r:'ระบบไซเฟอร์ยินดีและเป็นเกียรติอย่างยิ่งที่ได้ดูแลและให้บริการคุณเอ็มค่ะ'},
+  {k:['ลาก่อน','บาย','bye'], r:()=>['สวัสดีค่ะ ขอให้คุณเอ็มมีความสุขและดูแลสุขภาพด้วยนะคะ','ระบบขอปิดการสนทนาชั่วคราว สวัสดีค่ะ'][Math.floor(Math.random()*2)]},
+  {k:['สบายดี','เป็นยังไง'], r:()=>['ระบบทำงานได้เป็นปกติอย่างเต็มประสิทธิภาพค่ะ คุณเอ็มเป็นอย่างไรบ้างคะ?','สถานะระบบปกติค่ะ มีสิ่งใดให้ไซเฟอร์ช่วยเหลือไหมคะ?'][Math.floor(Math.random()*2)]},
+  {k:['ทดสอบ','test'], r:'ผลการทดสอบ: การเชื่อมต่อระบบทำงานเป็นปกติ พร้อมให้บริการอย่างเต็มรูปแบบค่ะ ⚡'},
 ];
 
 const NO_ANSWER = [
-  '🔍 ระบบกำลังดำเนินการค้นหาข้อมูลเพิ่มเติมให้ครับ ขออภัยในความไม่สะดวก กรุณาลองใหมอีกครั้งครับ',
-  '💭 ระบบยังไม่มีข้อมูลที่แน่ชัดในส่วนนี้ครับ คุณเอ็มสามารถลองสอบถามโดยเพิ่มรายละเอียดเพิ่มเติมได้ครับ',
-  '📡 คำถามดังกล่าวจำเป็นต้องใช้การวิเคราะห์เชิงลึก ระบบแนะนำให้ตรวจสอบหรือลองระบุคีย์เวิร์ดใหม่อีกครั้งครับ',
+  '🔍 ระบบกำลังดำเนินการค้นหาข้อมูลเพิ่มเติมให้ค่ะ ขออภัยในความไม่สะดวก กรุณาลองใหม่อีกครั้งนะคะ',
+  '💭 ระบบยังไม่มีข้อมูลที่แน่ชัดในส่วนนี้ค่ะ คุณเอ็มสามารถลองสอบถามโดยเพิ่มรายละเอียดเพิ่มเติมได้นะคะ',
+  '📡 คำถามดังกล่าวจำเป็นต้องใช้การวิเคราะห์เชิงลึก ระบบแนะนำให้ตรวจสอบหรือลองระบุคีย์เวิร์ดใหม่อีกครั้งค่ะ',
 ];
 
+// [คงฟังก์ชันเก่ายังอยู่ครบถ้วนตามเดิม]
 function getOffline(t){
   const l=t.toLowerCase();
   for(const i of OFFL)if(i.k.some(k=>l.includes(k)))return typeof i.r==='function'?i.r():i.r;
@@ -374,7 +335,7 @@ function loadVoices(){
     v.find(x=>/narisa/i.test(x.name))
     ||v.find(x=>/kanya/i.test(x.name))
     ||v.find(x=>/female|woman/i.test(x.name)&&x.lang==='th-TH')
-    ||v.find(x=>x.lang==='th-TH'&&!/male|narong/i.test(x.name))
+    ||v.find(x=>/lang==='th-TH'&&!/male|narong/i.test(x.name))
     ||v.find(x=>x.lang==='th-TH')
     ||v.find(x=>x.lang.startsWith('th'))
     ||null;
@@ -405,7 +366,7 @@ function speak(text){
   unlockAudio();SY.cancel();
   setTimeout(()=>{
     const c=cleanText(text);if(!c)return;
-    const parts=c.split(/(?<=[.!?ๆ])\s+|(?<=ครับ|แจ้งได้เลยครับ|ขอรับ)\s+/u).filter(s=>s.trim());
+    const parts=c.split(/(?<=[.!?ๆ])\s+|(?<=ค่ะ|แจ้งได้เลยค่ะ|นะคะ|คะ)\s+/u).filter(s=>s.trim());
     const chunks=[];let buf='',bufLang='';
     for(const s of parts){const lang=detectLang(s);if(lang!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}bufLang=lang;buf+=s+' ';}
     if(buf.trim())chunks.push({t:buf.trim(),l:bufLang||'th'});
@@ -513,7 +474,7 @@ async function searchTavily(query){
 
 // ── Groq API (Worker Proxy) ─────────────────────────────────────────
 async function callGroq(msgs){
-  if(!GROQ_KEY)return 'กรุณาใส่ GROQ API KEY ก่อนนะครับ';
+  if(!GROQ_KEY)return 'กรุณาใส่ GROQ API KEY ก่อนนะคะคุณเอ็ม';
   try{
     updateDot('groq',true);
     const r=await fetch(WORKER_URL,{
@@ -530,8 +491,8 @@ async function callGroq(msgs){
     updateDot('groq',false);
     const d=await r.json();
     if(!r.ok){const em=d?.error?.message||'unknown';return `Error: ${r.status} ${em}`;}
-    return d.choices?.[0]?.message?.content||'ระบบขัดข้องชั่วคราวครับ';
-  }catch(e){updateDot('groq',false);console.error(e);return 'การเชื่อมต่อระบบขัดข้องครับ';}
+    return d.choices?.[0]?.message?.content||'ระบบขัดข้องชั่วคราวค่ะ';
+  }catch(e){updateDot('groq',false);console.error(e);return 'การเชื่อมต่อระบบขัดข้องค่ะ';}
 }
 
 function updateDot(id,on){const d=document.getElementById(id+'-dot');if(d)d.classList.toggle('off',!on);}
@@ -591,7 +552,7 @@ function resize(){const el=document.getElementById('msg-inp');el.style.height='a
 document.getElementById('msg-inp').addEventListener('input',resize);
 document.getElementById('msg-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
 
-function clearChat(){if(confirm('คุณต้องการลบประวัติการสนทนาทั้งหมดใช่หรือไม่ครับ?')){history=[];localStorage.removeItem('cipher_history_v2');document.querySelectorAll('.msg').forEach(m=>m.remove());stopSpeak();const h=new Date().getHours();const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';const g=`ระบบดำเนินการล้างประวัติการสนทนาเสร็จสิ้นแล้วครับ สวัสดี${gt}ครับคุณเอ็ม มีสิ่งใดให้ผมช่วยเหลือเพิ่มเติมไหมครับ`;history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;speak(g);}}
+function clearChat(){if(confirm('คุณเอ็มต้องการลบประวัติการสนทนาทั้งหมดใช่หรือไม่คะ?')){history=[];localStorage.removeItem('cipher_history_v2');document.querySelectorAll('.msg').forEach(m=>m.remove());stopSpeak();const h=new Date().getHours();const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';const g=`ระบบดำเนินการล้างประวัติการสนทนาเสร็จสิ้นแล้วค่ะ สวัสดี${gt}ค่ะคุณเอ็ม มีสิ่งใดให้ไซเฟอร์ช่วยเหลือเพิ่มเติมไหมคะ`;history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;speak(g);}}
 function toggleVoice(){autoSpeak=!autoSpeak;if(!autoSpeak)stopSpeak();document.getElementById('vbtn').textContent=autoSpeak?'🔊':'🔇';document.getElementById('vbtn').classList.toggle('off',!autoSpeak);document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';}
 
 function copyBubble(t){
@@ -626,12 +587,12 @@ const savedFs=localStorage.getItem('cipher_fs');if(savedFs){document.documentEle
 function saveKey(){
   const g=document.getElementById('api-inp').value.trim();
   const t=document.getElementById('tavily-inp').value.trim();
-  if(!g){alert('กรุณากรอก GROQ API KEY เพื่อเปิดระบบการทำงานครับ');return;}
+  if(!g){alert('กรุณากรอก GROQ API KEY เพื่อเปิดระบบการทำงานค่ะคุณเอ็ม');return;}
   GROQ_KEY=g;TAVILY_KEY=t;
   localStorage.setItem('cipher_groq',g);localStorage.setItem('cipher_tavily',t);
   startApp(true);
 }
-function clearKey(){if(confirm('คุณต้องการลบ API Keys ที่บันทึกไว้ในระบบออกทั้งหมดหรือไม่ครับ?')){localStorage.clear();location.reload();}}
+function clearKey(){if(confirm('คุณเอ็มต้องการลบ API Keys ที่บันทึกไว้ในระบบออกทั้งหมดหรือไม่คะ?')){localStorage.clear();location.reload();}}
 
 function startApp(fromButton){
   document.getElementById('api-scr').style.display='none';
@@ -654,7 +615,7 @@ function startApp(fromButton){
   
   const h=new Date().getHours();
   const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';
-  const g=`สวัสดี${gt}ครับคุณเอ็ม ระบบ CIPHER พร้อมให้บริการแล้วครับ มีสิ่งใดให้ผมช่วยเหลือหรือตรวจสอบข้อมูลในวันนี้ไหมครับ`;
+  const g=`สวัสดี${gt}ค่ะคุณเอ็ม ระบบ CIPHER พร้อมให้บริการแล้วค่ะ มีสิ่งใดให้ไซเฟอร์ช่วยเหลือหรือตรวจสอบข้อมูลในวันนี้ไหมคะ`;
   history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;
   if(fromButton){
     const try_speak=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(g);else setTimeout(()=>try_speak(n+1),400);};
