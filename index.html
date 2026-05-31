@@ -521,7 +521,7 @@ async function callGroq(msgs){
       mode:'cors',
       headers:{'Content-Type':'application/json','x-api-key':GROQ_KEY,'x-service':'groq'},
       body:JSON.stringify({
-        model:'llama-3.3-70b-specdec',
+        model:'llama-3.3-70b-versatile',
         messages:msgs,
         temperature:0.3,
         max_tokens:1024
