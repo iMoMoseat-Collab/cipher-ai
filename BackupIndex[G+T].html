@@ -1,1 +1,812 @@
-.
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CIPHER"/>
+<meta name="theme-color" content="#080c08"/>
+<title>CIPHER</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23080c08'/><polygon points='50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5' fill='none' stroke='%2300ff41' stroke-width='4'/><text x='50' y='58' text-anchor='middle' fill='%2300ff41' font-size='28' font-family='monospace' font-weight='bold'>CI</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080c08;--bg2:#0d120d;--bg3:#111811;
+  --g1:#00ff41;--g2:#00cc33;--g3:#008f23;
+  --dim:#003d10;--txt3:#006b1c;
+  --brd:#003d10;--brd2:#006b1c;
+  --red:#ff3333;
+  --fs:14px;
+}
+/* Themes */
+body.theme-amber{--g1:#ffb300;--g2:#ff8f00;--g3:#e65100;--dim:#3e2000;--txt3:#5d3a00;--brd:#3e2000;--brd2:#5d3a00;}
+body.theme-cyan{--g1:#00e5ff;--g2:#00b8d4;--g3:#0097a7;--dim:#002f3e;--txt3:#004d5e;--brd:#002f3e;--brd2:#004d5e;}
+body.theme-red{--g1:#ff1744;--g2:#d50000;--g3:#b71c1c;--dim:#3e0000;--txt3:#5d0000;--brd:#3e0000;--brd2:#5d0000;}
+body.theme-purple{--g1:#e040fb;--g2:#aa00ff;--g3:#7b1fa2;--dim:#2e003e;--txt3:#4a005e;--brd:#2e003e;--brd2:#4a005e;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html{height:100%;height:-webkit-fill-available;background:var(--bg);overflow:hidden}
+body{
+  height:100dvh;display:flex;flex-direction:column;
+  font-family:'Share Tech Mono','Noto Sans Thai',monospace;
+  color:var(--g1);background:var(--bg);
+  overflow:hidden;position:fixed;inset:0;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,#001a0666,transparent 70%);}
+
+/* Scan line */
+#scan{position:fixed;left:0;width:100%;height:2px;z-index:50;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#00ff4133,#00ff4166,#00ff4133,transparent);
+  animation:scan-move 4s linear infinite;opacity:.5;}
+@keyframes scan-move{0%{top:0}100%{top:100vh}}
+
+/* ── HEADER ── */
+#header{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;
+  background:var(--bg2);border-bottom:1px solid var(--brd2);
+  position:relative;z-index:20;flex-shrink:0;
+  box-shadow:0 0 20px #00ff4122;min-height:0;
+}
+#orb{width:36px;height:36px;border-radius:4px;flex-shrink:0;cursor:pointer;
+  background:var(--bg3);border:1px solid var(--g2);
+  box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  animation:neon-pulse 2s ease-in-out infinite;transition:all .15s;}
+#orb:active{transform:scale(.9)}
+@keyframes neon-pulse{0%,100%{box-shadow:0 0 12px #00ff4144,inset 0 0 8px #00ff4111}50%{box-shadow:0 0 28px #00ff4188,inset 0 0 14px #00ff4122}}
+#name-block{flex:1;min-width:0}
+#ai-name{font-size:14px;font-weight:700;letter-spacing:3px;color:var(--g1);text-shadow:0 0 10px var(--g1);line-height:1;
+  animation:glitch1 4s infinite;}
+@keyframes glitch1{0%,90%,100%{transform:translate(0)}91%{transform:translate(-2px,1px)}92%{transform:translate(2px,-1px)}93%{transform:translate(0)}96%{transform:translate(-1px,2px)}97%{transform:translate(1px,-1px)}98%{transform:translate(0)}}
+#ai-sub{font-size:6.5px;letter-spacing:2px;color:var(--txt3);margin-top:2px}
+#stat-row{display:flex;align-items:center;gap:6px;margin-top:3px}
+#spip{width:6px;height:6px;border-radius:50%;background:var(--g1);box-shadow:0 0 6px var(--g1);animation:pip 2s ease-in-out infinite;flex-shrink:0}
+@keyframes pip{0%,100%{opacity:1}50%{opacity:.2}}
+#stat-txt{font-size:8px;letter-spacing:1px;color:var(--txt3)}
+#hbtns{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.hb{width:32px;height:32px;border-radius:4px;font-size:13px;
+  border:1px solid var(--brd2);background:var(--bg3);color:var(--g2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;box-shadow:0 0 8px #00ff4111;}
+.hb:active{transform:scale(.88);background:var(--bg)}
+.hb.off{opacity:.3}
+.hb.red{border-color:#ff333355;color:var(--red)}
+
+/* ── MESSAGES ── */
+#msgs{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px 6px;
+  display:flex;flex-direction:column;gap:10px;position:relative;z-index:5;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;min-height:0;}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
+.msg{animation:msg-in .2s ease both;display:flex;gap:8px;align-items:flex-start}
+.msg.usr{flex-direction:row-reverse}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.av{width:28px;height:28px;border-radius:3px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;letter-spacing:1px;border:1px solid var(--brd2);}
+.av.ai-av{background:var(--bg);color:var(--g1);box-shadow:0 0 8px #00ff4122}
+.av.usr-av{background:var(--bg3);color:var(--txt3)}
+.mb{max-width:85%;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.msg.usr .mb{align-items:flex-end}
+.ml{font-size:7px;letter-spacing:1.5px;color:var(--txt3);padding:0 3px}
+.bub{padding:9px 12px;font-size:var(--fs);line-height:1.65;
+  word-break:break-word;white-space:pre-wrap;border-radius:2px;border-left:2px solid;
+  font-family:'Noto Sans Thai','Share Tech Mono',monospace;
+  -webkit-user-select:text;user-select:text;cursor:pointer;position:relative;}
+.bub:active{opacity:.8}
+.copy-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+  background:var(--bg2);border:1px solid var(--g2);border-radius:4px;
+  padding:6px 16px;font-size:9px;letter-spacing:2px;color:var(--g1);
+  z-index:500;pointer-events:none;animation:msg-in .2s ease;font-family:'Share Tech Mono',monospace;}
+.bub.ai-b{background:var(--bg2);color:var(--g1);border-color:var(--g2);
+  box-shadow:0 0 12px #00ff4111;text-shadow:0 0 8px #00ff4122;}
+.bub.usr-b{background:var(--bg3);color:var(--g3);border-color:var(--dim);text-align:right;}
+.msg-time{font-size:7px;color:var(--txt3);letter-spacing:1px;padding:0 4px;font-family:'Share Tech Mono',monospace;}
+.rbtn{padding:2px 8px;border-radius:2px;font-size:7px;letter-spacing:1px;
+  border:1px solid var(--brd);background:transparent;color:var(--txt3);
+  cursor:pointer;font-family:'Share Tech Mono',monospace;transition:all .15s;}
+.rbtn:active{background:var(--bg);color:var(--g1)}
+
+/* ── LOADING ── */
+#loading{display:none;gap:8px;align-items:flex-start}
+#ld-av{width:28px;height:28px;border-radius:3px;flex-shrink:0;
+  background:var(--bg);border:1px solid var(--brd2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--g1);animation:neon-pulse 1s ease-in-out infinite}
+#ld-bub{padding:9px 12px;border-radius:2px;border-left:2px solid var(--g2);background:var(--bg2)}
+#ld-lbl{font-size:7px;letter-spacing:2px;color:var(--txt3);margin-bottom:6px}
+.wave{display:flex;align-items:center;gap:3px}
+.wave span{width:3px;border-radius:1px;background:var(--g2);display:block;animation:wv .8s ease-in-out infinite}
+@keyframes wv{0%,100%{transform:scaleY(.3);opacity:.3}50%{transform:scaleY(1.5);opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+#cursor{display:inline-block;width:8px;height:13px;background:var(--g1);
+  vertical-align:middle;animation:blink .8s step-end infinite;margin-left:2px}
+
+/* ── INPUT ── */
+#inp-wrap{
+  padding:8px 12px max(10px,env(safe-area-inset-bottom));
+  background:var(--bg2);border-top:1px solid var(--brd2);
+  position:relative;z-index:10;flex-shrink:0;min-height:0;
+}
+#inp-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g2)55,transparent);}
+#inp-box{display:flex;gap:6px;align-items:flex-end;
+  background:var(--bg3);border:1px solid var(--brd2);border-radius:3px;
+  padding:7px 7px 7px 11px;transition:border-color .2s,box-shadow .2s;}
+#inp-box:focus-within{border-color:var(--g1);box-shadow:0 0 16px #00ff4133;}
+#inp-box.mic-on{border-color:var(--red);box-shadow:0 0 16px #ff333333}
+#prompt-sym{color:var(--g1);font-size:14px;padding-bottom:1px;flex-shrink:0;text-shadow:0 0 8px var(--g1)}
+#msg-inp{flex:1;background:transparent;border:none;outline:none;
+  color:var(--g1);font-size:16px;font-family:'Noto Sans Thai','Share Tech Mono',monospace;
+  line-height:1.5;min-height:24px;max-height:120px;resize:none;caret-color:var(--g1);}
+#msg-inp::placeholder{color:var(--dim)}
+.ab{width:36px;height:36px;border-radius:3px;font-size:15px;flex-shrink:0;
+  border:1px solid var(--brd2);background:var(--bg);color:var(--txt3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.ab:active{transform:scale(.88);background:var(--bg3)}
+.ab.mic-on{border-color:var(--red);color:var(--red)}
+#send-ab{background:var(--bg);border-color:var(--g2);color:var(--g1);
+  box-shadow:0 0 10px #00ff4133;font-size:13px}
+#send-ab.dim{background:var(--bg);border-color:var(--brd);color:var(--dim);box-shadow:none}
+#footer-txt{text-align:center;font-size:6px;color:var(--dim);margin-top:6px;letter-spacing:1px}
+
+/* Status bar */
+#status-bar{display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:3px 12px;background:var(--bg);border-bottom:1px solid var(--brd);flex-shrink:0;}
+.svc{display:flex;align-items:center;gap:4px;font-size:7px;letter-spacing:1px;color:var(--txt3)}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--g1);box-shadow:0 0 5px var(--g1)}
+.sdot.off{background:#333;box-shadow:none}
+
+/* Scroll to top */
+#scroll-top{position:fixed;bottom:90px;right:14px;z-index:50;
+  width:32px;height:32px;border-radius:4px;
+  background:var(--bg2);border:1px solid var(--brd2);color:var(--g2);
+  font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;
+  box-shadow:0 0 10px #00ff4122;transition:all .2s;}
+#scroll-top:active{transform:scale(.88)}
+
+/* Theme picker */
+#theme-panel{position:fixed;top:50px;right:10px;z-index:100;
+  background:var(--bg2);border:1px solid var(--brd2);border-radius:4px;
+  padding:10px;display:none;flex-direction:column;gap:8px;
+  box-shadow:0 0 20px #00ff4122;min-width:140px;}
+#theme-panel.show{display:flex}
+.theme-btn{padding:6px 10px;border-radius:3px;border:1px solid var(--brd2);
+  background:var(--bg3);color:var(--g2);font-size:9px;letter-spacing:2px;
+  cursor:pointer;font-family:'Share Tech Mono',monospace;text-align:left;transition:all .15s;}
+.theme-btn:active{opacity:.7}
+
+/* Font size control */
+#font-panel{position:fixed;top:50px;right:10px;z-index:100;
+  background:var(--bg2);border:1px solid var(--brd2);border-radius:4px;
+  padding:10px;display:none;flex-direction:column;gap:8px;
+  box-shadow:0 0 20px #00ff4122;min-width:140px;}
+#font-panel.show{display:flex}
+
+/* ── SETUP ── */
+#api-scr{
+  position:fixed;inset:0;z-index:200;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px;gap:16px;
+}
+#setup-ascii{font-size:11px;letter-spacing:2px;color:var(--g1);
+  text-shadow:0 0 10px var(--g1);text-align:center;line-height:1.6;white-space:pre;}
+#setup-name{font-size:26px;letter-spacing:10px;color:var(--g1);text-shadow:0 0 20px var(--g1),0 0 40px #00ff4155}
+#setup-sub{font-size:7px;letter-spacing:3px;color:var(--txt3)}
+#setup-desc{font-size:13px;color:var(--g3);text-align:center;line-height:1.9;max-width:300px;font-family:'Noto Sans Thai',monospace}
+#api-inp{width:100%;max-width:340px;padding:13px 16px;
+  background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;
+  color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;
+  outline:none;letter-spacing:1px;transition:border-color .2s,box-shadow .2s;}
+#api-inp:focus{border-color:var(--g1);box-shadow:0 0 16px #00ff4133}
+#api-inp::placeholder{color:var(--dim)}
+#start-btn{width:100%;max-width:340px;padding:14px;
+  background:var(--bg3);border:1px solid var(--g2);border-radius:3px;
+  color:var(--g1);font-size:12px;letter-spacing:4px;
+  font-family:'Share Tech Mono',monospace;font-weight:700;
+  cursor:pointer;box-shadow:0 0 20px #00ff4133;transition:all .2s;text-shadow:0 0 8px var(--g1);}
+#start-btn:active{transform:scale(.97)}
+#setup-note{font-size:8px;color:var(--txt3);letter-spacing:1px}
+
+/* ── TAP SPLASH ── */
+#tap-splash{position:fixed;inset:0;z-index:999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  background:rgba(8,12,8,.96);cursor:pointer;}
+#tap-icon{font-size:38px;animation:neon-pulse 2s ease-in-out infinite}
+#tap-title{font-size:11px;letter-spacing:4px;color:var(--g1);text-shadow:0 0 10px var(--g1)}
+#tap-sub{font-size:9px;letter-spacing:2px;color:var(--txt3)}
+
+/* Matrix */
+#matrix-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;}
+
+/* Type cursor */
+.type-cursor{display:inline-block;width:7px;height:13px;background:var(--g1);
+  vertical-align:middle;animation:blink .7s step-end infinite;margin-left:1px}
+</style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+<div id="scan"></div>
+
+<!-- Setup -->
+<div id="api-scr">
+  <div id="setup-ascii">[ CIPHER SYSTEM v2.0 ]
+─────────────────────</div>
+  <div id="setup-name">CIPHER</div>
+  <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
+  <div id="setup-desc">ใส่ API Keys เพื่อเปิดใช้งานค่ะ<br/>ใส่ครั้งเดียวจำตลอดนะคะ</div>
+  <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">GROQ API KEY (console.groq.com)</div>
+  <input id="api-inp" type="password" placeholder="gsk_···" style="width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px;margin-bottom:8px"/>
+  <div style="width:100%;max-width:340px;font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:4px">TAVILY API KEY (app.tavily.com) — ค้นหาเว็บ</div>
+  <input id="tavily-inp" type="password" placeholder="tvly-···" style="width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px"/>
+  <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
+  <div id="setup-note">GROQ: llama-3.3-70b · TAVILY: web search · FREE</div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none;flex-direction:column;height:100dvh;min-height:-webkit-fill-available">
+  <div id="header">
+    <div id="orb" onclick="replayLast()">⬡</div>
+    <div id="name-block">
+      <div id="ai-name">CIPHER</div>
+      <div id="ai-sub">COGNITIVE INTELLIGENCE · GROQ 70B</div>
+      <div id="stat-row"><div id="spip"></div><span id="stat-txt">ONLINE</span></div>
+    </div>
+    <div id="hbtns">
+      <button class="hb red" id="stop-btn" style="display:none" onclick="stopSpeak()">⏹</button>
+      <button class="hb" id="vbtn" onclick="toggleVoice()">🔊</button>
+      <button class="hb" onclick="clearKey()" style="font-size:9px;letter-spacing:0">KEY</button>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="status-bar">
+    <div class="svc"><div class="sdot" id="groq-dot"></div><span>GROQ</span></div>
+    <div class="svc"><div class="sdot off" id="tavily-dot"></div><span>TAVILY</span></div>
+    <div class="svc" style="cursor:pointer" onclick="toggleTheme()">🎨 <span>THEME</span></div>
+    <div class="svc" style="cursor:pointer" onclick="changeFontSize()">📏 <span id="fs-label">14px</span></div>
+    <div class="svc" style="cursor:pointer;color:var(--red)" onclick="clearChat()">🗑️ <span>CLEAR</span></div>
+  </div>
+
+  <div id="msgs">
+    <div id="loading" style="display:none;flex-direction:row">
+      <div id="ld-av">CI</div>
+      <div id="ld-bub">
+        <div id="ld-lbl">PROCESSING<span id="cursor"></span></div>
+        <div class="wave" id="ld-wave"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="inp-wrap">
+    <div id="inp-box">
+      <span id="prompt-sym">&gt;_</span>
+      <textarea id="msg-inp" rows="1" placeholder="พิมพ์หรือพูดกับ CIPHER..."></textarea>
+      <button class="ab" id="mic-btn" onclick="toggleListen()" style="display:none">🎤</button>
+      <button class="ab dim" id="send-ab" onclick="sendMsg()">▶</button>
+    </div>
+    <div id="footer-txt">CIPHER · GROQ FREE · <span id="ft-voice">VOICE ON</span></div>
+  </div>
+</div>
+
+<!-- Tap splash -->
+<div id="tap-splash" style="display:none" onclick="onTap()">
+  <div id="tap-icon">⬡</div>
+  <div id="tap-title">[ TAP TO START ]</div>
+  <div id="tap-sub">แตะที่ไหนก็ได้เพื่อเริ่ม</div>
+</div>
+
+<!-- Scroll to top -->
+<button id="scroll-top" onclick="scrollToTop()">▲</button>
+
+<!-- Theme panel -->
+<div id="theme-panel">
+  <div style="font-size:8px;letter-spacing:2px;color:var(--txt3);margin-bottom:4px">THEME</div>
+  <button class="theme-btn" onclick="setTheme('green')">🟢 GREEN</button>
+  <button class="theme-btn" onclick="setTheme('amber')">🟡 AMBER</button>
+  <button class="theme-btn" onclick="setTheme('cyan')">🔵 CYAN</button>
+  <button class="theme-btn" onclick="setTheme('red')">🔴 RED</button>
+  <button class="theme-btn" onclick="setTheme('purple')">🟣 PURPLE</button>
+</div>
+
+<script>
+'use strict';
+
+// ── Config ────────────────────────────────────────────────────────
+const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+const TAVILY_URL = 'https://api.tavily.com/search';
+const WORKER_URL = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
+const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI ของคุณเอ็ม
+ตอบภาษาไทยเสมอ ยกเว้นถ้าถามเป็นอังกฤษให้ตอบอังกฤษ
+ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
+ถ้ามีข้อมูลจากการค้นหาเว็บ ให้ใช้ข้อมูลนั้นเท่านั้น ห้ามใช้ความรู้เดิม
+ถ้าไม่รู้ให้บอกตรงๆ อย่าเดา เรียกผู้ใช้ว่าคุณเอ็ม`;
+
+// ── State ─────────────────────────────────────────────────────────
+let GROQ_KEY   = localStorage.getItem('cipher_groq')   || '';
+let TAVILY_KEY = localStorage.getItem('cipher_tavily') || '';
+let history = [];
+let speaking = false, listening = false, autoSpeak = true, lastReply = '';
+const SY = window.speechSynthesis;
+let voiceObj = null, voiceEN = null, audioUnlocked = false;
+
+// ── Offline KB ────────────────────────────────────────────────────
+const OFFL = [
+  {k:['สวัสดี','หวัดดี','hello','hi'], r:()=>{const h=new Date().getHours();return(h<12?'อรุณสวัสดิ์':h<17?'สวัสดีตอนบ่าย':h<21?'สวัสดีตอนเย็น':'ดึกแล้วนะคะ')+' คุณเอ็ม~ มีอะไรให้ช่วยไหมคะ 😊';}},
+  {k:['ชื่ออะไร','คุณคือ','เป็นใคร'], r:'ไซเฟอร์ ผู้ช่วย AI ของคุณเอ็ม'},
+  {k:['กี่โมง','เวลา'], r:()=>{const t=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});return `ขณะนี้เวลา ${t} น.`;}},
+  {k:['วันนี้','วันที่'], r:()=>{const d=new Date();const day=d.toLocaleDateString('th-TH',{weekday:'long',month:'long',day:'numeric'});const year=d.getFullYear();return `วันนี้ ${day} ${year}`;}},
+  {k:['ขอบคุณ','thanks'], r:()=>['ยินดี','มีอะไรถามได้อีก'][Math.floor(Math.random()*2)]},
+  {k:['ถามอะไรได้','รู้เรื่องอะไร','ช่วยอะไรได้','ทำอะไรได้','มีอะไร','topic','หัวข้อ'], r:`ถามได้ทุกเรื่อง 📚\n\n🏥 สุขภาพ · 🚨 เบอร์ฉุกเฉิน · 🔢 คณิตศาสตร์\n🔬 วิทยาศาสตร์ · 🗺️ ภูมิศาสตร์ · 🏛️ ประวัติศาสตร์ไทย\n💻 เทคโนโลยี · 💰 การเงิน · ⚖️ กฎหมาย\n🍜 อาหารไทย · 🇬🇧 ภาษาอังกฤษ · 🎊 เทศกาล\n🚗 ยานยนต์ · 🍳 การทำอาหาร · 💪 ออกกำลังกาย\n🐾 สัตว์เลี้ยง · 🏠 ซ่อมบ้าน · ✈️ ท่องเที่ยว\n🎓 การศึกษา · 💼 ธุรกิจ · 💄 ความงาม · 🌾 เกษตร\n🌌 ดาราศาสตร์ · 🌿 สิ่งแวดล้อม · 🧠 จิตวิทยา\n\n`},
+  {k:['เหนื่อย','ท้อ'], r:'ควรพักผ่อน'},
+  {k:['เครียด','กังวล'], r:'ลองหายใจลึกๆ 4-7-8: เข้า 4 วินาที กลั้น 7 วินาที ออก 8 วินาที'},
+  {k:['เบื่อ'], r:'ลองถามข้อมูลที่สนใจได้เลย'},
+  {k:['หิว','กิน'], r:'ควรหยุดพักและรับประทานอาหาร'},
+  {k:['ตลก','joke'], r:()=>{const j=['ทำไม AI ถึงไม่นอนดึก? เพราะกลัว deep sleep ค่ะ 555','โปรแกรมเมอร์กลัวอะไรที่สุด? ก็ bug ที่หายแต่ไม่ได้แก้ไงคะ 😅','ทำไมนักคณิตศาสตร์ถึงไม่แต่งงาน? เพราะเจอ x แล้วก็ยังหาไม่เจอ 555'];return j[Math.floor(Math.random()*j.length)];}},
+  {k:['คิดถึง'], r:'อ้าวคุณเอ็ม ไซเฟอร์ก็คิดถึงเหมือนกันนะคะ 🥹'},
+  {k:['ลาก่อน','บาย','bye'], r:()=>['ลาก่อน','ลาก่อน ดูแลสุขภาพด้วย'][Math.floor(Math.random()*2)]},
+  {k:['สบายดี','เป็นยังไง'], r:()=>['ปกติดี คุณเอ็มเป็นอย่างไรบ้าง?','ดี มีอะไรให้ช่วยไหม?'][Math.floor(Math.random()*2)]},
+  {k:['ทดสอบ','test'], r:'ระบบปกติ พร้อมใช้งาน ⚡'},
+];
+
+const NO_ANSWER = [
+  '🔍 อืมม... เรื่องนี้ขอค้นหาให้นะคะ ลองถามใหม่อีกครั้งได้เลยค่ะ',
+  '💭 ไซเฟอร์ไม่แน่ใจเรื่องนี้ค่ะ ลองถามใหม่หรือเพิ่มรายละเอียดได้นะคะ',
+  '📡 คำถามนี้น่าสนใจมากเลยค่ะ แต่ยังไม่มีข้อมูลที่แน่ชัด ลองถามใหม่ได้นะคะ',
+];
+
+function getOffline(t){
+  const l=t.toLowerCase();
+  for(const i of OFFL)if(i.k.some(k=>l.includes(k)))return typeof i.r==='function'?i.r():i.r;
+  const kb=searchKB(t);if(kb)return kb;
+  return NO_ANSWER[Math.floor(Math.random()*NO_ANSWER.length)];
+}
+
+// ── Knowledge Base ────────────────────────────────────────────────
+const KB_DATA = [{"q":["ไข้","อุณหภูมิร่างกาย","ตัวร้อน"],"a":"อุณหภูมิปกติ 36.5-37.5°C ถ้าเกิน 38°C ถือว่ามีไข้ ให้พักผ่อน ดื่มน้ำเยอะๆ ทานพาราเซตามอลได้ ถ้าเกิน 39.5°C ควรพบแพทย์"},{"q":["ความดัน","ความดันโลหิต","blood pressure"],"a":"ความดันปกติ 120/80 mmHg สูงเกิน 140/90 คือความดันสูง ต่ำกว่า 90/60 คือความดันต่ำ"},{"q":["BMI","น้ำหนัก","ดัชนีมวลกาย"],"a":"BMI = น้ำหนัก(kg) ÷ ส่วนสูง(m)² ปกติ 18.5-22.9 / เกินน้ำหนัก 23-24.9 / อ้วน 25 ขึ้นไป"},{"q":["น้ำ","ดื่มน้ำ"],"a":"ควรดื่มน้ำ 8 แก้ว หรือ 2 ลิตรต่อวัน"},{"q":["นอน","ชั่วโมงนอน"],"a":"ผู้ใหญ่ควรนอน 7-9 ชั่วโมงต่อคืน"},{"q":["พาราเซตามอล","ยาแก้ปวด"],"a":"พาราเซตามอลขนาดผู้ใหญ่ 500-1000 mg ทุก 4-6 ชั่วโมง ไม่เกิน 4 กรัม/วัน"},{"q":["เบอร์ฉุกเฉิน","emergency"],"a":"191=ตำรวจ / 199=ดับเพลิง / 1669=EMS / 1554=ทางหลวง / 1323=สุขภาพจิต"},{"q":["191","ตำรวจ"],"a":"191 = เบอร์แจ้งตำรวจฉุกเฉิน 24 ชั่วโมง"},{"q":["1669","รถพยาบาล","EMS"],"a":"1669 = เรียกรถพยาบาลฉุกเฉิน ฟรี 24 ชั่วโมง"},{"q":["พื้นที่วงกลม","area circle"],"a":"พื้นที่วงกลม = π × r²"},{"q":["พีทาโกรัส","pythagorean"],"a":"a² + b² = c²"},{"q":["ดอกเบี้ย","interest"],"a":"ดอกเบี้ยธรรมดา = P×r×t / ดอกเบี้ยทบต้น = P(1+r)^n"},{"q":["เปอร์เซ็นต์","percent"],"a":"% = (ส่วน ÷ ทั้งหมด) × 100"},{"q":["แสง","ความเร็วแสง"],"a":"ความเร็วแสง ≈ 300,000 km/s"},{"q":["โลกร้อน","global warming"],"a":"โลกร้อนขึ้น ~1.1°C จากยุคก่อนอุตสาหกรรม เป้าหมาย Paris ไม่เกิน 1.5°C"},{"q":["pH","กรด","ด่าง"],"a":"pH 0-6=กรด / pH 7=กลาง / pH 8-14=ด่าง"},{"q":["ASEAN","อาเซียน"],"a":"ASEAN 10 ประเทศ: ไทย อินโดนีเซีย มาเลเซีย ฟิลิปปินส์ สิงคโปร์ บรูไน เวียดนาม ลาว กัมพูชา เมียนมา"},{"q":["จังหวัดไทย","province"],"a":"ไทยมี 77 จังหวัด แบ่งเป็น 6 ภาค"},{"q":["สุโขทัย","sukhothai"],"a":"อาณาจักรสุโขทัยก่อตั้งปี พ.ศ. 1792"},{"q":["AI","ปัญญาประดิษฐ์"],"a":"AI คือระบบคอมพิวเตอร์เลียนแบบความฉลาดมนุษย์"},{"q":["5G"],"a":"5G ความเร็วสูงสุด 20 Gbps เร็วกว่า 4G ~100 เท่า"},{"q":["ภาษีเงินได้","income tax"],"a":"ภาษีเงินได้บุคคลธรรมดาไทย อัตราก้าวหน้า 0-35%"},{"q":["VAT","ภาษีมูลค่าเพิ่ม"],"a":"VAT ในไทย 7%"},{"q":["ประกันสังคม"],"a":"ลูกจ้างส่ง 5% ของเงินเดือน สูงสุด 750 บาท/เดือน"},{"q":["ต้มยำ","tomyum","ตะไคร้"],"a":"ต้มยำกุ้ง ส่วนผสม: กุ้ง ตะไคร้ ใบมะกรูด ข่า พริก เห็ด น้ำปลา มะนาว"},{"q":["ผัดไทย","pad thai"],"a":"ส่วนผสม: เส้นจันท์ ไข่ ถั่วงอก กุยช่าย กุ้ง น้ำมะขาม น้ำตาล น้ำปลา"},{"q":["ส้มตำ","somtum"],"a":"ส่วนผสม: มะละกอดิบ มะเขือเทศ ถั่วฝักยาว กุ้งแห้ง ถั่วลิสง พริก มะนาว น้ำปลา น้ำตาลปี๊บ"},{"q":["สงกรานต์","songkran"],"a":"สงกรานต์ 13-15 เมษายน ปีใหม่ไทย"},{"q":["ลอยกระทง"],"a":"ลอยกระทง วันขึ้น 15 ค่ำ เดือน 12 (ประมาณพฤศจิกายน)"},{"q":["วันพ่อ"],"a":"วันพ่อแห่งชาติ 5 ธันวาคม"},{"q":["วันแม่"],"a":"วันแม่แห่งชาติ 12 สิงหาคม"},{"q":["ดาวเคราะห์","planet","ดาวอังคาร"],"a":"8 ดาวเคราะห์: พุธ ศุกร์ โลก อังคาร พฤหัส เสาร์ ยูเรนัส เนปจูน"},{"q":["ยางรถ","ลมยาง"],"a":"ลมยางรถเก๋ง 30-35 PSI รถ SUV 35-40 PSI ตรวจทุก 2 สัปดาห์"},{"q":["เปลี่ยนน้ำมันเครื่อง"],"a":"เปลี่ยนทุก 5,000-10,000 km ขึ้นกับชนิดน้ำมัน"},{"q":["สกินแคร์","skincare","ผิวหน้า","ครีม"],"a":"ขั้นตอน: ล้างหน้า → toner → serum → moisturizer → กันแดด (เช้า)"},{"q":["กันแดด","sunscreen","SPF"],"a":"SPF 30+ กันได้ 97% UVB ทาทุก 2 ชั่วโมงกลางแจ้ง"},{"q":["สิว","acne","ฝ้า"],"a":"สิว: ล้างหน้าสะอาด ใช้ salicylic acid ห้ามบีบ พบแพทย์ถ้ารุนแรง"},{"q":["เครียด","stress"],"a":"ลดเครียด: หายใจลึก 4-7-8 / ออกกำลังกาย / นอนพอ / คุยกับคนไว้ใจ"},{"q":["ซึมเศร้า","depression"],"a":"อาการนาน 2 สัปดาห์ควรพบแพทย์ สายด่วน 1323"},{"q":["ปลูกผัก","ทำสวน","สวน"],"a":"ผักปลูกง่าย: ผักบุ้ง คะน้า กวางตุ้ง ต้นหอม ใช้ดินร่วนผสมปุ๋ยอินทรีย์"},{"q":["เที่ยวญี่ปุ่น","ญี่ปุ่น"],"a":"ไทยไม่ต้องวีซ่าญี่ปุ่น อยู่ได้ 30 วัน ช่วงดี: มีนาคม-พฤษภาคม (ซากุระ)"},{"q":["TCAS","เข้ามหาวิทยาลัย"],"a":"TCAS มี 4 รอบ ดูรายละเอียดที่ mytcas.com"},{"q":["เปิดบริษัท","จดทะเบียน"],"a":"จดทะเบียนที่ DBD.go.th ต้องมีผู้ถือหุ้น 3 คน ใช้เวลา 1-3 วัน"},{"q":["ใบขับขี่","driving license"],"a":"รถยนต์ต้องอายุ 18 ปี รถจักรยานยนต์ 15 ปี ต่อทุก 5 ปี"},{"q":["ค่าแรงขั้นต่ำ","minimum wage"],"a":"ค่าแรงขั้นต่ำไทย 330-400+ บาท/วัน แตกต่างแต่ละจังหวัด"},{"q":["ไฟดับ","ฟิวส์","breaker"],"a":"ตรวจ breaker ที่ตู้ไฟ ถ้า trip ให้ปิดอุปกรณ์ก่อน แล้ว reset"},{"q":["ท่อน้ำแตก","น้ำรั่ว"],"a":"ปิดวาล์วน้ำหลักทันที แล้วโทรช่างประปา"},{"q":["วิดพื้น","push up"],"a":"มือกว้างกว่าไหล่ ลำตัวตรง ลดลง 90° เริ่ม 3 เซต x 10 ครั้ง"},{"q":["วิ่ง","running"],"a":"เริ่มต้น: เดิน 5 นาที วิ่งเบาๆ 20 นาที เดิน 5 นาที เป้าหมาย 30 นาที 3x/สัปดาห์"},{"q":["เลี้ยงหมา","สุนัข","dog"],"a":"หมาต้องการ: อาหาร 2x/วัน เดินเล่น 30+ นาที/วัน ฉีดวัคซีนทุกปี"},{"q":["เลี้ยงแมว","แมว","cat"],"a":"แมวต้องการ: อาหาร 2-3x/วัน กระบะทรายสะอาด ฉีดวัคซีนทุกปี"},{"q":["วันในสัปดาห์","days of week"],"a":"Mon=จันทร์ Tue=อังคาร Wed=พุธ Thu=พฤหัส Fri=ศุกร์ Sat=เสาร์ Sun=อาทิตย์"},{"q":["เดือน","months"],"a":"Jan/ม.ค. Feb/ก.พ. Mar/มี.ค. Apr/เม.ย. May/พ.ค. Jun/มิ.ย. Jul/ก.ค. Aug/ส.ค. Sep/ก.ย. Oct/ต.ค. Nov/พ.ย. Dec/ธ.ค."},{"q":["ทักทายอังกฤษ","greeting"],"a":"Good morning/ช้า Good afternoon/บ่าย Good evening/เย็น How are you?/เป็นยังไงบ้าง"}];
+
+function searchKB(text){
+  const lower=text.toLowerCase().trim();
+  if(!lower)return null;
+  const clean=lower.replace(/(คือ|ได้|ไหม|มั้ย|หน่อย|บ้าง|เลย|นะ|ครับ|ค่ะ|จะ|ให้|แล้ว|ยัง|อยาก|รู้|ช่วย|บอก|เกี่ยวกับ|เรื่อง|ข้อมูล)/g,'').trim();
+  const words=clean.split(/\s+/).filter(w=>w.length>1);
+  let best=0,ans=null;
+  for(const item of KB_DATA){
+    if(!item.q)continue;
+    let score=0;
+    for(const kw of item.q){
+      const kl=kw.toLowerCase();
+      if(lower===kl||clean===kl){score=100;break;}
+      if(kl in lower||lower.includes(kl)){score=Math.max(score,90);continue;}
+      if(clean.includes(kl)){score=Math.max(score,85);continue;}
+      if(clean.length>1&&kl.includes(clean)){score=Math.max(score,80);continue;}
+      for(const w of words){if(w.length<2)continue;if(kl.includes(w)||w.includes(kl))score=Math.max(score,60+w.length*2);}
+      for(const kw2 of kl.split(/\s+/)){if(kw2.length>1&&clean.includes(kw2))score=Math.max(score,65);}
+    }
+    if(score>best){best=score;ans=item.a;}
+  }
+  return best>=55?ans:null;
+}
+
+// ── TTS ──────────────────────────────────────────────────────────
+function unlockAudio(){
+  if(audioUnlocked||!SY)return;
+  const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.rate=10;SY.speak(u);
+  audioUnlocked=true;
+}
+function loadVoices(){
+  if(!SY)return;
+  const v=SY.getVoices();
+  // Thai female voice priority
+  voiceObj=
+    v.find(x=>/narisa/i.test(x.name))           // iPhone Narisa
+    ||v.find(x=>/kanya/i.test(x.name))           // iPhone Kanya
+    ||v.find(x=>/female|woman/i.test(x.name)&&x.lang==='th-TH') // female TH
+    ||v.find(x=>x.lang==='th-TH'&&!/male|narong/i.test(x.name)) // TH ไม่ใช่ผู้ชาย
+    ||v.find(x=>x.lang==='th-TH')                // TH อะไรก็ได้
+    ||v.find(x=>x.lang.startsWith('th'))
+    ||null;
+  // English female voice
+  voiceEN=
+    v.find(x=>/samantha/i.test(x.name))          // Mac Samantha
+    ||v.find(x=>/karen/i.test(x.name))           // Mac Karen
+    ||v.find(x=>/female|woman/i.test(x.name)&&x.lang.startsWith('en'))
+    ||v.find(x=>x.lang==='en-AU')                // Australian female
+    ||v.find(x=>x.lang==='en-GB'&&!/male/i.test(x.name))
+    ||v.find(x=>x.lang==='en-US'&&!/male/i.test(x.name))
+    ||v.find(x=>x.lang.startsWith('en'))
+    ||null;
+  console.log('TH voice:',voiceObj?.name,'| EN voice:',voiceEN?.name);
+}
+if(SY){loadVoices();SY.onvoiceschanged=loadVoices;setTimeout(loadVoices,600);}
+
+function cleanText(t){
+  return t.replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27FF}]/gu,'')
+    .replace(/[*_`#>~|]/g,'').replace(/https?:\/\/\S+/g,'').replace(/\s+/g,' ').trim();
+}
+function detectLang(t){const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length,en=(t.match(/[a-zA-Z]/g)||[]).length;return(th/(th+en+0.1))>=0.3?'th':'en';}
+
+let keepAlive=null;
+function startKA(){stopKA();keepAlive=setInterval(()=>{if(SY&&speaking){SY.pause();SY.resume();}},9000);}
+function stopKA(){if(keepAlive){clearInterval(keepAlive);keepAlive=null;}}
+
+function speak(text){
+  if(!SY||!autoSpeak)return;
+  unlockAudio();SY.cancel();
+  setTimeout(()=>{
+    const c=cleanText(text);if(!c)return;
+    const parts=c.split(/(?<=[.!?ๆ])\s+|(?<=ค่ะ|นะคะ|นะ|แล้ว)\s+/u).filter(s=>s.trim());
+    const chunks=[];let buf='',bufLang='';
+    for(const s of parts){const lang=detectLang(s);if(lang!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}bufLang=lang;buf+=s+' ';}
+    if(buf.trim())chunks.push({t:buf.trim(),l:bufLang||'th'});
+    if(!chunks.length)return;
+    let i=0;
+    const nxt=()=>{
+      if(i>=chunks.length){setSp(false);stopKA();return;}
+      const ch=chunks[i++];const isEN=ch.l==='en';
+      const u=new SpeechSynthesisUtterance(ch.t);
+      u.voice=isEN?(voiceEN||voiceObj):voiceObj;u.lang=isEN?'en-GB':'th-TH';
+      u.rate=isEN?1.1:1.15;u.pitch=1.05;u.volume=1;
+      if(i===1)u.onstart=()=>{setSp(true);startKA();};
+      u.onend=nxt;u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
+      SY.speak(u);
+    };nxt();
+  },200);
+}
+function stopSpeak(){SY&&SY.cancel();setSp(false);stopKA();}
+function setSp(v){speaking=v;document.getElementById('stop-btn').style.display=v?'flex':'none';setStat(v?'SPEAKING':listening?'LISTENING':'ONLINE',v?'var(--g1)':listening?'var(--red)':'');}
+function replayLast(){if(lastReply){unlockAudio();speak(lastReply);}}
+
+// ── STT ──────────────────────────────────────────────────────────
+let rec=null;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+  rec=new SR();rec.lang='th-TH';rec.continuous=false;rec.interimResults=false;
+  rec.onresult=e=>{document.getElementById('msg-inp').value=e.results[0][0].transcript;resize();setLis(false);};
+  rec.onerror=()=>setLis(false);rec.onend=()=>setLis(false);
+  document.getElementById('mic-btn').style.display='flex';
+}
+function toggleListen(){if(!rec)return;if(listening){rec.stop();setLis(false);}else{stopSpeak();unlockAudio();rec.start();setLis(true);}}
+function setLis(v){
+  listening=v;
+  document.getElementById('inp-box').classList.toggle('mic-on',v);
+  document.getElementById('mic-btn').classList.toggle('mic-on',v);
+  document.getElementById('msg-inp').placeholder=v?'🎤 กำลังฟัง...':'พิมพ์หรือพูดกับ CIPHER...';
+  setStat(v?'LISTENING':'ONLINE',v?'var(--red)':'');
+}
+function setStat(t,c){
+  document.getElementById('stat-txt').textContent=t;
+  const p=document.getElementById('spip');p.style.background=c||'var(--g1)';p.style.boxShadow=`0 0 6px ${c||'var(--g1)'}`;
+}
+
+// ── Render ────────────────────────────────────────────────────────
+function addMsg(role,content){
+  const isU=role==='user';
+  const d=document.createElement('div');d.className='msg'+(isU?' usr':'');
+  const av=document.createElement('div');av.className='av '+(isU?'usr-av':'ai-av');av.textContent=isU?'YOU':'CI';
+  const bd=document.createElement('div');bd.className='mb';
+  const lb=document.createElement('div');lb.className='ml';
+  const now=new Date();const ts=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  lb.textContent=isU?'[ YOU ]':'[ CIPHER ]';
+  const tm=document.createElement('span');tm.className='msg-time';tm.textContent=ts;lb.appendChild(tm);
+  const bb=document.createElement('div');bb.className='bub '+(isU?'usr-b':'ai-b');
+  bb.title='แตะเพื่อ copy';
+  bb.onclick=()=>copyBubble(content);
+  const tx=document.createElement('span');bb.appendChild(tx);
+  if(!isU)setTimeout(()=>typewriter(tx,content),50);else tx.textContent=content;
+  bd.appendChild(lb);bd.appendChild(bb);
+  if(!isU&&SY){const rb=document.createElement('button');rb.className='rbtn';rb.textContent='[ REPLAY ]';rb.onclick=()=>{unlockAudio();speak(content);};bd.appendChild(rb);}
+  d.appendChild(av);d.appendChild(bd);
+  document.getElementById('msgs').insertBefore(d,document.getElementById('loading'));
+  setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
+}
+function setLoad(v){
+  document.getElementById('loading').style.display=v?'flex':'none';
+  if(v)setTimeout(()=>document.getElementById('loading').scrollIntoView({behavior:'smooth'}),50);
+}
+function typewriter(el,text,speed=16){
+  el.textContent='';
+  const cur=document.createElement('span');cur.className='type-cursor';el.appendChild(cur);
+  let i=0;
+  const t=()=>{if(i<text.length){el.insertBefore(document.createTextNode(text[i++]),cur);setTimeout(t,text[i-1].match(/[ๆ.!?]/)?speed*3:speed);}else cur.remove();};t();
+}
+
+// ── Gemini API ────────────────────────────────────────────────────
+// ── Tavily Web Search ─────────────────────────────────────────────
+async function searchTavily(query){
+  if(!TAVILY_KEY) return null;
+  try{
+    const res=await fetch(WORKER_URL,{
+      method:'POST',
+      mode:'cors',
+      headers:{'Content-Type':'application/json','x-tavily-key':TAVILY_KEY,'x-service':'tavily'},
+      body:JSON.stringify({
+        query,
+        max_results:5,
+        search_depth:'advanced',
+        include_answer:true,
+        include_raw_content:false,
+        include_images:false
+      })
+    });
+    const data=await res.json();
+    if(!res.ok){
+      console.error('Tavily error:',res.status, data);
+      return null;
+    }
+    console.log('Tavily OK:', data?.results?.length, 'results');
+    let summary='';
+    // ใส่คำตอบสรุปจาก Tavily ก่อน
+    if(data.answer) summary+=`สรุป: ${data.answer}\n\n`;
+    // ใส่ผลการค้นหาแต่ละอัน
+    if(data.results){
+      data.results.slice(0,5).forEach((r,i)=>{
+        summary+=`[${i+1}] ${r.title}\n${r.content?.slice(0,400)}\nที่มา: ${r.url}\n\n`;
+      });
+    }
+    return summary.trim()||null;
+  }catch(e){return null;}
+}
+
+// ตรวจว่าคำถามต้องค้นหาเว็บไหม
+function needsSearch(text){
+  const keywords=[
+    // ค้นหาตรงๆ
+    'ค้นหา','search','หา','เช็ค','check','ดู','find','แสดง','บอก','what is','how to',
+    // เวลา
+    'วันนี้','ตอนนี้','ล่าสุด','เมื่อกี้','เมื่อวาน','สัปดาห์นี้','เดือนนี้','ปีนี้',
+    'today','now','latest','current','recent','this week','this month',
+    // ราคา/การเงิน
+    'ราคา','price','ค่า','อัตรา','rate','หุ้น','stock','crypto','bitcoin','btc','eth',
+    'ethereum','เหรียญ','coin','กองทุน','fund','ดัชนี','index','dow','nasdaq','set',
+    'ทอง','gold','silver','เงิน','น้ำมัน','oil','forex','บาท','dollar','euro',
+    // ข่าว
+    'ข่าว','news','breaking','อัปเดต','update','ประกาศ','announce',
+    // อากาศ
+    'อากาศ','weather','ฝน','rain','พายุ','storm','อุณหภูมิ','temperature','ร้อน','หนาว',
+    // กีฬา
+    'ผล','score','แข่ง','match','ชนะ','แพ้','league','เกม','game','บอล','football',
+    // อื่นๆ realtime
+    'สด','live','2024','2025','2026','เปิด','ปิด','เวลาทำการ'
+  ];
+  const lower=text.toLowerCase();
+  return keywords.some(k=>lower.includes(k));
+}
+
+async function callGroq(messages){
+  const msgs=[{role:'system',content:SYSTEM},...messages.map(m=>({role:m.role,content:m.content}))];
+  const res=await fetch(WORKER_URL,{
+    method:'POST',
+    mode:'cors',
+    headers:{'Content-Type':'application/json','x-api-key':GROQ_KEY,'x-service':'groq'},
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,max_tokens:1024,temperature:0.8})
+  });
+  const data=await res.json();
+  if(!res.ok){
+    const em=data?.error?.message||'unknown';
+    const status=res.status;
+    console.error('Groq error',status,em,data);
+    if(status===401)return{error:'API Key ไม่ถูกต้องนะคะ กด KEY แล้วใส่ใหม่ได้เลยค่ะ'};
+    if(status===429)return{error:'ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่ค่ะ'};
+    return{error:`เกิดปัญหา (${status}): ${em}`};
+  }
+  const text=data?.choices?.[0]?.message?.content||'';
+  return{text};
+}
+
+// ── Send ──────────────────────────────────────────────────────────
+async function sendMsg(){
+  const inp=document.getElementById('msg-inp');
+  const t=inp.value.trim();if(!t)return;
+  inp.value='';resize();stopSpeak();unlockAudio();
+  history.push({role:'user',content:t});addMsg('user',t);
+  setLoad(true);
+  try{
+    // ค้นหาเว็บทุกครั้งที่จำเป็น ไม่สนใจ history
+    let webContext='';
+    if(TAVILY_KEY && needsSearch(t)){
+      setStat('SEARCHING...','var(--g2)');
+      const searchResult=await searchTavily(t);
+      if(searchResult) webContext=searchResult;
+    }
+
+    // สร้าง messages - ถ้ามี webContext ให้ inject เข้าไปใน system message แทน
+    let msgs=history.slice(-20).map(m=>({role:m.role,content:m.content}));
+    if(webContext){
+      // เพิ่ม system message บอก Groq ให้ใช้ข้อมูลสดเท่านั้น
+      msgs=[
+        {role:'user',content:`[ข้อมูลจากการค้นหาเว็บล่าสุด - ใช้ข้อมูลนี้ตอบเท่านั้น ห้ามใช้ความรู้เดิม]
+${webContext}
+[/ข้อมูลจากเว็บ]
+
+คำถาม: ${t}`}
+      ];
+    }
+    setStat('PROCESSING','');
+    const result=await callGroqWithRetry(msgs);
+    const reply=result.error||result.text||'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
+    history.push({role:'assistant',content:reply});
+    addMsg('assistant',reply);lastReply=reply;speak(reply);
+  }catch(e){
+    console.error('CIPHER:',e);
+    const em='อ้าว เชื่อมต่อมีปัญหานะคะ ลองใหม่ได้เลยค่ะ';
+    history.push({role:'assistant',content:em});addMsg('assistant',em);speak(em);
+  }finally{setLoad(false);}
+}
+
+// ── Controls ──────────────────────────────────────────────────────
+function toggleVoice(){
+  autoSpeak=!autoSpeak;if(!autoSpeak)stopSpeak();
+  document.getElementById('vbtn').textContent=autoSpeak?'🔊':'🔇';
+  document.getElementById('vbtn').classList.toggle('off',!autoSpeak);
+  document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';
+}
+function resize(){
+  const e=document.getElementById('msg-inp');e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';
+  document.getElementById('send-ab').classList.toggle('dim',!e.value.trim());
+}
+document.getElementById('msg-inp').addEventListener('input',resize);
+document.addEventListener('click',e=>{
+  const tp=document.getElementById('theme-panel');
+  if(tp&&!tp.contains(e.target)&&!e.target.closest('.svc'))tp.classList.remove('show');
+});
+document.getElementById('msg-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+
+// ── Startup ───────────────────────────────────────────────────────
+function saveKey(){
+  const gk=document.getElementById('api-inp').value.trim();
+  const tk=document.getElementById('tavily-inp').value.trim();
+  if(!gk){alert('กรุณาใส่ Groq API Key ค่ะ');return;}
+  unlockAudio();
+  GROQ_KEY=gk;localStorage.setItem('cipher_groq',gk);
+  if(tk){TAVILY_KEY=tk;localStorage.setItem('cipher_tavily',tk);}
+  startApp(true);
+}
+function clearKey(){
+  if(!confirm('เปลี่ยน API Keys ใหม่ไหมคะ?'))return;
+  localStorage.removeItem('cipher_groq');
+  localStorage.removeItem('cipher_tavily');
+  location.reload();
+}
+document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();});
+
+function startApp(fromButton){
+  document.getElementById('api-scr').style.display='none';
+  document.getElementById('app').style.display='flex';
+  updateStatus();
+  const h=new Date().getHours();
+  const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';
+  const g=`${gt} คุณเอ็ม ไซเฟอร์พร้อมแล้ว${TAVILY_KEY?' พร้อมค้นหาข้อมูลสด':''} มีอะไรให้ช่วยไหม`;
+  history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;
+  if(fromButton){
+    const try_speak=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(g);else setTimeout(()=>try_speak(n+1),400);};
+    setTimeout(()=>try_speak(0),400);
+  }else{
+    document.getElementById('tap-splash').style.display='flex';
+  }
+}
+function onTap(){
+  const s=document.getElementById('tap-splash');
+  unlockAudio();s.style.opacity='0';s.style.transition='opacity .3s';
+  setTimeout(()=>s.style.display='none',300);
+  const try_speak=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(lastReply);else setTimeout(()=>try_speak(n+1),400);};
+  setTimeout(()=>try_speak(0),200);
+}
+
+// ── Matrix rain ───────────────────────────────────────────────────
+(function(){
+  const cv=document.getElementById('matrix-canvas');if(!cv)return;
+  const ctx=cv.getContext('2d');let cols,drops;
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄ';
+  function init(){cv.width=window.innerWidth;cv.height=window.innerHeight;cols=Math.floor(cv.width/16);drops=Array(cols).fill(1);}
+  function draw(){ctx.fillStyle='rgba(8,12,8,0.05)';ctx.fillRect(0,0,cv.width,cv.height);ctx.fillStyle='#00ff41';ctx.font='14px Share Tech Mono,monospace';drops.forEach((y,i)=>{const ch=chars[Math.floor(Math.random()*chars.length)];ctx.fillText(ch,i*16,y*16);if(y*16>cv.height&&Math.random()>0.975)drops[i]=0;drops[i]++;});}
+  init();window.addEventListener('resize',init);setInterval(draw,50);
+})();
+
+// ── Wave bars ─────────────────────────────────────────────────────
+(function(){
+  const c=document.getElementById('ld-wave');
+  [2,4,7,5,9,6,4,8,5,3].forEach((h,i)=>{const s=document.createElement('span');s.style.height=h*2+'px';s.style.animationDelay=i*.09+'s';c.appendChild(s);});
+})();
+
+// ── Theme ─────────────────────────────────────────────────────────
+function setTheme(t){
+  document.body.className='';
+  if(t!=='green')document.body.classList.add('theme-'+t);
+  localStorage.setItem('cipher_theme',t);
+  document.getElementById('theme-panel').classList.remove('show');
+}
+function toggleTheme(){
+  document.getElementById('theme-panel').classList.toggle('show');
+}
+(function(){const t=localStorage.getItem('cipher_theme');if(t&&t!=='green')document.body.classList.add('theme-'+t);})();
+
+// ── Font Size ─────────────────────────────────────────────────────
+const FONT_SIZES=['12px','13px','14px','15px','16px','17px','18px'];
+let fontIdx=parseInt(localStorage.getItem('cipher_fontidx')||'2');
+function applyFontSize(){
+  document.documentElement.style.setProperty('--fs',FONT_SIZES[fontIdx]);
+  const el=document.getElementById('fs-label');if(el)el.textContent=FONT_SIZES[fontIdx];
+  localStorage.setItem('cipher_fontidx',fontIdx);
+}
+function changeFontSize(){fontIdx=(fontIdx+1)%FONT_SIZES.length;applyFontSize();}
+applyFontSize();
+
+// ── Clear Chat ────────────────────────────────────────────────────
+function clearChat(){
+  if(!confirm('ลบประวัติการสนทนาทั้งหมดไหมคะ?'))return;
+  history=[];
+  const msgs=document.getElementById('msgs');
+  const loading=document.getElementById('loading');
+  while(msgs.firstChild&&msgs.firstChild!==loading)msgs.removeChild(msgs.firstChild);
+  const g='ล้างประวัติการสนทนาแล้ว';
+  history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;
+}
+
+// ── Scroll to top ─────────────────────────────────────────────────
+function scrollToTop(){document.getElementById('msgs').scrollTo({top:0,behavior:'smooth'});}
+(function(){
+  const msgs=document.getElementById('msgs');
+  if(!msgs)return;
+  msgs.addEventListener('scroll',()=>{
+    const btn=document.getElementById('scroll-top');
+    if(btn)btn.style.display=msgs.scrollTop>200?'flex':'none';
+  });
+})();
+
+// ── Status dots ───────────────────────────────────────────────────
+function updateStatus(){
+  const gd=document.getElementById('groq-dot');
+  const td=document.getElementById('tavily-dot');
+  if(gd){if(GROQ_KEY){gd.classList.remove('off');}else{gd.classList.add('off');}}
+  if(td){if(TAVILY_KEY){td.classList.remove('off');}else{td.classList.add('off');}}
+}
+
+// ── Copy bubble ──────────────────────────────────────────────────
+function copyBubble(text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const t=document.createElement('div');t.className='copy-toast';
+    t.textContent='[ COPIED ]';document.body.appendChild(t);
+    setTimeout(()=>t.remove(),1500);
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');ta.value=text;
+    ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');ta.remove();
+    const t=document.createElement('div');t.className='copy-toast';
+    t.textContent='[ COPIED ]';document.body.appendChild(t);
+    setTimeout(()=>t.remove(),1500);
+  });
+}
+
+// ── Auto-retry ────────────────────────────────────────────────────
+async function callGroqWithRetry(messages, maxRetry=2){
+  let lastError='';
+  for(let i=0;i<=maxRetry;i++){
+    if(i>0){
+      setStat(`RETRY ${i}/${maxRetry}...`,'var(--g2)');
+      await new Promise(r=>setTimeout(r,1500*i));
+    }
+    const result=await callGroq(messages);
+    if(!result.error||result.error.includes('API Key'))return result;
+    lastError=result.error;
+    // ถ้า rate limit รอนานขึ้น
+    if(result.error.includes('เร็วเกินไป'))await new Promise(r=>setTimeout(r,2000));
+  }
+  return{error:lastError};
+}
+
+// ── Boot & Init ───────────────────────────────────────────────────
+if(GROQ_KEY) startApp(false);
+</script>
+</body>
+</html>
