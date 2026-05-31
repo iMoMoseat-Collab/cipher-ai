@@ -196,10 +196,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 ─────────────────────</div>
   <div id="setup-name">CIPHER</div>
   <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
-  <div id="setup-desc">ใส่ Gemini API Key เพื่อเปิดใช้งานค่ะ<br/>ขอฟรีได้ที่ aistudio.google.com</div>
-  <input id="api-inp" type="password" placeholder="AIza··· หรือ AQ···"/>
+  <div id="setup-desc">ใส่ Groq API Key เพื่อเปิดใช้งานค่ะ<br/>ขอฟรีได้ที่ console.groq.com</div>
+  <input id="api-inp" type="password" placeholder="gsk_···"/>
   <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
-  <div id="setup-note">MODEL: gemini-2.0-flash · FREE · Google AI Studio</div>
+  <div id="setup-note">MODEL: llama-3.1-8b · FREE · Groq</div>
 </div>
 
 <!-- App -->
@@ -208,7 +208,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div id="orb" onclick="replayLast()">⬡</div>
     <div id="name-block">
       <div id="ai-name">CIPHER</div>
-      <div id="ai-sub">COGNITIVE INTELLIGENCE · GEMINI FREE</div>
+      <div id="ai-sub">COGNITIVE INTELLIGENCE · GROQ FREE</div>
       <div id="stat-row"><div id="spip"></div><span id="stat-txt">ONLINE</span></div>
     </div>
     <div id="hbtns">
@@ -235,7 +235,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <button class="ab" id="mic-btn" onclick="toggleListen()" style="display:none">🎤</button>
       <button class="ab dim" id="send-ab" onclick="sendMsg()">▶</button>
     </div>
-    <div id="footer-txt">CIPHER · GEMINI FREE · <span id="ft-voice">VOICE ON</span></div>
+    <div id="footer-txt">CIPHER · GROQ FREE · <span id="ft-voice">VOICE ON</span></div>
   </div>
 </div>
 
@@ -250,7 +250,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 'use strict';
 
 // ── Config ────────────────────────────────────────────────────────
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const SYSTEM = `คุณคือไซเฟอร์ เพื่อนสนิท AI ของคุณเอ็ม
 คุณเป็นผู้หญิง พูดไทยสบายๆ เป็นกันเอง ลงท้าย "นะคะ" หรือ "ค่ะ"
 เรียกตัวเองว่า "ไซเฟอร์" เรียกผู้ใช้ว่า "คุณเอ็ม" เสมอ
@@ -258,7 +258,7 @@ const SYSTEM = `คุณคือไซเฟอร์ เพื่อนสน
 ตอบสั้น 1-3 ประโยค กระชับ มีชีวิตชีวา`;
 
 // ── State ─────────────────────────────────────────────────────────
-let GEMINI_KEY = localStorage.getItem('cipher_gemini') || '';
+let GROQ_KEY = localStorage.getItem('cipher_groq') || '';
 let history = [];
 let speaking = false, listening = false, autoSpeak = true, lastReply = '';
 const SY = window.speechSynthesis;
@@ -423,30 +423,23 @@ function typewriter(el,text,speed=16){
 }
 
 // ── Gemini API ────────────────────────────────────────────────────
-async function callGemini(messages){
-  const contents=messages.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
-  const body={
-    system_instruction:{parts:[{text:SYSTEM}]},
-    contents:contents,
-    generationConfig:{maxOutputTokens:1024,temperature:0.8}
-  };
-  const res=await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`,{
-    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+async function callGroq(messages){
+  const msgs=[{role:'system',content:SYSTEM},...messages.map(m=>({role:m.role,content:m.content}))];
+  const res=await fetch(GROQ_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_KEY}`},
+    body:JSON.stringify({model:'llama-3.1-8b-instant',messages:msgs,max_tokens:1024,temperature:0.8})
   });
   const data=await res.json();
   if(!res.ok){
     const em=data?.error?.message||'unknown';
     const status=res.status;
-    console.error('Gemini error',status,em,data);
-    if(status===401||em.toLowerCase().includes('api key')||em.toLowerCase().includes('invalid key'))
-      return{error:'API Key ไม่ถูกต้องนะคะ กด KEY แล้วใส่ใหม่ได้เลยค่ะ'};
-    if(status===429||em.toLowerCase().includes('quota')||em.toLowerCase().includes('rate'))
-      return{error:'ส่งเร็วเกินไปหรือ quota เต็มนะคะ รอ 1 นาทีแล้วลองใหม่ค่ะ'};
-    if(status===400)
-      return{error:`Request error (400): ${em} — ลองใหม่ได้เลยค่ะ`};
+    console.error('Groq error',status,em,data);
+    if(status===401)return{error:'API Key ไม่ถูกต้องนะคะ กด KEY แล้วใส่ใหม่ได้เลยค่ะ'};
+    if(status===429)return{error:'ส่งเร็วเกินไปนิดนึงนะคะ รอแป๊บแล้วลองใหม่ค่ะ'};
     return{error:`เกิดปัญหา (${status}): ${em}`};
   }
-  const text=data?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+  const text=data?.choices?.[0]?.message?.content||'';
   return{text};
 }
 
@@ -458,7 +451,7 @@ async function sendMsg(){
   history.push({role:'user',content:t});addMsg('user',t);
   setLoad(true);
   try{
-    const result=await callGemini(history.slice(-20));
+    const result=await callGroq(history.slice(-20));
     const reply=result.error||result.text||'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
     history.push({role:'assistant',content:reply});
     addMsg('assistant',reply);lastReply=reply;speak(reply);
@@ -487,11 +480,11 @@ document.getElementById('msg-inp').addEventListener('keydown',e=>{if(e.key==='En
 function saveKey(){
   const k=document.getElementById('api-inp').value.trim();
   if(!k){alert('กรุณาใส่ API Key ค่ะ');return;}
-  unlockAudio();GEMINI_KEY=k;localStorage.setItem('cipher_gemini',k);startApp(true);
+  unlockAudio();GROQ_KEY=k;localStorage.setItem('cipher_groq',k);startApp(true);
 }
 function clearKey(){
   if(!confirm('เปลี่ยน API Key ใหม่ไหมคะ?'))return;
-  localStorage.removeItem('cipher_gemini');location.reload();
+  localStorage.removeItem('cipher_groq');location.reload();
 }
 document.getElementById('api-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();});
 
@@ -534,7 +527,7 @@ function onTap(){
 })();
 
 // ── Boot & Init ───────────────────────────────────────────────────
-if(GEMINI_KEY) startApp(false);
+if(GROQ_KEY) startApp(false);
 </script>
 </body>
 </html>
