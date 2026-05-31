@@ -23,7 +23,7 @@
 body.theme-amber{--g1:#ffb300;--g2:#ff8f00;--g3:#e65100;--dim:#3e2000;--txt3:#5d3a00;--brd:#3e2000;--brd2:#5d3a00;}
 body.theme-cyan{--g1:#00e5ff;--g2:#00b8d4;--g3:#0097a7;--dim:#002f3e;--txt3:#004d5e;--brd:#002f3e;--brd2:#004d5e;}
 body.theme-red{--g1:#ff1744;--g2:#d50000;--g3:#b71c1c;--dim:#3e0000;--txt3:#5d0000;--brd:#3e0000;--brd2:#5d0000;}
-body.theme-purple{--g1:#e040fb;--g2:#aa00ff;--g3:#7b1fa2;--dim:#2e003e;--txt3:#4a005e;--brd:#2e003e;--4a005e;}
+body.theme-purple{--g1:#e040fb;--g2:#aa00ff;--g3:#7b1fa2;--dim:#2e003e;--txt3:#4a005e;--brd:#2e003e;--brd2:#4a005e;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html{height:100%;height:-webkit-fill-available;background:var(--bg);overflow:hidden}
 body{
@@ -196,7 +196,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:32px;gap:16px;
 }
-#setup-ascii">{ CIPHER SYSTEM v2.0 ]\n─────────────────────</div>
+#setup-ascii">[ CIPHER SYSTEM v2.0 ]\n─────────────────────</div>
   <div id="setup-name">CIPHER</div>
   <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
   <div id="setup-desc">ใส่ API Keys เพื่อเปิดใช้งานค่ะ<br/>ใส่ครั้งเดียวจำตลอดนะคะ</div>
@@ -208,7 +208,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div id="setup-note">GROQ: llama-3.3-70b · TAVILY: web search · FREE</div>
 </div>
 
-<!-- App -->
 <div id="app" style="display:none;flex-direction:column;height:100dvh;min-height:-webkit-fill-available">
   <div id="header">
     <div id="orb" onclick="replayLast()">⬡</div>
@@ -224,7 +223,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     </div>
   </div>
 
-  <!-- Status bar -->
   <div id="status-bar">
     <div class="svc"><div class="sdot" id="groq-dot"></div><span>GROQ</span></div>
     <div class="svc"><div class="sdot off" id="tavily-dot"></div><span>TAVILY</span></div>
@@ -254,17 +252,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
-<!-- Tap splash -->
 <div id="tap-splash" style="display:none" onclick="onTap()">
   <div id="tap-icon">⬡</div>
   <div id="tap-title">[ TAP TO START ]</div>
   <div id="tap-sub">แตะที่ไหนก็ได้เพื่อเริ่ม</div>
 </div>
 
-<!-- Scroll to top -->
 <button id="scroll-top" onclick="scrollToTop()">▲</button>
 
-<!-- Theme panel -->
 <div id="theme-panel">
   <div style="font-size:8px;letter-spacing:2px;color:var(--txt3);margin-bottom:4px">THEME</div>
   <button class="theme-btn" onclick="setTheme('green')">🟢 GREEN</button>
@@ -282,7 +277,7 @@ const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
 const TAVILY_URL = 'https://api.tavily.com/search';
 const WORKER_URL = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
 const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI ของคุณเอ็ม
-ตอบภาษาไทยอย่างสุภาพ เรียบร้อย และเป็นทางการเสมอ ลงท้ายด้วยครับ/หากมีข้อสงสัยเพิ่มเติมสอบถามได้ครับ ยกลงท้ายด้วยครับ/หากมีข้อสงสัยเพิ่มเติมสอบถามได้ครับ ยกเว้นถ้าถามเป็นอังกฤษให้ตอบอังกฤษ
+ตอบภาษาไทยอย่างสุภาพ เรียบร้อย และเป็นทางการเสมอ ลงท้ายด้วยครับ/หากมีข้อสงสัยเพิ่มเติมสอบถามได้ครับ ยกเว้นถ้าถามเป็นอังกฤษให้ตอบอังกฤษ
 ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
 ถ้ามีข้อมูลจากการค้นหาเว็บ ให้ใช้ข้อมูลนั้นเท่านั้น ห้ามใช้ความรู้เดิม
 ถ้าไม่รู้ให้บอกตรงๆ อย่างสุภาพและเป็นทางการ ห้ามคาดเดาข้อมูล เรียกผู้ใช้ว่าคุณเอ็มทุกครั้ง`;
@@ -454,19 +449,29 @@ async function searchTavily(query){
     const r=await fetch(TAVILY_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({api_key:TAVILY_KEY,query:query,search_depth:'basic',max_results:3})
+      body:JSON.stringify({
+        api_key:TAVILY_KEY,
+        query:query,
+        search_depth:'advanced',
+        max_results:5,
+        include_answer:true
+      })
     });
     updateDot('tavily',false);
     if(!r.ok)return '';
     const d=await r.json();
-    if(d&&d.results)return d.results.map(x=>`Source: ${x.title}\nContent: ${x.content}`).join('\n\n');
+    let context = d.answer ? `[บทสรุปจากเว็บ]: ${d.answer}\n\n` : '';
+    if(d&&d.results){
+      context += d.results.map(x=>`Source: ${x.title}\nContent: ${x.content}`).join('\n\n');
+    }
+    return context;
   }catch(e){updateDot('tavily',false);console.error(e);}
   return '';
 }
 
 // ── Groq API ──────────────────────────────────────────────────────
 async function callGroq(msgs){
-  if(!GROQ_KEY)return 'กรุณาใส่ GROQ API KEY ก่อนนะคะ';
+  if(!GROQ_KEY)return 'กรุณาใส่ GROQ API KEY ก่อนนะครับ';
   try{
     updateDot('groq',true);
     const r=await fetch(WORKER_URL,{
@@ -506,14 +511,21 @@ async function sendMsg(){
   setLoad(true);
   let webContext='';
   const lower=val.toLowerCase();
-  const needWeb=/(เช็ค|ตรวจ|ราคา|ข่าว|สภาพอากาศ|พยากรณ์|หุ้น|crypto|btc|ทองคำ|วันนี้|ล่าสุด|อัปเดต|update|เว็บ|ค้นหา)/i.test(lower);
+  
+  // ปรับเงื่อนไขการค้นหาเว็บให้ฉลาดขึ้น ครอบคลุมคีย์เวิร์ดคำถามทั่วไป
+  const needWeb=/(เช็ค|ตรวจ|ราคา|ข่าว|สภาพอากาศ|พยากรณ์|หุ้น|crypto|btc|ทองคำ|วันนี้|ล่าสุด|อัปเดต|update|เว็บ|ค้นหา|ใคร|คืออะไร|ที่ไหน|เมื่อไหร่|ทำไม|สถิติ|แนวโน้ม|รีวิว|เที่ยว|สถานการณ์)/i.test(lower) || lower.includes('?');
+  
   if(needWeb&&TAVILY_KEY)webContext=await searchTavily(val);
   
   const activeMsgs=[{role:'system',content:SYSTEM}];
   history.forEach(h=>activeMsgs.push(h));
   
+  // บังคับ Prompt ให้ AI อ่านข้อมูลเว็บแล้วตอบให้เนียนขึ้น
   if(webContext){
-    activeMsgs.push({role:'user',content:`[ข้อมูลจริงจากเว็บล่าสุดเพื่อใช้ตอบคำถามด้านล่างนี้]\n${webContext}\n\nคำถามของคุณเอ็ม: ${val}`});
+    activeMsgs.push({
+      role:'user',
+      content:`[ข้อมูลอัปเดตล่าสุดจากการค้นหาเว็บ]\n${webContext}\n\nคำสั่ง/คำถามของคุณเอ็ม: ${val}\n\nข้อกำหนดการตอบ: โปรดใช้ข้อมูลอัปเดตด้านบนเพื่อตอบคำถามอย่างเป็นธรรมชาติและกระชับที่สุด หากข้อมูลข้างต้นไม่เพียงพอ ให้ใช้ความรู้เดิมของคุณอธิบายเสริมอย่างสุภาพ`
+    });
   }else{
     activeMsgs.push({role:'user',content:val});
   }
@@ -537,7 +549,7 @@ document.getElementById('msg-inp').addEventListener('input',resize);
 document.getElementById('msg-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
 
 function clearChat(){if(confirm('คุณต้องการลบประวัติการสนทนาทั้งหมดใช่หรือไม่ครับ?')){history=[];localStorage.removeItem('cipher_history_v2');document.querySelectorAll('.msg').forEach(m=>m.remove());stopSpeak();const h=new Date().getHours();const gt=h<12?'เช้านี้':h<17?'ตอนบ่าย':h<21?'ตอนเย็น':'ตอนดึก';const g=`ระบบดำเนินการล้างประวัติการสนทนาเสร็จสิ้นแล้วครับ สวัสดี${gt}ครับคุณเอ็ม มีสิ่งใดให้ผมช่วยเหลือเพิ่มเติมไหมครับ`;history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;speak(g);}}
-function toggleVoice(){autoSpeak=!autoSpeak;if(!autoSpeak)stopSpeak();document.getElementById('vbtn').textContent=autoSpeak?'🔊':' odorless ';document.getElementById('vbtn').classList.toggle('off',!autoSpeak);document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';}
+function toggleVoice(){autoSpeak=!autoSpeak;if(!autoSpeak)stopSpeak();document.getElementById('vbtn').textContent=autoSpeak?'🔊':'🔇';document.getElementById('vbtn').classList.toggle('off',!autoSpeak);document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';}
 
 function copyBubble(t){
   if(navigator.clipboard&&navigator.clipboard.writeText){
