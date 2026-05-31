@@ -323,6 +323,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 // ── Config ────────────────────────────────────────────────────────
 const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
 const TAVILY_URL = 'https://api.tavily.com/search';
+const WORKER_URL = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
 const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI ของคุณเอ็ม
 พูดไทยแบบทางการ กระชับ ตรงประเด็น ไม่ใช้คำลงท้าย เช่น ค่ะ ครับ นะคะ
 ตอบสั้น ได้ใจความ เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
@@ -524,9 +525,9 @@ function typewriter(el,text,speed=16){
 async function searchTavily(query){
   if(!TAVILY_KEY) return null;
   try{
-    const res=await fetch(TAVILY_URL,{
+    const res=await fetch(WORKER_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${TAVILY_KEY}`},
+      headers:{'Content-Type':'application/json','x-tavily-key':TAVILY_KEY,'x-service':'tavily'},
       body:JSON.stringify({
         query,
         max_results:5,
@@ -578,9 +579,9 @@ function needsSearch(text){
 
 async function callGroq(messages){
   const msgs=[{role:'system',content:SYSTEM},...messages.map(m=>({role:m.role,content:m.content}))];
-  const res=await fetch(GROQ_URL,{
+  const res=await fetch(WORKER_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_KEY}`},
+    headers:{'Content-Type':'application/json','x-api-key':GROQ_KEY,'x-service':'groq'},
     body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,max_tokens:1024,temperature:0.8})
   });
   const data=await res.json();
