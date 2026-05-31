@@ -605,20 +605,26 @@ async function sendMsg(){
   history.push({role:'user',content:t});addMsg('user',t);
   setLoad(true);
   try{
-    // ค้นหาเว็บก่อนถ้าจำเป็น
+    // ค้นหาเว็บทุกครั้งที่จำเป็น ไม่สนใจ history
     let webContext='';
     if(TAVILY_KEY && needsSearch(t)){
       setStat('SEARCHING...','var(--g2)');
       const searchResult=await searchTavily(t);
-      if(searchResult) webContext=`\n\n[ข้อมูลจากเว็บ]\n${searchResult}\n[/ข้อมูลจากเว็บ]`;
+      if(searchResult) webContext=searchResult;
     }
-    // ใส่ web context เข้าไปใน message ล่าสุด
-    const msgs=history.slice(-20).map((m,i,arr)=>{
-      if(i===arr.length-1&&webContext){
-        return{...m,content:m.content+`\n\n---\nข้อมูลจากการค้นหาเว็บล่าสุด (ใช้ข้อมูลนี้ตอบ อย่าใช้ความรู้เดิม):${webContext}`};
-      }
-      return m;
-    });
+
+    // สร้าง messages - ถ้ามี webContext ให้ inject เข้าไปใน system message แทน
+    let msgs=history.slice(-20).map(m=>({role:m.role,content:m.content}));
+    if(webContext){
+      // เพิ่ม system message บอก Groq ให้ใช้ข้อมูลสดเท่านั้น
+      msgs=[
+        {role:'user',content:`[ข้อมูลจากการค้นหาเว็บล่าสุด - ใช้ข้อมูลนี้ตอบเท่านั้น ห้ามใช้ความรู้เดิม]
+${webContext}
+[/ข้อมูลจากเว็บ]
+
+คำถาม: ${t}`}
+      ];
+    }
     setStat('PROCESSING','');
     const result=await callGroqWithRetry(msgs);
     const reply=result.error||result.text||'อ้าว ประมวลผลไม่ได้แป๊บนึงนะคะ ลองใหม่ได้เลยค่ะ';
