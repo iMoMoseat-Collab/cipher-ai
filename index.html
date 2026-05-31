@@ -1089,7 +1089,7 @@ document.getElementById('msg-inp').addEventListener('keydown',e=>{
 // ── Startup ───────────────────────────────────────────────────────
 function saveKey(){
   const k=document.getElementById('api-inp').value.trim();
-  if(!k.startsWith('sk-')){alert('[ ERROR ] API Key ต้องขึ้นต้นด้วย sk-');return;}
+  
   unlockAudio();
   API_KEY=k;localStorage.setItem('cipher_key',k);
   startApp(true);
@@ -1098,7 +1098,7 @@ function toggleAI(){
   if(!useGemini && !GEMINI_KEY){
     // ขอ Gemini key ก่อน
     const k=prompt('ใส่ Gemini API Key (AIza...)\nขอฟรีได้ที่ aistudio.google.com');
-    if(!k||!k.startsWith('AIza')){alert('Key ไม่ถูกต้องค่ะ ต้องขึ้นต้นด้วย AIza');return;}
+    
     GEMINI_KEY=k;localStorage.setItem('cipher_gemini',k);
   }
   useGemini=!useGemini;
