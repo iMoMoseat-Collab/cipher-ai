@@ -633,7 +633,11 @@ async function sendMsg(){
   
   if(needWeb&&TAVILY_KEY){setStat('SEARCHING...','var(--g2)');webContext=await searchTavily(val);}
   
-  const activeMsgs=[{role:'system',content:SYSTEM}];
+  const now=new Date();
+  const dateStr=`${now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} เวลา ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. (ปี ${now.getFullYear()})`;
+  const activeMsgs=[{role:'system',content:SYSTEM+`\n\nวันและเวลาปัจจุบัน: ${dateStr}`}];
+
+  
   history.forEach(h=>activeMsgs.push(h));
   if(webContext) activeMsgs.push({role:'user',content:`[ข้อมูลค้นหาเว็บ]\n${webContext}\nคำถามของคุณเอ็ม: ${val}\nข้อกำหนด: ใช้ข้อมูลอัปเดตตอบให้เป็นธรรมชาติและกระชับ`});
   else activeMsgs.push({role:'user',content:val});
