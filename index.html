@@ -336,7 +336,7 @@ let TAVILY_KEY = localStorage.getItem('cipher_tavily') || '';
 let history = [];
 let speaking = false, listening = false, autoSpeak = true, lastReply = '';
 const SY = window.speechSynthesis;
-let voiceObj = null, voiceEN = null, audioUnlocked = false;
+let voiceObj = null, voiceEN = null, voiceZH = null, audioUnlocked = false;
 
 // ── Offline KB ────────────────────────────────────────────────────
 const OFFL = [
@@ -405,11 +405,42 @@ function loadVoices(){
     ||v.find(x=>/female|woman/i.test(x.name)&&x.lang.startsWith('en'))
     ||v.find(x=>x.lang.startsWith('en'))
     ||null;
+  voiceZH=
+    v.find(x=>x.lang==='zh-TW')
+    ||v.find(x=>x.lang==='zh-CN')
+    ||v.find(x=>x.lang.startsWith('zh'))
+    ||null;
 }
 if(SY){loadVoices();SY.onvoiceschanged=loadVoices;setTimeout(loadVoices,600);}
 
-function cleanText(t){return t.replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27FF}]/gu,'').replace(/[*_`#>~|]/g,'').replace(/https?:\/\/\S+/g,'').replace(/\s+/g,' ').trim();}
-function detectLang(t){const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length,en=(t.match(/[a-zA-Z]/g)||[]).length;return(th/(th+en+0.1))>=0.3?'th':'en';}
+function cleanText(t){
+  return t
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
+    .replace(/[\u{2600}-\u{27FF}]/gu,'')
+    .replace(/[*_`#>~|\[\]{}]/g,'')
+    .replace(/https?:\/\/\S+/g,'')
+    .replace(/···+/g,'').replace(/--+/g,' ')
+    .replace(/\bBTC\b/g,'บิตคอยน์')
+    .replace(/\bETH\b/g,'อีเธอเรียม')
+    .replace(/\bAI\b/g,'เอไอ')
+    .replace(/\bAPI\b/g,'เอพีไอ')
+    .replace(/\bUI\b/g,'ยูไอ')
+    .replace(/\bGPS\b/g,'จีพีเอส')
+    .replace(/\bWiFi\b|\bwifi\b/g,'ไวไฟ')
+    .replace(/\bOK\b/gi,'โอเค')
+    .replace(/(\d+)%/g,'$1 เปอร์เซ็นต์')
+    .replace(/\$(\d)/g,'$1 ดอลลาร์')
+    .replace(/\s+/g,' ').trim();
+}
+function detectLang(t){
+  const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length;
+  const zh=(t.match(/[\u4E00-\u9FFF\u3400-\u4DBF]/g)||[]).length;
+  const en=(t.match(/[a-zA-Z]/g)||[]).length;
+  const total=th+zh+en+0.1;
+  if(zh/total>=0.3)return'zh';
+  if(th/total>=0.3)return'th';
+  return'en';
+}
 
 let keepAlive=null;
 function startKA(){stopKA();keepAlive=setInterval(()=>{if(SY&&speaking){SY.pause();SY.resume();}},9000);}
@@ -420,7 +451,7 @@ function speak(text){
   unlockAudio();SY.cancel();
   setTimeout(()=>{
     const c=cleanText(text);if(!c)return;
-    const parts=c.split(/(?<=[.!?ๆ])\s+|(?<=ค่ะ|นะคะ|คะ)\s+/u).filter(s=>s.trim());
+    const parts=c.split(/(?<=[.!?ๆ。！？])\s+|(?<=ค่ะ|นะคะ|คะ)\s+/u).filter(s=>s.trim());
     const chunks=[];let buf='',bufLang='';
     for(const s of parts){const lang=detectLang(s);if(lang!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}bufLang=lang;buf+=s+' ';}
     if(buf.trim())chunks.push({t:buf.trim(),l:bufLang||'th'});
@@ -430,8 +461,11 @@ function speak(text){
       if(i>=chunks.length){setSp(false);stopKA();return;}
       const ch=chunks[i++];const isEN=ch.l==='en';
       const u=new SpeechSynthesisUtterance(ch.t);
-      u.voice=isEN?(voiceEN||voiceObj):voiceObj;u.lang=isEN?'en-GB':'th-TH';
-      u.rate=isEN?1.1:1.15;u.pitch=1.05;u.volume=1;
+      const isZH=ch.l==='zh';
+      if(isZH){u.voice=voiceZH||voiceObj;u.lang='zh-TW';u.rate=1.2;u.pitch=1.0;}
+      else if(isEN){u.voice=voiceEN||voiceObj;u.lang='en-GB';u.rate=1.15;u.pitch=1.05;}
+      else{u.voice=voiceObj;u.lang='th-TH';u.rate=1.2;u.pitch=1.0;}
+      u.volume=1;
       if(i===1)u.onstart=()=>{setSp(true);startKA();};
       u.onend=nxt;u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
       SY.speak(u);
@@ -686,9 +720,7 @@ async function sendMsg(){
   
   if(needWeb&&TAVILY_KEY){setStat('SEARCHING...','var(--g2)');webContext=await searchTavily(val);}
   
-  const now=new Date();
-  const dateStr=`${now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} เวลา ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. (ปี ${now.getFullYear()})`;
-  const activeMsgs=[{role:'system',content:SYSTEM+`\n\nวันและเวลาปัจจุบัน: ${dateStr}`}];
+  const activeMsgs=[{role:'system',content:getSystemWithContext()}];
 
   
   history.forEach(h=>activeMsgs.push(h));
