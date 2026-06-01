@@ -506,8 +506,10 @@ function addMsg(role,content){
         sb.style.cssText='color:var(--g2);border-color:var(--brd2);font-size:8px;';
         sb.textContent=s.label;
         sb.onclick=()=>{
-          document.getElementById('msg-inp').value=s.prompt;
-          resize();sendMsg();
+          setTimeout(()=>{
+            document.getElementById('msg-inp').value=s.prompt;
+            resize();sendMsg();
+          },300);
         };
         sw.appendChild(sb);
       });
@@ -662,15 +664,25 @@ function enrichMessage(text){
 }
 
 function extractPlaces(text){
-  // ดึงชื่อสถานที่จากข้อความ
-  const patterns=[
-    /(?:ที่|ใกล้|บริเวณ|แถว|ย่าน)\s+([ก-๙a-zA-Z][ก-๙a-zA-Z\s]{2,20})/g,
-    /([ก-๙a-zA-Z][ก-๙a-zA-Z\s]{2,15})(?:\s+(?:จังหวัด|อำเภอ|เขต|แขวง|ถนน))/g,
-  ];
   const places=new Set();
+  const patterns=[
+    // สถานที่ขึ้นต้นด้วยคำนำหน้า
+    /(?:โรงพยาบาล|รพ\.?|วัด|ห้าง|ร้าน|โรงเรียน|มหาวิทยาลัย|สนามบิน|ท่าอากาศยาน|ศาล|สถานี|ตลาด|ห้องสมุด|พิพิธภัณฑ์|สวนสาธารณะ|อุทยาน|เขาหรือดอย|ชายหาด|หาด|เกาะ|น้ำตก|ถ้ำ)[ก-๙a-zA-Z\s]{1,25}/g,
+    // ชื่อ + จังหวัด/อำเภอ
+    /[ก-๙a-zA-Z][ก-๙a-zA-Z\s]{1,15}(?:จังหวัด|อำเภอ|เขต|แขวง|ตำบล)/g,
+    // ที่/ใกล้/แถว/ย่าน + ชื่อสถานที่
+    /(?:ที่|ใกล้|บริเวณ|แถว|ย่าน|ใน|จาก|ไป)\s+([ก-๙][ก-๙\s]{2,20})/g,
+    // ชื่อสถานที่ท่องเที่ยวที่รู้จักกัน
+    /(?:ดอย|เขา|หาด|เกาะ|น้ำตก|อ่าว|แหลม|ถ้ำ)[ก-๙a-zA-Z\s]{1,20}/g,
+    // ย่าน/ถนน
+    /(?:ถนน|ซอย|ย่าน)[ก-๙a-zA-Z\s]{1,20}/g,
+  ];
   for(const p of patterns){
-    let m;
-    while((m=p.exec(text))!==null) places.add(m[1].trim());
+    let m;p.lastIndex=0;
+    while((m=p.exec(text))!==null){
+      const place=(m[1]||m[0]).trim().replace(/\s+/g,' ').replace(/[.,:;!?]+$/,'');
+      if(place.length>2&&place.length<30) places.add(place);
+    }
   }
   return [...places].slice(0,3);
 }
