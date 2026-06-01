@@ -621,14 +621,21 @@ function initLocation(){
   navigator.geolocation.getCurrentPosition(async pos=>{
     userLat=pos.coords.latitude.toFixed(4);
     userLon=pos.coords.longitude.toFixed(4);
+    // ลอง Nominatim ก่อน ถ้าไม่ได้ใช้ lat/lon เลย
     try{
-      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLon}&format=json&accept-language=th`);
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLon}&format=json&accept-language=th`,{mode:'cors'});
       const d=await r.json();
-      userCity=d.address?.city||d.address?.town||d.address?.suburb||d.address?.county||'';
+      const city=d.address?.city||d.address?.town||d.address?.suburb||d.address?.county||'';
       const country=d.address?.country||'';
-      userCity=userCity?`${userCity}, ${country}`:country;
-    }catch(e){userCity=`${userLat}, ${userLon}`;}
-  },()=>{},{timeout:8000,maximumAge:300000});
+      userCity=city?`${city}, ${country}`:country||`${userLat}, ${userLon}`;
+    }catch(e){
+      // Nominatim ไม่ได้ ใช้ lat/lon แทน
+      userCity=`${userLat}, ${userLon}`;
+    }
+    console.log('[CIPHER] Location:', userCity);
+  },(err)=>{
+    console.log('[CIPHER] Location denied:', err.message);
+  },{timeout:10000,maximumAge:300000,enableHighAccuracy:false});
 }
 
 function getSystemWithContext(){
@@ -708,10 +715,7 @@ async function sendMsg(){
   
   if(needWeb&&TAVILY_KEY){setStat('SEARCHING...','var(--g2)');webContext=await searchTavily(val);}
   
-  const now=new Date();
-  const dateStr=`${now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} เวลา ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. (ปี ${now.getFullYear()})`;
-  const activeMsgs=[{role:'system',content:SYSTEM+`\n\nวันและเวลาปัจจุบัน: ${dateStr}`}];
-  
+  const activeMsgs=[{role:'system',content:getSystemWithContext()}];
   history.forEach(h=>activeMsgs.push(h));
   if(webContext) activeMsgs.push({role:'user',content:`[ข้อมูลค้นหาเว็บ]\n${webContext}\nคำถามของคุณเอ็ม: ${val}\nข้อกำหนด: ใช้ข้อมูลอัปเดตตอบให้เป็นธรรมชาติและกระชับ`});
   else activeMsgs.push({role:'user',content:val});
