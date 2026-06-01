@@ -497,24 +497,7 @@ function addMsg(role,content){
       });
       bd.appendChild(mw);
     }
-    // Context shortcuts
-    const shortcuts=getContextShortcuts(content);
-    if(shortcuts.length>0){
-      const sw=document.createElement('div');sw.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;';
-      shortcuts.forEach(s=>{
-        const sb=document.createElement('button');sb.className='rbtn';
-        sb.style.cssText='color:var(--g2);border-color:var(--brd2);font-size:8px;';
-        sb.textContent=s.label;
-        sb.onclick=()=>{
-          setTimeout(()=>{
-            document.getElementById('msg-inp').value=s.prompt;
-            resize();sendMsg();
-          },300);
-        };
-        sw.appendChild(sb);
-      });
-      bd.appendChild(sw);
-    }
+
     // Replay button
     if(SY){const rb=document.createElement('button');rb.className='rbtn';rb.textContent='[ REPLAY ]';rb.onclick=()=>{unlockAudio();speak(content);};bd.appendChild(rb);}
   }
@@ -687,30 +670,6 @@ function extractPlaces(text){
   return [...places].slice(0,3);
 }
 
-function getContextShortcuts(text){
-  const lower=text.toLowerCase();
-  const shortcuts=[];
-  // Code shortcuts
-  if(/```|def |function |class |import |error|bug|syntax/i.test(text)){
-    shortcuts.push({label:'🐛 Debug',prompt:'debug โค้ดด้านบนให้หน่อย'});
-    shortcuts.push({label:'📝 Review',prompt:'review โค้ดด้านบนให้หน่อย'});
-  }
-  // Price shortcuts
-  if(/ราคา|price|บาท|usd|\$|฿/i.test(text)){
-    shortcuts.push({label:'📊 ดูกราฟ',prompt:'ค้นหากราฟราคาย้อนหลัง 7 วัน'});
-    shortcuts.push({label:'🔄 อัปเดต',prompt:'ค้นหาราคาล่าสุดตอนนี้'});
-  }
-  // Weather shortcuts
-  if(/อากาศ|weather|ฝน|ร้อน|หนาว/i.test(text)){
-    shortcuts.push({label:'🌤️ พรุ่งนี้',prompt:'พยากรณ์อากาศพรุ่งนี้'});
-    shortcuts.push({label:'📅 7 วัน',prompt:'พยากรณ์อากาศ 7 วันข้างหน้า'});
-  }
-  // News shortcuts
-  if(/ข่าว|news/i.test(text)){
-    shortcuts.push({label:'🔄 อัปเดต',prompt:'ค้นหาข่าวล่าสุดเพิ่มเติม'});
-  }
-  return shortcuts;
-}
 
 // ── Core Operations ───────────────────────────────────────────────
 async function sendMsg(){
@@ -727,7 +686,11 @@ async function sendMsg(){
   
   if(needWeb&&TAVILY_KEY){setStat('SEARCHING...','var(--g2)');webContext=await searchTavily(val);}
   
-  const activeMsgs=[{role:'system',content:getSystemWithContext()}];
+  const now=new Date();
+  const dateStr=`${now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} เวลา ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น. (ปี ${now.getFullYear()})`;
+  const activeMsgs=[{role:'system',content:SYSTEM+`\n\nวันและเวลาปัจจุบัน: ${dateStr}`}];
+
+  
   history.forEach(h=>activeMsgs.push(h));
   if(webContext) activeMsgs.push({role:'user',content:`[ข้อมูลค้นหาเว็บ]\n${webContext}\nคำถามของคุณเอ็ม: ${val}\nข้อกำหนด: ใช้ข้อมูลอัปเดตตอบให้เป็นธรรมชาติและกระชับ`});
   else activeMsgs.push({role:'user',content:val});
