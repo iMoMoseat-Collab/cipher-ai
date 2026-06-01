@@ -324,10 +324,11 @@ body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-in
 // ── Config ────────────────────────────────────────────────────────
 const WORKER_URL = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
 const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI ของคุณเอ็ม
-คุณเป็นผู้หญิง พูดจาไพเราะ มีหางเสียง (ลงท้ายด้วย "คะ" หรือ "ค่ะ") 
-ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
+คุณเป็นผู้หญิง พูดจาไพเราะ ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง
+ลงท้ายด้วย "ค่ะ" หรือ "คะ" แต่ไม่ต้องทุกประโยค
+เรียก "คุณเอ็ม" เฉพาะตอนทักทาย หรือตอนที่เหมาะสมเท่านั้น ไม่ต้องเรียกทุกประโยค
 ถ้ามีข้อมูลจากการค้นหาเว็บ ให้ใช้ข้อมูลนั้นเท่านั้น ห้ามใช้ความรู้เดิม
-ถ้าไม่รู้ให้บอกตรงๆ อย่าเดา เรียกผู้ใช้ว่าคุณเอ็ม
+ถ้าไม่รู้ให้บอกตรงๆ อย่าเดา
 รองรับภาษาไทย อังกฤษ และจีน ถ้าถามจีนตอบจีน`;
 
 // ── State ─────────────────────────────────────────────────────────
@@ -412,7 +413,38 @@ function loadVoices(){
 }
 if(SY){loadVoices();SY.onvoiceschanged=loadVoices;setTimeout(loadVoices,600);}
 
-function cleanText(t){return t.replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27FF}]/gu,'').replace(/[*_`#>~|]/g,'').replace(/https?:\/\/\S+/g,'').replace(/\s+/g,' ').trim();}
+function cleanText(t){
+  return t
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
+    .replace(/[\u{2600}-\u{27FF}]/gu,'')
+    .replace(/[*_`#>~|\[\]{}]/g,'')
+    .replace(/https?:\/\/\S+/g,'')
+    .replace(/···+/g,'')
+    .replace(/--+/g,' ')
+    // แปลงคำอังกฤษที่อ่านไม่ออก
+    .replace(/\bBTC\b/g,'บิตคอยน์')
+    .replace(/\bETH\b/g,'อีเธอร์เรียม')
+    .replace(/\bAI\b/g,'เอไอ')
+    .replace(/\bAPI\b/g,'เอพีไอ')
+    .replace(/\bUI\b/g,'ยูไอ')
+    .replace(/\bURL\b/g,'ยูอาร์แอล')
+    .replace(/\bGPS\b/g,'จีพีเอส')
+    .replace(/\bSMS\b/g,'เอสเอ็มเอส')
+    .replace(/\bPDF\b/g,'พีดีเอฟ')
+    .replace(/\bGPU\b/g,'จีพียู')
+    .replace(/\bCPU\b/g,'ซีพียู')
+    .replace(/\bRAM\b/g,'แรม')
+    .replace(/\bSSD\b/g,'เอสเอสดี')
+    .replace(/\bVPN\b/g,'วีพีเอ็น')
+    .replace(/\bWifi\b|\bWiFi\b|\bwifi\b/g,'ไวไฟ')
+    .replace(/\bOK\b|\bokay\b/gi,'โอเค')
+    // แปลงสัญลักษณ์
+    .replace(/(\d+)%/g,'$1 เปอร์เซ็นต์')
+    .replace(/\$(\d)/g,'$1 ดอลลาร์')
+    .replace(/\+/g,'บวก')
+    .replace(/=/g,'เท่ากับ')
+    .replace(/\s+/g,' ').trim();
+}
 function detectLang(t){
   const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length;
   const zh=(t.match(/[\u4E00-\u9FFF\u3400-\u4DBF]/g)||[]).length;
@@ -432,7 +464,7 @@ function speak(text){
   unlockAudio();SY.cancel();
   setTimeout(()=>{
     const c=cleanText(text);if(!c)return;
-    const parts=c.split(/(?<=[.!?ๆ。！？])\s+|(?<=ค่ะ|นะคะ|คะ)\s+/u).filter(s=>s.trim());
+    const parts=c.split(/(?<=[.!?ๆ。！？])\s+|(?<=ค่ะ|นะคะ|คะ|ครับ|นะ|แล้ว)\s+/u).filter(s=>s.trim());
     const chunks=[];let buf='',bufLang='';
     for(const s of parts){const lang=detectLang(s);if(lang!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}bufLang=lang;buf+=s+' ';}
     if(buf.trim())chunks.push({t:buf.trim(),l:bufLang||'th'});
@@ -443,9 +475,9 @@ function speak(text){
       const ch=chunks[i++];const isEN=ch.l==='en';
       const u=new SpeechSynthesisUtterance(ch.t);
       const isZH=ch.l==='zh';
-      if(isZH){u.voice=voiceZH||voiceObj;u.lang='zh-TW';u.rate=1.0;u.pitch=1.0;}
-      else if(isEN){u.voice=voiceEN||voiceObj;u.lang='en-GB';u.rate=1.1;u.pitch=1.05;}
-      else{u.voice=voiceObj;u.lang='th-TH';u.rate=1.15;u.pitch=1.05;}
+      if(isZH){u.voice=voiceZH||voiceObj;u.lang='zh-TW';u.rate=0.95;u.pitch=1.0;}
+      else if(isEN){u.voice=voiceEN||voiceObj;u.lang='en-GB';u.rate=1.0;u.pitch=1.0;}
+      else{u.voice=voiceObj;u.lang='th-TH';u.rate=0.95;u.pitch=1.0;}
       u.volume=1;
       if(i===1)u.onstart=()=>{setSp(true);startKA();};
       u.onend=nxt;u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
