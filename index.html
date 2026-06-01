@@ -477,7 +477,7 @@ function speak(text){
       const isZH=ch.l==='zh';
       if(isZH){u.voice=voiceZH||voiceObj;u.lang='zh-TW';u.rate=0.95;u.pitch=1.0;}
       else if(isEN){u.voice=voiceEN||voiceObj;u.lang='en-GB';u.rate=1.0;u.pitch=1.0;}
-      else{u.voice=voiceObj;u.lang='th-TH';u.rate=0.95;u.pitch=1.0;}
+      else{u.voice=voiceObj;u.lang='th-TH';u.rate=1.0;u.pitch=1.0;}
       u.volume=1;
       if(i===1)u.onstart=()=>{setSp(true);startKA();};
       u.onend=nxt;u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
