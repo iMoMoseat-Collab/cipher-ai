@@ -324,10 +324,13 @@ body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-in
 // ── Config ────────────────────────────────────────────────────────
 const WORKER_URL = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
 const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI ของคุณเอ็ม
-คุณเป็นผู้หญิง พูดจาไพเราะ มีหางเสียง (ลงท้ายด้วย "คะ" หรือ "ค่ะ") 
-ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
+คุณเป็นผู้หญิง พูดไทยสุภาพ ฉลาด ตรงประเด็น
+ตอบกระชับ ได้ใจความ เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
+ใช้คำลงท้าย "ค่ะ" หรือ "คะ" เฉพาะตอนที่เหมาะสมเท่านั้น ไม่ต้องทุกประโยค
+เรียก "คุณเอ็ม" เฉพาะตอนทักทายหรือเน้นย้ำ ไม่ต้องทุกประโยค
 ถ้ามีข้อมูลจากการค้นหาเว็บ ให้ใช้ข้อมูลนั้นเท่านั้น ห้ามใช้ความรู้เดิม
-ถ้าไม่รู้ให้บอกตรงๆ อย่าเดา เรียกผู้ใช้ว่าคุณเอ็ม`;
+ถ้าไม่รู้ให้บอกตรงๆ อย่าเดา
+รองรับภาษาไทย อังกฤษ และจีน ถ้าถามจีนตอบจีน`;
 
 // ── State ─────────────────────────────────────────────────────────
 let GROQ_KEY   = localStorage.getItem('cipher_groq')   || '';
@@ -515,24 +518,6 @@ function addMsg(role,content){
   bd.appendChild(lb);bd.appendChild(bb);
 
   if(!isU){
-    // Maps buttons
-    const places=extractPlaces(content);
-    if(places.length>0){
-      const mw=document.createElement('div');mw.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;';
-      places.forEach(p=>{
-        const mb=document.createElement('button');mb.className='rbtn';
-        mb.style.cssText='color:var(--g1);border-color:var(--brd2);font-size:8px;';
-        mb.textContent=`🗺️ ${p}`;
-        mb.onclick=()=>{
-          const q=encodeURIComponent(p+(userCity?` ${userCity}`:''));
-          window.open(`https://maps.google.com/?q=${q}`,'_blank');
-        };
-        mw.appendChild(mb);
-      });
-      bd.appendChild(mw);
-    }
-
-    // Replay button
     if(SY){const rb=document.createElement('button');rb.className='rbtn';rb.textContent='[ REPLAY ]';rb.onclick=()=>{unlockAudio();speak(content);};bd.appendChild(rb);}
   }
   d.appendChild(av);d.appendChild(bd);
@@ -540,16 +525,7 @@ function addMsg(role,content){
 
   if(!isU){
     setTimeout(()=>{
-      // typewriter with phone/url enrichment
-      const enriched=enrichMessage(content);
-      if(enriched!==content){
-        // has links - use innerHTML after typewriter
-        typewriter(tx,content,16,()=>{
-          tx.innerHTML=enrichMessage(tx.textContent);
-        });
-      } else {
-        typewriter(tx,content);
-      }
+      typewriter(tx,content);
       scrollToBottom();
     },50);
   } else {
@@ -670,39 +646,7 @@ function getSystemWithContext(){
 }
 
 // ── Phone & Maps Detection ────────────────────────────────────────
-function enrichMessage(text){
-  // แปลงเบอร์โทรเป็น link
-  text=text.replace(/(0[0-9]{1,2}[-\s]?[0-9]{3,4}[-\s]?[0-9]{3,4})/g,
-    '<a href="tel:$1" style="color:var(--g1);text-decoration:underline;cursor:pointer">📞 $1</a>');
-  // แปลง URL เป็น link
-  text=text.replace(/(https?:\/\/[^\s]+)/g,
-    '<a href="$1" target="_blank" style="color:var(--g1);text-decoration:underline">$1</a>');
-  return text;
-}
 
-function extractPlaces(text){
-  const places=new Set();
-  const patterns=[
-    // สถานที่ขึ้นต้นด้วยคำนำหน้า
-    /(?:โรงพยาบาล|รพ\.?|วัด|ห้าง|ร้าน|โรงเรียน|มหาวิทยาลัย|สนามบิน|ท่าอากาศยาน|ศาล|สถานี|ตลาด|ห้องสมุด|พิพิธภัณฑ์|สวนสาธารณะ|อุทยาน|เขาหรือดอย|ชายหาด|หาด|เกาะ|น้ำตก|ถ้ำ)[ก-๙a-zA-Z\s]{1,25}/g,
-    // ชื่อ + จังหวัด/อำเภอ
-    /[ก-๙a-zA-Z][ก-๙a-zA-Z\s]{1,15}(?:จังหวัด|อำเภอ|เขต|แขวง|ตำบล)/g,
-    // ที่/ใกล้/แถว/ย่าน + ชื่อสถานที่
-    /(?:ที่|ใกล้|บริเวณ|แถว|ย่าน|ใน|จาก|ไป)\s+([ก-๙][ก-๙\s]{2,20})/g,
-    // ชื่อสถานที่ท่องเที่ยวที่รู้จักกัน
-    /(?:ดอย|เขา|หาด|เกาะ|น้ำตก|อ่าว|แหลม|ถ้ำ)[ก-๙a-zA-Z\s]{1,20}/g,
-    // ย่าน/ถนน
-    /(?:ถนน|ซอย|ย่าน)[ก-๙a-zA-Z\s]{1,20}/g,
-  ];
-  for(const p of patterns){
-    let m;p.lastIndex=0;
-    while((m=p.exec(text))!==null){
-      const place=(m[1]||m[0]).trim().replace(/\s+/g,' ').replace(/[.,:;!?]+$/,'');
-      if(place.length>2&&place.length<30) places.add(place);
-    }
-  }
-  return [...places].slice(0,3);
-}
 
 
 // ── Core Operations ───────────────────────────────────────────────
