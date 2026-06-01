@@ -331,6 +331,19 @@ const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI
 ถ้าไม่รู้ให้บอกตรงๆ อย่าเดา
 รองรับภาษาไทย อังกฤษ และจีน ถ้าถามจีนตอบจีน`;
 
+// แก้เป็น — เพิ่มวันที่ realtime
+function getSystem(){
+  const now = new Date()
+  const date = now.toLocaleDateString('th-TH', {
+    weekday:'long', year:'numeric', 
+    month:'long', day:'numeric'
+  })
+  const time = now.toLocaleTimeString('th-TH', {
+    hour:'2-digit', minute:'2-digit'
+  })
+  return SYSTEM + `\nวันนี้: ${date} เวลา ${time} น.`
+}
+  
 // ── State ─────────────────────────────────────────────────────────
 let GROQ_KEY   = localStorage.getItem('cipher_groq')   || '';
 let TAVILY_KEY = localStorage.getItem('cipher_tavily') || '';
