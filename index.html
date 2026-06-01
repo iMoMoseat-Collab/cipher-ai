@@ -393,8 +393,9 @@ function loadVoices(){
   voiceObj=
     v.find(x=>/narisa/i.test(x.name))
     ||v.find(x=>/kanya/i.test(x.name))
-    ||v.find(x=>/female|woman/i.test(x.name)&&x.lang==='th-TH')
-    ||v.find(x=>x.lang==='th-TH'&&!/male|narong/i.test(x.name))
+    ||v.find(x=>/เปรมวดี|premwadee/i.test(x.name))
+    ||v.find(x=>/อัจฉรา|atchara/i.test(x.name))
+    ||v.find(x=>x.lang==='th-TH'&&!/pattara|นิวัฒน์|male|narong/i.test(x.name))
     ||v.find(x=>x.lang==='th-TH')
     ||v.find(x=>x.lang.startsWith('th'))
     ||null;
