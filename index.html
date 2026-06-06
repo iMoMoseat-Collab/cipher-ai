@@ -266,7 +266,7 @@ function loadVoices(){
   if(!SY)return;
   const v=SY.getVoices();
   voiceObj=v.find(x=>/narisa/i.test(x.name))||v.find(x=>/kanya/i.test(x.name))||v.find(x=>/เปรมวดี|premwadee/i.test(x.name))||v.find(x=>/อัจฉรา|atchara/i.test(x.name))||v.find(x=>x.lang==='th-TH'&&!/pattara|นิวัฒน์|male/i.test(x.name))||v.find(x=>x.lang==='th-TH')||v.find(x=>x.lang.startsWith('th'))||null;
-  voiceEN=v.find(x=>/samantha/i.test(x.name))||v.find(x=>/karen/i.test(x.name))||v.find(x=>x.lang==='en-GB')||v.find(x=>x.lang.startsWith('en'))||null;
+  voiceEN=v.find(x=>/samantha/i.test(x.name))||v.find(x=>/karen/i.test(x.name))||v.find(x=>/zira/i.test(x.name))||v.find(x=>/hazel/i.test(x.name))||v.find(x=>x.lang==='en-GB')||v.find(x=>x.lang==='en-US')||v.find(x=>x.lang.startsWith('en'))||null;
   voiceZH=v.find(x=>x.lang==='zh-TW')||v.find(x=>x.lang==='zh-CN')||v.find(x=>x.lang.startsWith('zh'))||null;
   console.log('[CIPHER] TH:', voiceObj?.name, '| EN:', voiceEN?.name, '| ZH:', voiceZH?.name);
 }
@@ -302,9 +302,20 @@ function speak(text){
   unlockAudio();SY.cancel();
   setTimeout(()=>{
     const c=cleanText(text);if(!c)return;
+    // Split by sentence AND by language change
     const parts=c.split(/(?<=[.!?ๆ。！？])\s+|(?<=ค่ะ|นะคะ|คะ)\s+/u).filter(s=>s.trim());
     const chunks=[];let buf='',bufLang='';
-    for(const s of parts){const l=detectLang(s);if(l!==bufLang&&buf){chunks.push({t:buf.trim(),l:bufLang});buf='';}bufLang=l;buf+=s+' ';}
+    for(const s of parts){
+      // Split further by language within each sentence
+      const words=s.split(/\s+/);
+      for(const w of words){
+        const l=detectLang(w);
+        if(l!==bufLang&&buf&&buf.trim().length>2){
+          chunks.push({t:buf.trim(),l:bufLang});buf='';
+        }
+        bufLang=l;buf+=w+' ';
+      }
+    }
     if(buf.trim())chunks.push({t:buf.trim(),l:bufLang||'th'});
     if(!chunks.length)return;
     let i=0;
@@ -413,33 +424,56 @@ function copyBubble(t){
 
 // ── API ──────────────────────────────────────────────────────────
 async function callClaude(messages){
-  const res=await fetch(WORKER,{
-    method:'POST',
-    mode:'cors',
-    headers:{'Content-Type':'application/json','x-api-key':AKEY},
-    body:JSON.stringify({
-      model:MODEL,
-      max_tokens:1024,
-      system:getSystem(),
-      messages:messages.map(m=>({role:m.role,content:m.content})),
-      tools:[{type:'web_search_20250305',name:'web_search',max_uses:5}]
-    })
-  });
-  const data=await res.json();
-  console.log('[CIPHER] status:', res.status, 'stop:', data.stop_reason, 'blocks:', data.content?.length);
-  if(!res.ok){
-    const et=data?.error?.type||'';const em=data?.error?.message||'unknown';
-    if(et==='authentication_error')return 'API Key ไม่ถูกต้อง กด KEY แล้วใส่ใหม่';
-    if(et==='insufficient_quota'||em.includes('credit'))return 'เครดิตหมด เติมได้ที่ console.anthropic.com';
-    if(et==='rate_limit_error')return 'ส่งเร็วเกินไป รอแป๊บแล้วลองใหม่';
-    return `เกิดปัญหา: ${em}`;
-  }
-  // Collect text from all content blocks (web search may add multiple turns)
+  const apiMsgs=messages.map(m=>({role:m.role,content:m.content}));
   let reply='';
-  for(const b of(data.content||[])){
-    if(b.type==='text') reply+=b.text;
+
+  for(let turn=0;turn<8;turn++){
+    const res=await fetch(WORKER,{
+      method:'POST',mode:'cors',
+      headers:{'Content-Type':'application/json','x-api-key':AKEY},
+      body:JSON.stringify({
+        model:MODEL,max_tokens:1024,
+        system:getSystem(),
+        messages:apiMsgs,
+        tools:[{type:'web_search_20250305',name:'web_search',max_uses:5}]
+      })
+    });
+    const data=await res.json();
+    const stop=data.stop_reason;
+    const blocks=data.content||[];
+    console.log('[CIPHER] turn',turn,'status:',res.status,'stop:',stop,'blocks:',blocks.map(b=>b.type));
+
+    if(!res.ok){
+      const et=data?.error?.type||'';const em=data?.error?.message||'';
+      if(et==='authentication_error')return 'API Key ไม่ถูกต้อง กด KEY แล้วใส่ใหม่';
+      if(et==='insufficient_quota'||em.includes('credit'))return 'เครดิตหมด เติมได้ที่ console.anthropic.com';
+      if(et==='rate_limit_error')return 'ส่งเร็วเกินไป รอแป๊บแล้วลองใหม่';
+      return `เกิดปัญหา (${res.status}): ${em}`;
+    }
+
+    // Collect text
+    for(const b of blocks){
+      if(b.type==='text') reply+=b.text;
+    }
+
+    if(stop==='end_turn') break;
+
+    if(stop==='tool_use'){
+      // ส่ง assistant message + tool_result กลับ
+      apiMsgs.push({role:'assistant',content:blocks});
+      const results=blocks
+        .filter(b=>b.type==='tool_use')
+        .map(b=>({type:'tool_result',tool_use_id:b.id,content:''}));
+      if(results.length>0){
+        apiMsgs.push({role:'user',content:results});
+        reply=''; // รอผลจาก turn ถัดไป
+        continue;
+      }
+    }
+    break;
   }
-  console.log('[CIPHER] reply length:', reply.length, 'stop:', data.stop_reason);
+
+  console.log('[CIPHER] final reply length:',reply.length);
   return reply||'ไม่ได้รับคำตอบ ลองใหม่อีกครั้ง';
 }
 
