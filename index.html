@@ -299,15 +299,16 @@ body::before{
 
 /* Scroll */
 #scroll-top{
-  position:fixed;bottom:95px;right:16px;z-index:50;
-  width:36px;height:36px;border-radius:12px;
+  position:fixed;bottom:130px;left:50%;transform:translateX(-50%);z-index:50;
+  height:30px;padding:0 14px;border-radius:20px;
   background:var(--card);border:1.5px solid var(--brd);
   color:var(--ink3);cursor:pointer;display:none;
-  align-items:center;justify-content:center;
+  align-items:center;justify-content:center;gap:4px;
   box-shadow:0 4px 16px var(--shadow2);
-  transition:all .2s;font-size:14px;
+  transition:all .2s;font-size:11px;font-weight:500;
+  font-family:'DM Sans',sans-serif;white-space:nowrap;
 }
-#scroll-top:hover{transform:translateY(-2px);border-color:var(--acc);color:var(--acc);}
+#scroll-top:active{transform:translateX(-50%) scale(.95);}
 
 /* Theme panel */
 #theme-panel{
@@ -450,10 +451,10 @@ body::before{
       <img id="img-preview" alt="preview"/>
       <textarea id="msg-inp" rows="1" placeholder="พิมพ์หรือพูดกับ CIPHER..."></textarea>
       <button class="ab" id="mic-btn" onclick="toggleListen()" style="display:none;">🎤</button>
-      <button class="ab" id="cam-btn" onclick="triggerCamera()">📷</button>
+      <button class="ab" id="cam-btn" onclick="triggerCamera()" title="เลือกรูปหรือถ่ายภาพ">📷</button>
       <button class="ab dim" id="send-btn" onclick="sendMsg()">↑</button>
     </div>
-    <input type="file" id="file-inp" accept="image/*" capture="environment" style="display:none;" onchange="handleImage(this)"/>
+    <input type="file" id="file-inp" accept="image/*" style="display:none;" onchange="handleImage(this)"/>
     <div id="footer-txt">CIPHER · <span id="ft-voice">เปิดเสียง</span> · Claude Haiku 4.5</div>
   </div>
 </div>
@@ -473,7 +474,7 @@ body::before{
   <button class="theme-btn" onclick="setTheme('th-dark')">🌑 Dark Mode</button>
 </div>
 
-<button id="scroll-top" onclick="scrollTop()">↑</button>
+<button id="scroll-top" onclick="scrollTop()">↑ ขึ้นบน</button>
 
 <script>
 'use strict';
@@ -521,7 +522,12 @@ function initGPS(){
   },()=>{},{timeout:8000,maximumAge:300000});
 }
 
-function triggerCamera(){document.getElementById('file-inp').click();}
+function triggerCamera(){
+  // สร้าง input ใหม่ทุกครั้งเพื่อให้ iOS แสดง action sheet (Camera/Photo Library)
+  const inp=document.getElementById('file-inp');
+  inp.removeAttribute('capture'); // ไม่บังคับกล้อง ให้เลือกได้
+  inp.click();
+}
 function handleImage(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
@@ -632,7 +638,13 @@ function speak(text){
     };nxt();
   },200);
 }
-function stopSpeak(){SY&&SY.cancel();setSp(false);stopKA();paused=false;document.getElementById('pause-btn').textContent='⏸';}
+function stopSpeak(){
+  if(SY){SY.cancel();SY.cancel();}  // double cancel for iOS
+  setTimeout(()=>{if(SY)SY.cancel();},50); // extra cancel after delay
+  setSp(false);stopKA();
+  paused=false;typingStop=true;
+  document.getElementById('pause-btn').textContent='⏸';
+}
 
 let paused=false, typingActive=false, typingStop=false;
 function togglePause(){
