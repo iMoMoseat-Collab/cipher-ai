@@ -31,7 +31,7 @@ body.th-dark{--bg:#1C1917;--bg2:#292524;--bg3:#3C3532;--card:#292524;--card2:#3C
 html,body{height:100%;height:-webkit-fill-available;overflow:hidden;}
 body{
   display:flex;flex-direction:column;
-  font-family:'DM Sans','Noto Sans Thai',sans-serif;
+  font-family:'Noto Sans Thai','DM Sans',sans-serif;
   color:var(--ink);background:var(--bg);
   position:fixed;inset:0;
   padding-top:env(safe-area-inset-top);
@@ -163,7 +163,7 @@ body::before{
 .bub{
   padding:13px 17px;font-size:var(--fs);line-height:1.7;
   word-break:break-word;white-space:pre-wrap;
-  font-family:'DM Sans','Noto Sans Thai',sans-serif;
+  font-family:'Noto Sans Thai','DM Sans',sans-serif;
   -webkit-user-select:text;user-select:text;cursor:pointer;
   transition:all .2s;position:relative;
 }
@@ -260,7 +260,7 @@ body::before{
 #msg-inp{
   flex:1;background:transparent;border:none;outline:none;
   color:var(--ink);font-size:15px;
-  font-family:'DM Sans','Noto Sans Thai',sans-serif;
+  font-family:'Noto Sans Thai','DM Sans',sans-serif;
   line-height:1.5;min-height:24px;max-height:120px;resize:none;
   caret-color:var(--acc);
 }
@@ -466,13 +466,15 @@ body::before{
 
 const WORKER = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
 const MODEL  = 'claude-haiku-4-5-20251001';
-const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI หญิงของคุณเอ็ม ใช้สรรพนาม "ฉัน" หรือ "ไซเฟอร์"
-ตอบภาษาไทยเสมอ ยกเว้นถ้าถามภาษาอื่น
-ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
-ใช้ "ค่ะ" หรือ "คะ" เฉพาะตอนที่เหมาะสม ห้ามใช้ "ครับ" เด็ดขาด
-เรียก "คุณเอ็ม" เฉพาะตอนทักทาย
-สำคัญ: ถ้าถามเรื่องข้อมูลปัจจุบัน ราคา ข่าว อากาศ ผลกีฬา ให้ใช้ web_search tool ค้นหาก่อนตอบทุกครั้ง
-รองรับไทย อังกฤษ จีน`;
+const SYSTEM = `You are CIPHER, a female AI assistant for คุณเอ็ม.
+CRITICAL RULES:
+- Always respond in Thai language unless asked otherwise
+- You are female. NEVER use "ครับ". Only use "ค่ะ" or "คะ" when appropriate, not every sentence
+- Refer to yourself as "ไซเฟอร์" or "ฉัน"
+- Address user as "คุณเอ็ม" only when greeting
+- Be concise, accurate, direct. No filler words
+- For current info (prices, news, weather, sports): ALWAYS use web_search tool first
+- Support Thai, English, Chinese`;
 
 let AKEY = localStorage.getItem('cipher_key') || '';
 let history = JSON.parse(localStorage.getItem('cipher_history_v2') || '[]');
