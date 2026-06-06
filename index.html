@@ -632,7 +632,11 @@ async function sendMsg(){
   addMsg('assistant',reply);
   lastReply=reply;
   speak(reply);
-  updateStatus();
+}
+
+function updateStatus(){
+  const gd=document.getElementById('groq-dot');
+  if(gd){gd.classList.toggle('off',!ANTHROPIC_KEY);}
 }
 
 function resize(){const el=document.getElementById('msg-inp');el.style.height='auto';el.style.height=(el.scrollHeight)+'px';const btn=document.getElementById('send-ab');if(el.value.trim()){btn.classList.remove('dim');}else{btn.classList.add('dim');}}
@@ -713,7 +717,6 @@ function runBootSequence(fromButton) {
 
 function startApp(fromButton){
   document.getElementById('app').style.display='flex';
-  updateStatus();
   initLocation();
   
   const savedHist=localStorage.getItem('cipher_history_v2');
