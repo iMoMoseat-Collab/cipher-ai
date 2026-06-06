@@ -587,20 +587,37 @@ async function callAnthropic(messages){
       if(et==='rate_limit_error')return{text:'ส่งเร็วเกินไป รอแป๊บแล้วลองใหม่'};
       return{text:`เกิดปัญหา: ${em}`};
     }
+    const stopReason = data.stop_reason;
+    console.log('[CIPHER] turn', turn, 'stop_reason:', stopReason, 'blocks:', data.content?.map(b=>b.type));
+
     for(const b of(data.content||[])){
-      if(b.type==='text')reply+=b.text;
-      if(b.type==='tool_use'&&b.name==='web_search')web=true;
-      if(b.type==='server_tool_use'||b.type==='web_search_tool_result')web=true;
+      if(b.type==='text') reply+=b.text;
+      if(b.type==='tool_use'&&b.name==='web_search') web=true;
+      if(b.type==='server_tool_use') web=true;
+      if(b.type==='tool_result'||b.type==='web_search_tool_result') web=true;
     }
-    // ถ้าได้ reply แล้ว หยุดเลย
-    if(reply) break;
-    if(data.stop_reason==='end_turn') break;
-    if(data.stop_reason==='tool_use'){
-      apiMsgs.push({role:'assistant',content:data.content});
-      const tb=(data.content||[]).find(b=>b.type==='tool_use');
-      if(tb)apiMsgs.push({role:'user',content:[{type:'tool_result',tool_use_id:tb.id,content:'Search completed.'}]});
-      continue;
+
+    if(stopReason==='end_turn'){
+      break; // จบแล้ว
     }
+
+    if(stopReason==='tool_use'){
+      // Claude ใช้ tool - ต้องส่ง tool_result กลับ
+      apiMsgs.push({role:'assistant', content:data.content});
+      const toolBlocks = (data.content||[]).filter(b=>b.type==='tool_use');
+      const toolResults = toolBlocks.map(tb=>({
+        type:'tool_result',
+        tool_use_id:tb.id,
+        content:'Search executed successfully.'
+      }));
+      if(toolResults.length>0){
+        apiMsgs.push({role:'user', content:toolResults});
+        reply=''; // reset reply รอผลจาก loop ถัดไป
+        continue;
+      }
+    }
+
+    // stop_reason อื่นๆ หยุด
     break;
   }
   console.log('[CIPHER] reply:', reply, 'web:', web, 'length:', reply.length);
