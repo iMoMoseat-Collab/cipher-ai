@@ -570,7 +570,7 @@ async function callAnthropic(messages){
   for(let turn=0;turn<6;turn++){
     const res=await fetch(WORKER_URL,{
       method:'POST',mode:'cors',
-      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'x-service':'anthropic'},
+      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY},
       body:JSON.stringify({
         model:MODEL,max_tokens:1024,
         system:getSystemWithContext(),
