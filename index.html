@@ -579,7 +579,7 @@ async function callAnthropic(messages){
       })
     });
     const data=await res.json();
-    console.log('[CIPHER] API response:', data?.stop_reason, 'content blocks:', data?.content?.length);
+    console.log('[CIPHER] API response:', data?.stop_reason, 'content blocks:', data?.content?.length, 'full:', JSON.stringify(data?.content?.slice(0,2)));
     if(!res.ok){
       const et=data?.error?.type||'';const em=data?.error?.message||'unknown';
       if(et==='authentication_error')return{text:'API Key ไม่ถูกต้อง กด KEY แล้วใส่ใหม่'};
