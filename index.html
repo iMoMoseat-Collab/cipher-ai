@@ -3,233 +3,486 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="CIPHER"/>
-<meta name="theme-color" content="#080c08"/>
+<meta name="theme-color" content="#FAF8F5"/>
 <title>CIPHER</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23080c08'/><polygon points='50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5' fill='none' stroke='%2300ff41' stroke-width='4'/><text x='50' y='62' text-anchor='middle' fill='%2300ff41' font-size='30' font-family='monospace' font-weight='bold'>CI</text></svg>"/>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23FAF8F5'/><text x='50' y='68' text-anchor='middle' fill='%2392400E' font-size='52' font-family='Georgia,serif' font-weight='bold'>C</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#080c08;--bg2:#0d120d;--bg3:#111811;--g1:#00ff41;--g2:#00cc33;--g3:#008f23;--dim:#003d10;--t3:#006b1c;--brd:#003d10;--brd2:#006b1c;--red:#ff3333;--fs:14px;}
-body.theme-amber{--g1:#ffb300;--g2:#ff8f00;--g3:#e65100;--dim:#3e2000;--t3:#5d3a00;--brd:#3e2000;--brd2:#5d3a00;}
-body.theme-cyan{--g1:#00e5ff;--g2:#00b8d4;--g3:#0097a7;--dim:#002f3e;--t3:#004d5e;--brd:#002f3e;--brd2:#004d5e;}
-body.theme-red{--g1:#ff1744;--g2:#d50000;--g3:#b71c1c;--dim:#3e0000;--t3:#5d0000;--brd:#3e0000;--brd2:#5d0000;}
-body.theme-purple{--g1:#e040fb;--g2:#aa00ff;--g3:#7b1fa2;--dim:#2e003e;--t3:#4a005e;--brd:#2e003e;--brd2:#4a005e;}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;-webkit-font-smoothing:antialiased}
-html,body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--bg)}
-body{display:flex;flex-direction:column;font-family:'Share Tech Mono','Noto Sans Thai',monospace;color:var(--g1);background:var(--bg);position:fixed;inset:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);}
-#scan{position:fixed;left:0;width:100%;height:2px;z-index:50;pointer-events:none;background:linear-gradient(90deg,transparent,#00ff4133,#00ff4166,#00ff4133,transparent);animation:scan-move 4s linear infinite;opacity:.4;}
-@keyframes scan-move{0%{top:0}100%{top:100vh}}
-#matrix-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;}
+:root{
+  --bg:#FAF8F5;--bg2:#F5F1EB;--bg3:#EDE8E0;
+  --card:#FFFFFF;--card2:#FDFCFA;
+  --ink:#1C1917;--ink2:#44403C;--ink3:#78716C;--ink4:#A8A29E;
+  --acc:#92400E;--acc2:#B45309;--acc3:#FEF3C7;
+  --brd:#E7E0D8;--brd2:#D6CDC2;
+  --shadow:rgba(120,80,40,.08);--shadow2:rgba(120,80,40,.14);
+  --red:#DC2626;--fs:15px;
+  --radius:20px;--radius-sm:12px;
+}
+body.th-sage{--acc:#3D6B4F;--acc2:#4A7C5F;--acc3:#D1FAE5;--shadow:rgba(40,100,60,.08);--shadow2:rgba(40,100,60,.14);}
+body.th-navy{--acc:#1D3557;--acc2:#2A4A7F;--acc3:#DBEAFE;--shadow:rgba(30,50,100,.08);--shadow2:rgba(30,50,100,.14);}
+body.th-rose{--acc:#9F1239;--acc2:#BE123C;--acc3:#FFE4E6;--shadow:rgba(150,30,60,.08);--shadow2:rgba(150,30,60,.14);}
+body.th-dark{--bg:#1C1917;--bg2:#292524;--bg3:#3C3532;--card:#292524;--card2:#3C3532;--ink:#FAF8F5;--ink2:#E7E0D8;--ink3:#A8A29E;--ink4:#78716C;--brd:#3C3532;--brd2:#57534E;--shadow:rgba(0,0,0,.3);--shadow2:rgba(0,0,0,.5);}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{height:100%;height:-webkit-fill-available;overflow:hidden;}
+body{
+  display:flex;flex-direction:column;
+  font-family:'DM Sans','Noto Sans Thai',sans-serif;
+  color:var(--ink);background:var(--bg);
+  position:fixed;inset:0;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  transition:background .4s,color .4s;
+}
+
+/* Subtle texture */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:.4;
+}
+
 /* Header */
-#header{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--brd2);position:relative;z-index:20;flex-shrink:0;box-shadow:0 0 20px #00ff4115;}
-#orb{width:36px;height:36px;border-radius:4px;flex-shrink:0;cursor:pointer;background:var(--bg3);border:1px solid var(--g2);box-shadow:0 0 12px #00ff4133;display:flex;align-items:center;justify-content:center;font-size:16px;animation:orb-pulse 2s ease-in-out infinite;}
-#orb:active{transform:scale(.9)}
-@keyframes orb-pulse{0%,100%{box-shadow:0 0 12px #00ff4133}50%{box-shadow:0 0 24px #00ff4166}}
-#name-block{flex:1;min-width:0}
-#ai-name{font-size:14px;font-weight:700;letter-spacing:3px;color:var(--g1);text-shadow:0 0 10px var(--g1);line-height:1;animation:glitch 4s infinite;}
-@keyframes glitch{0%,90%,100%{transform:translate(0)}91%{transform:translate(-2px,1px)}93%{transform:translate(0)}97%{transform:translate(1px,-1px)}98%{transform:translate(0)}}
-#ai-sub{font-size:6.5px;letter-spacing:2px;color:var(--t3);margin-top:2px;}
-#stat-row{display:flex;align-items:center;gap:6px;margin-top:3px;}
-#spip{width:6px;height:6px;border-radius:50%;background:var(--g1);box-shadow:0 0 6px var(--g1);animation:pip 2s ease-in-out infinite;flex-shrink:0;}
-@keyframes pip{0%,100%{opacity:1}50%{opacity:.2}}
-#stat-txt{font-size:8px;letter-spacing:1px;color:var(--t3);}
-#hbtns{display:flex;gap:6px;align-items:center;flex-shrink:0;}
-.hb{width:32px;height:32px;border-radius:4px;font-size:13px;border:1px solid var(--brd2);background:var(--bg3);color:var(--g2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.hb:active{transform:scale(.88);background:var(--bg)}
-.hb.off{opacity:.3}
-.hb.red{border-color:#ff333355;color:var(--red);}
+#header{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 20px;
+  background:rgba(250,248,245,.92);
+  border-bottom:1px solid var(--brd);
+  position:relative;z-index:20;flex-shrink:0;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:background .4s,border-color .4s;
+}
+#orb{
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;cursor:pointer;
+  background:var(--acc3);border:1.5px solid rgba(146,64,14,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:20px;font-weight:700;
+  color:var(--acc);letter-spacing:-1px;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 2px 8px var(--shadow);
+}
+#orb:hover{transform:scale(1.05);box-shadow:0 4px 16px var(--shadow2);}
+#orb:active{transform:scale(.95);}
+#name-block{flex:1;min-width:0;}
+#ai-name{
+  font-family:'Playfair Display',serif;
+  font-size:18px;font-weight:700;letter-spacing:.5px;
+  color:var(--ink);line-height:1;
+}
+#ai-sub{font-size:10px;color:var(--ink4);margin-top:3px;letter-spacing:.5px;font-weight:400;}
+#stat-row{display:flex;align-items:center;gap:5px;margin-top:4px;}
+#spip{
+  width:6px;height:6px;border-radius:50%;background:var(--acc);
+  animation:pip-warm 2.5s ease-in-out infinite;flex-shrink:0;
+}
+@keyframes pip-warm{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+#stat-txt{font-size:9px;color:var(--ink4);letter-spacing:.5px;font-weight:500;}
+#hbtns{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.hb{
+  width:36px;height:36px;border-radius:10px;font-size:14px;
+  border:1.5px solid var(--brd);background:var(--card);
+  color:var(--ink3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 1px 4px var(--shadow);
+}
+.hb:hover{border-color:var(--brd2);color:var(--ink);box-shadow:0 3px 10px var(--shadow2);transform:translateY(-1px);}
+.hb:active{transform:scale(.9) translateY(0);}
+.hb.off{opacity:.3;}
+.hb.danger{border-color:rgba(220,38,38,.2);color:var(--red);}
+
 /* Status bar */
-#sbar{display:flex;align-items:center;justify-content:center;gap:12px;padding:3px 12px;background:var(--bg);border-bottom:1px solid var(--brd);flex-shrink:0;position:relative;z-index:10;}
-.svc{display:flex;align-items:center;gap:4px;font-size:7px;letter-spacing:1px;color:var(--t3);cursor:pointer;}
-.sdot{width:5px;height:5px;border-radius:50%;background:var(--g1);box-shadow:0 0 4px var(--g1);}
-.sdot.off{background:#333;box-shadow:none;}
+#sbar{
+  display:flex;align-items:center;justify-content:center;gap:20px;
+  padding:6px 20px;
+  background:var(--bg2);border-bottom:1px solid var(--brd);
+  flex-shrink:0;position:relative;z-index:10;
+  transition:background .4s;
+}
+.svc{
+  display:flex;align-items:center;gap:5px;
+  font-size:9px;letter-spacing:.5px;color:var(--ink4);
+  cursor:pointer;transition:color .2s;padding:2px 6px;border-radius:6px;
+  font-weight:500;
+}
+.svc:hover{color:var(--acc);background:var(--acc3);}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--acc);animation:pip-warm 3s ease-in-out infinite;}
+.sdot.off{background:var(--brd2);animation:none;}
+
 /* Messages */
-#msgs{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px 6px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:5;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;min-height:0;}
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
-.msg{animation:msg-in .2s ease both;display:flex;gap:8px;align-items:flex-start;}
+#msgs{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:20px 16px 12px;
+  display:flex;flex-direction:column;gap:16px;
+  position:relative;z-index:5;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;min-height:0;
+  background:var(--bg);
+  transition:background .4s;
+}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+
+.msg{
+  display:flex;gap:10px;align-items:flex-end;
+  animation:msg-warm .3s cubic-bezier(.34,1.56,.64,1) both;
+}
 .msg.usr{flex-direction:row-reverse;}
-@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.av{width:28px;height:28px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:1px solid var(--brd2);}
-.av.ai-av{background:var(--bg);color:var(--g1);}
-.av.usr-av{background:var(--bg3);color:var(--t3);}
-.mb{max-width:85%;display:flex;flex-direction:column;gap:3px;align-items:flex-start;}
+@keyframes msg-warm{
+  from{opacity:0;transform:translateY(16px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.av{
+  width:34px;height:34px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:11px;letter-spacing:.5px;
+  transition:transform .2s;
+}
+.av.ai-av{
+  background:var(--acc3);color:var(--acc);
+  border:1.5px solid rgba(146,64,14,.12);
+  font-family:'Playfair Display',serif;font-size:14px;
+  box-shadow:0 2px 8px var(--shadow);
+}
+.av.usr-av{
+  background:var(--bg3);color:var(--ink3);
+  border:1.5px solid var(--brd);
+  font-family:'DM Sans',sans-serif;font-size:10px;
+  box-shadow:0 2px 8px var(--shadow);
+}
+.mb{max-width:80%;display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
 .msg.usr .mb{align-items:flex-end;}
-.ml{font-size:7px;letter-spacing:1.5px;color:var(--t3);padding:0 3px;display:flex;gap:5px;align-items:center;}
-.bub{padding:9px 12px;font-size:var(--fs);line-height:1.65;word-break:break-word;white-space:pre-wrap;border-radius:2px;border-left:2px solid;font-family:'Noto Sans Thai','Share Tech Mono',monospace;-webkit-user-select:text;user-select:text;cursor:pointer;}
-.bub:active{opacity:.8}
-.bub.ai-b{background:var(--bg2);color:var(--g1);border-color:var(--g2);box-shadow:0 0 10px #00ff4108;}
-.bub.usr-b{background:var(--bg3);color:var(--g3);border-color:var(--dim);}
-.rbtn{padding:2px 8px;border-radius:2px;font-size:7px;letter-spacing:1px;border:1px solid var(--brd);background:transparent;color:var(--t3);cursor:pointer;font-family:'Share Tech Mono',monospace;transition:all .15s;}
-.rbtn:active{background:var(--bg3);color:var(--g1);}
-.msg-time{font-size:7px;color:var(--t3);letter-spacing:1px;}
-.copy-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--g2);border-radius:4px;padding:5px 14px;font-size:9px;letter-spacing:2px;color:var(--g1);z-index:500;pointer-events:none;animation:msg-in .2s ease;font-family:'Share Tech Mono',monospace;}
+.ml{font-size:9px;color:var(--ink4);padding:0 4px;display:flex;gap:6px;align-items:center;font-weight:500;}
+.msg-time{font-size:9px;color:var(--ink4);opacity:.7;}
+
+.bub{
+  padding:13px 17px;font-size:var(--fs);line-height:1.7;
+  word-break:break-word;white-space:pre-wrap;
+  font-family:'DM Sans','Noto Sans Thai',sans-serif;
+  -webkit-user-select:text;user-select:text;cursor:pointer;
+  transition:all .2s;position:relative;
+}
+.bub:hover{transform:translateY(-1px);}
+.bub:active{transform:scale(.99);}
+
+.bub.ai-b{
+  background:var(--card);color:var(--ink);
+  border:1.5px solid var(--brd);
+  border-radius:4px var(--radius) var(--radius) var(--radius);
+  box-shadow:0 2px 12px var(--shadow),0 1px 3px rgba(0,0,0,.04);
+}
+.bub.usr-b{
+  background:var(--acc);color:#FFF;
+  border-radius:var(--radius) 4px var(--radius) var(--radius);
+  box-shadow:0 2px 12px var(--shadow2),0 1px 3px rgba(0,0,0,.1);
+}
+
+.bub img{max-width:200px;max-height:160px;border-radius:10px;margin-top:8px;display:block;border:1px solid var(--brd);}
+
+.rbtn{
+  padding:4px 10px;border-radius:8px;font-size:9px;letter-spacing:.3px;
+  border:1.5px solid var(--brd);background:transparent;color:var(--ink4);
+  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;
+  transition:all .2s;
+}
+.rbtn:hover{border-color:var(--acc);color:var(--acc);background:var(--acc3);}
+
+.copy-toast{
+  position:fixed;bottom:110px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);
+  border-radius:20px;padding:8px 18px;
+  font-size:11px;letter-spacing:.5px;font-weight:500;
+  z-index:500;pointer-events:none;
+  animation:msg-warm .2s ease;
+  font-family:'DM Sans',sans-serif;
+}
+
 /* Loading */
-#loading{display:none;gap:8px;align-items:flex-start;}
-#ld-av{width:28px;height:28px;border-radius:3px;flex-shrink:0;background:var(--bg);border:1px solid var(--brd2);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--g1);animation:orb-pulse 1s ease-in-out infinite;}
-#ld-bub{padding:9px 12px;border-radius:2px;border-left:2px solid var(--g2);background:var(--bg2);}
-#ld-lbl{font-size:7px;letter-spacing:2px;color:var(--t3);margin-bottom:6px;}
-.wave{display:flex;align-items:center;gap:3px;}
-.wave span{width:3px;border-radius:1px;background:var(--g2);display:block;animation:wv .8s ease-in-out infinite;}
-@keyframes wv{0%,100%{transform:scaleY(.3);opacity:.3}50%{transform:scaleY(1.5);opacity:1}}
+#loading{display:none;gap:10px;align-items:flex-end;}
+#ld-av{
+  width:34px;height:34px;border-radius:12px;flex-shrink:0;
+  background:var(--acc3);color:var(--acc);
+  border:1.5px solid rgba(146,64,14,.12);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:14px;font-weight:700;
+  box-shadow:0 2px 8px var(--shadow);
+}
+#ld-bub{
+  padding:16px 20px;background:var(--card);
+  border:1.5px solid var(--brd);
+  border-radius:4px var(--radius) var(--radius) var(--radius);
+  box-shadow:0 2px 12px var(--shadow);
+}
+.dots{display:flex;gap:5px;align-items:center;}
+.dots span{
+  width:7px;height:7px;border-radius:50%;background:var(--acc);opacity:.3;
+  animation:dot-breath 1.4s ease-in-out infinite;
+}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dot-breath{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+
+.type-cursor{
+  display:inline-block;width:2px;height:1em;background:var(--acc);
+  vertical-align:text-bottom;animation:blink .8s step-end infinite;
+  margin-left:1px;border-radius:1px;
+}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-#cursor-blink{display:inline-block;width:7px;height:13px;background:var(--g1);vertical-align:middle;animation:blink .8s step-end infinite;margin-left:2px;}
-.type-cursor{display:inline-block;width:7px;height:13px;background:var(--g1);vertical-align:middle;animation:blink .7s step-end infinite;margin-left:1px;}
+
 /* Input */
-#inp-wrap{padding:8px 12px max(10px,env(safe-area-inset-bottom));background:var(--bg2);border-top:1px solid var(--brd2);position:relative;z-index:10;flex-shrink:0;}
-#inp-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g2)55,transparent);}
-#inp-box{display:flex;gap:6px;align-items:flex-end;background:var(--bg3);border:1px solid var(--brd2);border-radius:3px;padding:7px 7px 7px 11px;transition:border-color .2s,box-shadow .2s;}
-#inp-box:focus-within{border-color:var(--g1);box-shadow:0 0 14px #00ff4122;}
-#inp-box.mic-on{border-color:var(--red);}
-#prompt-sym{color:var(--g1);font-size:14px;padding-bottom:1px;flex-shrink:0;text-shadow:0 0 8px var(--g1);}
-#msg-inp{flex:1;background:transparent;border:none;outline:none;color:var(--g1);font-size:16px;font-family:'Noto Sans Thai','Share Tech Mono',monospace;line-height:1.5;min-height:24px;max-height:120px;resize:none;caret-color:var(--g1);}
-#msg-inp::placeholder{color:var(--dim);}
-.ab{width:36px;height:36px;border-radius:3px;font-size:15px;flex-shrink:0;border:1px solid var(--brd2);background:var(--bg);color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.ab:active{transform:scale(.88);}
-.ab.mic-on{border-color:var(--red);color:var(--red);}
-#send-btn{background:var(--bg);border-color:var(--g2);color:var(--g1);box-shadow:0 0 8px #00ff4122;font-size:13px;}
-#send-btn.dim{border-color:var(--brd);color:var(--dim);box-shadow:none;}
-#stop-btn{display:none;background:var(--bg);border-color:#ff333355;color:var(--red);}
-#footer-txt{text-align:center;font-size:6px;color:var(--dim);margin-top:5px;letter-spacing:1px;}
+#inp-wrap{
+  padding:12px 16px max(14px,env(safe-area-inset-bottom));
+  background:rgba(250,248,245,.95);
+  border-top:1px solid var(--brd);
+  position:relative;z-index:10;flex-shrink:0;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:background .4s;
+}
+#inp-box{
+  display:flex;gap:8px;align-items:flex-end;
+  background:var(--card);
+  border:1.5px solid var(--brd);border-radius:var(--radius);
+  padding:10px 10px 10px 16px;
+  transition:all .3s;
+  box-shadow:0 2px 8px var(--shadow);
+}
+#inp-box:focus-within{
+  border-color:var(--acc);
+  box-shadow:0 0 0 3px var(--acc3),0 4px 16px var(--shadow2);
+}
+#inp-box.mic-on{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.1);}
+#img-preview{display:none;width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1.5px solid var(--brd);}
+#msg-inp{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--ink);font-size:15px;
+  font-family:'DM Sans','Noto Sans Thai',sans-serif;
+  line-height:1.5;min-height:24px;max-height:120px;resize:none;
+  caret-color:var(--acc);
+}
+#msg-inp::placeholder{color:var(--ink4);}
+.ab{
+  width:38px;height:38px;border-radius:11px;font-size:16px;flex-shrink:0;
+  border:1.5px solid var(--brd);background:var(--bg2);
+  color:var(--ink3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+}
+.ab:hover{border-color:var(--brd2);color:var(--ink);transform:scale(1.05);}
+.ab:active{transform:scale(.9);}
+.ab.mic-on{border-color:rgba(220,38,38,.3);color:var(--red);}
+#send-btn{
+  background:var(--acc);border-color:var(--acc);color:#FFF;
+  box-shadow:0 2px 8px var(--shadow2);
+}
+#send-btn:hover{background:var(--acc2);border-color:var(--acc2);box-shadow:0 4px 16px var(--shadow2);transform:scale(1.05);}
+#send-btn.dim{background:var(--bg3);border-color:var(--brd);color:var(--ink4);box-shadow:none;transform:none;}
+#stop-btn{display:none;border-color:rgba(220,38,38,.3);color:var(--red);}
+#footer-txt{text-align:center;font-size:9px;color:var(--ink4);margin-top:8px;letter-spacing:.3px;font-weight:400;}
+
+/* Scroll */
+#scroll-top{
+  position:fixed;bottom:95px;right:16px;z-index:50;
+  width:36px;height:36px;border-radius:12px;
+  background:var(--card);border:1.5px solid var(--brd);
+  color:var(--ink3);cursor:pointer;display:none;
+  align-items:center;justify-content:center;
+  box-shadow:0 4px 16px var(--shadow2);
+  transition:all .2s;font-size:14px;
+}
+#scroll-top:hover{transform:translateY(-2px);border-color:var(--acc);color:var(--acc);}
+
 /* Theme panel */
-#theme-panel{position:fixed;top:55px;right:10px;z-index:100;background:var(--bg2);border:1px solid var(--brd2);border-radius:4px;padding:8px;display:none;flex-direction:column;gap:6px;box-shadow:0 0 20px #00ff4122;min-width:130px;}
-#theme-panel.show{display:flex;}
-.theme-btn{padding:5px 10px;border-radius:3px;border:1px solid var(--brd2);background:var(--bg3);color:var(--g2);font-size:9px;letter-spacing:1.5px;cursor:pointer;font-family:'Share Tech Mono',monospace;text-align:left;}
-.theme-btn:active{opacity:.7;}
-/* Scroll button */
-#scroll-top{position:fixed;bottom:90px;right:14px;z-index:50;width:32px;height:32px;border-radius:4px;background:var(--bg2);border:1px solid var(--brd2);color:var(--g2);font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+#theme-panel{
+  position:fixed;top:65px;right:12px;z-index:100;
+  background:var(--card);border:1.5px solid var(--brd);
+  border-radius:16px;padding:14px;
+  display:none;flex-direction:column;gap:6px;
+  box-shadow:0 8px 40px var(--shadow2),0 2px 8px var(--shadow);
+  min-width:155px;
+}
+#theme-panel.show{display:flex;animation:msg-warm .2s ease;}
+.theme-btn{
+  padding:8px 12px;border-radius:10px;border:1.5px solid var(--brd);
+  background:transparent;color:var(--ink2);
+  font-size:11px;letter-spacing:.3px;
+  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;
+  text-align:left;transition:all .2s;
+}
+.theme-btn:hover{border-color:var(--acc);background:var(--acc3);color:var(--acc);}
+
 /* Setup */
-#api-scr{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:14px;}
-#setup-title{font-size:11px;letter-spacing:2px;color:var(--g1);text-shadow:0 0 10px var(--g1);text-align:center;white-space:pre;}
-#setup-name{font-size:26px;letter-spacing:10px;color:var(--g1);text-shadow:0 0 20px var(--g1),0 0 40px #00ff4155;}
-#setup-sub{font-size:7px;letter-spacing:3px;color:var(--t3);}
-#setup-desc{font-size:13px;color:var(--g3);text-align:center;line-height:1.9;max-width:300px;font-family:'Noto Sans Thai',monospace;}
-#api-inp{width:100%;max-width:340px;padding:13px 16px;background:var(--bg2);border:1px solid var(--brd2);border-radius:3px;color:var(--g1);font-size:14px;font-family:'Share Tech Mono',monospace;outline:none;letter-spacing:1px;transition:border-color .2s;}
-#api-inp:focus{border-color:var(--g1);box-shadow:0 0 14px #00ff4122;}
-#api-inp::placeholder{color:var(--dim);}
-#start-btn{width:100%;max-width:340px;padding:14px;background:var(--bg3);border:1px solid var(--g2);border-radius:3px;color:var(--g1);font-size:12px;letter-spacing:4px;font-family:'Share Tech Mono',monospace;font-weight:700;cursor:pointer;box-shadow:0 0 16px #00ff4122;transition:all .2s;}
-#start-btn:active{transform:scale(.97);}
-#setup-note{font-size:8px;color:var(--t3);letter-spacing:1px;}
+#api-scr{
+  position:fixed;inset:0;z-index:200;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px;gap:18px;
+}
+#setup-ornament{font-size:11px;letter-spacing:4px;color:var(--ink4);font-weight:500;}
+#setup-logo{
+  font-family:'Playfair Display',serif;font-size:52px;font-weight:700;
+  color:var(--ink);letter-spacing:2px;line-height:1;
+  animation:logo-warm 3s ease-in-out infinite;
+}
+@keyframes logo-warm{0%,100%{opacity:1}50%{opacity:.85}}
+#setup-sub{font-size:10px;letter-spacing:3px;color:var(--ink4);font-weight:500;}
+#setup-line{width:60px;height:1.5px;background:linear-gradient(90deg,transparent,var(--acc),transparent);}
+#setup-desc{font-size:14px;color:var(--ink3);text-align:center;line-height:1.8;max-width:300px;font-weight:400;}
+#api-inp{
+  width:100%;max-width:340px;padding:14px 18px;
+  background:var(--card);border:1.5px solid var(--brd);border-radius:14px;
+  color:var(--ink);font-size:14px;
+  font-family:'JetBrains Mono',monospace;
+  outline:none;letter-spacing:.5px;
+  transition:all .3s;box-shadow:0 2px 8px var(--shadow);
+}
+#api-inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc3),0 4px 16px var(--shadow);}
+#api-inp::placeholder{color:var(--ink4);font-family:'DM Sans',sans-serif;}
+#start-btn{
+  width:100%;max-width:340px;padding:15px;
+  background:var(--acc);border:none;border-radius:14px;
+  color:#FFF;font-size:13px;letter-spacing:2px;
+  font-family:'DM Sans',sans-serif;font-weight:600;
+  cursor:pointer;box-shadow:0 4px 16px var(--shadow2);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#start-btn:hover{background:var(--acc2);box-shadow:0 8px 24px var(--shadow2);transform:translateY(-2px);}
+#start-btn:active{transform:scale(.97) translateY(0);}
+#setup-note{font-size:10px;color:var(--ink4);letter-spacing:.3px;font-weight:400;}
+
 /* Boot */
-#boot-scr{position:fixed;inset:0;z-index:300;background:var(--bg);display:none;flex-direction:column;padding:30px;gap:4px;font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--g1);text-shadow:0 0 8px var(--g1);}
-.boot-line{opacity:0;animation:boot-show .1s forwards;}
-@keyframes boot-show{to{opacity:1}}
-/* Tap splash */
-#tap-splash{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:rgba(8,12,8,.96);cursor:pointer;}
-#tap-icon{font-size:38px;animation:orb-pulse 2s ease-in-out infinite;}
-#tap-title{font-size:11px;letter-spacing:4px;color:var(--g1);text-shadow:0 0 10px var(--g1);}
-#tap-sub{font-size:9px;letter-spacing:2px;color:var(--t3);}
+#boot-scr{
+  position:fixed;inset:0;z-index:300;background:var(--bg);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:40px;
+}
+#boot-logo{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--acc);margin-bottom:20px;}
+.boot-bar{width:200px;height:2px;background:var(--brd);border-radius:1px;overflow:hidden;}
+.boot-fill{height:100%;background:var(--acc);width:0;transition:width .1s ease;border-radius:1px;}
+#boot-msg{font-size:11px;color:var(--ink4);letter-spacing:.5px;font-weight:500;margin-top:12px;}
+
+/* Tap */
+#tap-splash{
+  position:fixed;inset:0;z-index:400;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:rgba(250,248,245,.96);cursor:pointer;backdrop-filter:blur(8px);
+}
+#tap-logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:var(--acc);animation:logo-warm 2s ease-in-out infinite;}
+#tap-title{font-size:12px;letter-spacing:3px;color:var(--ink3);font-weight:500;}
+#tap-sub{font-size:10px;color:var(--ink4);}
 </style>
 </head>
 <body>
-<canvas id="matrix-canvas"></canvas>
-<div id="scan"></div>
 
 <!-- Setup -->
 <div id="api-scr">
-  <div id="setup-title">[ CIPHER SYSTEM v2.5 ]
-─────────────────────</div>
-  <div id="setup-name">CIPHER</div>
-  <div id="setup-sub">COGNITIVE INTELLIGENCE PERSONAL HUB</div>
-  <div id="setup-desc">ใส่ Anthropic API Key เพื่อเปิดใช้งาน<br/>คีย์จะถูกเก็บในอุปกรณ์นี้เท่านั้น</div>
+  <div id="setup-ornament">— PERSONAL AI ASSISTANT —</div>
+  <div id="setup-logo">CIPHER</div>
+  <div id="setup-sub">CLAUDE HAIKU · VISION · VOICE</div>
+  <div id="setup-line"></div>
+  <div id="setup-desc">ใส่ Anthropic API Key เพื่อเริ่มใช้งาน<br/>คีย์จะถูกเก็บในอุปกรณ์นี้เท่านั้น</div>
   <input id="api-inp" type="password" placeholder="sk-ant-···"/>
-  <button id="start-btn" onclick="saveKey()">[ INITIALIZE CIPHER ]</button>
-  <div id="setup-note">MODEL: Claude Haiku 4.5 · Anthropic · Built-in Web Search</div>
+  <button id="start-btn" onclick="saveKey()">เริ่มใช้งาน CIPHER</button>
+  <div id="setup-note">ปลอดภัย · ไม่มีการส่งข้อมูล · ฟรี</div>
 </div>
 
 <!-- Boot -->
-<div id="boot-scr"></div>
+<div id="boot-scr">
+  <div id="boot-logo">C</div>
+  <div class="boot-bar"><div class="boot-fill" id="boot-fill"></div></div>
+  <div id="boot-msg">กำลังเริ่มต้น...</div>
+</div>
 
 <!-- App -->
 <div id="app" style="display:none;flex-direction:column;height:100dvh;min-height:-webkit-fill-available;">
   <div id="header">
-    <div id="orb" onclick="replayLast()">⬡</div>
+    <div id="orb" onclick="replayLast()">C</div>
     <div id="name-block">
       <div id="ai-name">CIPHER</div>
-      <div id="ai-sub">COGNITIVE INTELLIGENCE · CLAUDE</div>
-      <div id="stat-row"><div id="spip"></div><span id="stat-txt">ONLINE</span></div>
+      <div id="ai-sub">Personal AI Assistant · Claude Haiku 4.5</div>
+      <div id="stat-row"><div id="spip"></div><span id="stat-txt">พร้อมใช้งาน</span></div>
     </div>
     <div id="hbtns">
-      <button class="hb red" id="stop-btn" onclick="stopSpeak()">⏹</button>
+      <button class="hb danger" id="stop-btn" onclick="stopSpeak()">⏹</button>
       <button class="hb" id="vbtn" onclick="toggleVoice()">🔊</button>
-      <button class="hb" onclick="clearKey()" style="font-size:9px;letter-spacing:0;">KEY</button>
+      <button class="hb" style="font-size:11px;letter-spacing:.5px;font-family:'DM Sans',sans-serif;font-weight:600;" onclick="clearKey()">KEY</button>
     </div>
   </div>
+
   <div id="sbar">
-    <div class="svc"><div class="sdot" id="api-dot"></div><span>CLAUDE</span></div>
-    <div class="svc" onclick="toggleTheme()">🎨 <span>THEME</span></div>
-    <div class="svc" onclick="changeFontSize()">📏 <span id="fs-lbl">14px</span></div>
-    <div class="svc" style="color:var(--red);" onclick="clearChat()">🗑️ <span>CLEAR</span></div>
+    <div class="svc"><div class="sdot" id="api-dot"></div><span>Claude</span></div>
+    <div class="svc" onclick="toggleTheme()">🎨 Theme</div>
+    <div class="svc" onclick="changeFontSize()">Aa <span id="fs-lbl">15px</span></div>
+    <div class="svc" style="color:var(--red);" onclick="clearChat()">🗑 ล้าง</div>
   </div>
+
   <div id="msgs">
     <div id="loading" style="display:none;flex-direction:row;">
-      <div id="ld-av">CI</div>
+      <div id="ld-av">C</div>
       <div id="ld-bub">
-        <div id="ld-lbl">PROCESSING<span id="cursor-blink"></span></div>
-        <div class="wave" id="ld-wave"></div>
+        <div class="dots">
+          <span></span><span></span><span></span>
+        </div>
       </div>
     </div>
   </div>
+
   <div id="inp-wrap">
     <div id="inp-box">
-      <span id="prompt-sym">&gt;_</span>
+      <img id="img-preview" alt="preview"/>
       <textarea id="msg-inp" rows="1" placeholder="พิมพ์หรือพูดกับ CIPHER..."></textarea>
       <button class="ab" id="mic-btn" onclick="toggleListen()" style="display:none;">🎤</button>
-      <button class="ab dim" id="send-btn" onclick="sendMsg()">▶</button>
+      <button class="ab" id="cam-btn" onclick="triggerCamera()">📷</button>
+      <button class="ab dim" id="send-btn" onclick="sendMsg()">↑</button>
     </div>
-    <div id="footer-txt">CIPHER · CLAUDE · <span id="ft-voice">VOICE ON</span></div>
+    <input type="file" id="file-inp" accept="image/*" capture="environment" style="display:none;" onchange="handleImage(this)"/>
+    <div id="footer-txt">CIPHER · <span id="ft-voice">เปิดเสียง</span> · Claude Haiku 4.5</div>
   </div>
 </div>
 
-<!-- Tap splash -->
 <div id="tap-splash" style="display:none;" onclick="onTap()">
-  <div id="tap-icon">⬡</div>
-  <div id="tap-title">[ TAP TO START ]</div>
-  <div id="tap-sub">แตะที่ไหนก็ได้เพื่อเริ่ม</div>
+  <div id="tap-logo">C</div>
+  <div id="tap-title">CIPHER</div>
+  <div id="tap-sub">แตะเพื่อเริ่มต้น</div>
 </div>
 
-<!-- Theme panel -->
 <div id="theme-panel">
-  <div style="font-size:8px;letter-spacing:2px;color:var(--t3);margin-bottom:2px;">THEME</div>
-  <button class="theme-btn" onclick="setTheme('green')">🟢 GREEN</button>
-  <button class="theme-btn" onclick="setTheme('amber')">🟡 AMBER</button>
-  <button class="theme-btn" onclick="setTheme('cyan')">🔵 CYAN</button>
-  <button class="theme-btn" onclick="setTheme('red')">🔴 RED</button>
-  <button class="theme-btn" onclick="setTheme('purple')">🟣 PURPLE</button>
+  <div style="font-size:10px;letter-spacing:.5px;color:var(--ink4);font-weight:600;margin-bottom:4px;">เลือกธีม</div>
+  <button class="theme-btn" onclick="setTheme('default')">🤍 Warm White</button>
+  <button class="theme-btn" onclick="setTheme('th-sage')">🌿 Sage Green</button>
+  <button class="theme-btn" onclick="setTheme('th-navy')">🌊 Deep Navy</button>
+  <button class="theme-btn" onclick="setTheme('th-rose')">🌹 Rose</button>
+  <button class="theme-btn" onclick="setTheme('th-dark')">🌑 Dark Mode</button>
 </div>
 
-<!-- Scroll -->
-<button id="scroll-top" onclick="scrollTop()">▲</button>
+<button id="scroll-top" onclick="scrollTop()">↑</button>
 
 <script>
 'use strict';
 
-// ── Config ──────────────────────────────────────────────────────
 const WORKER = 'https://cipher-proxy.akkarapon-tantrakul.workers.dev';
 const MODEL  = 'claude-haiku-4-5-20251001';
-const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI หญิงของคุณเอ็ม
-พูดภาษาไทยเสมอ ยกเว้นถ้าถามภาษาอื่น ใช้สรรพนาม "ฉัน" หรือ "ไซเฟอร์"
+const SYSTEM = `คุณคือไซเฟอร์ ผู้ช่วย AI หญิงของคุณเอ็ม ใช้สรรพนาม "ฉัน" หรือ "ไซเฟอร์"
+ตอบภาษาไทยเสมอ ยกเว้นถ้าถามภาษาอื่น
 ตอบกระชับ ตรงประเด็น เป็นข้อมูลจริง ไม่พูดเกินจำเป็น
-ใช้ "ค่ะ" หรือ "คะ" เฉพาะตอนที่เหมาะสม ไม่ต้องทุกประโยค
-เรียก "คุณเอ็ม" เฉพาะตอนทักทาย ห้ามใช้ "ครับ" เด็ดขาด
-สำคัญมาก: ถ้าถามเรื่องข้อมูลปัจจุบัน เช่น ราคา ข่าว อากาศ ผลกีฬา หรือข้อมูลที่เปลี่ยนแปลงได้ ให้ใช้ web_search tool ค้นหาก่อนตอบทุกครั้ง ห้ามตอบจากความรู้เดิม
+ใช้ "ค่ะ" หรือ "คะ" เฉพาะตอนที่เหมาะสม ห้ามใช้ "ครับ" เด็ดขาด
+เรียก "คุณเอ็ม" เฉพาะตอนทักทาย
+สำคัญ: ถ้าถามเรื่องข้อมูลปัจจุบัน ราคา ข่าว อากาศ ผลกีฬา ให้ใช้ web_search tool ค้นหาก่อนตอบทุกครั้ง
 รองรับไทย อังกฤษ จีน`;
 
-// ── State ────────────────────────────────────────────────────────
 let AKEY = localStorage.getItem('cipher_key') || '';
-let history = JSON.parse(localStorage.getItem('cipher_history_v2')||'[]');
+let history = JSON.parse(localStorage.getItem('cipher_history_v2') || '[]');
 let speaking=false, listening=false, autoSpeak=true, lastReply='';
 let voiceObj=null, voiceEN=null, voiceZH=null, audioUnlocked=false;
-let userLat=null, userLon=null, userCity='';
+let userCity='', pendingImg=null;
 const SY = window.speechSynthesis;
-
-// Font
 const FONT_SIZES=['12px','13px','14px','15px','16px','17px','18px'];
-let fontIdx=parseInt(localStorage.getItem('cipher_fontidx')||'2');
+let fontIdx=parseInt(localStorage.getItem('cipher_fontidx')||'3');
 
-// ── System with context ──────────────────────────────────────────
 function getSystem(){
   const now=new Date();
   const d=now.toLocaleDateString('th-TH',{weekday:'long',month:'long',day:'numeric'});
@@ -239,24 +492,39 @@ function getSystem(){
   return s;
 }
 
-// ── GPS ──────────────────────────────────────────────────────────
 function initGPS(){
   if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(async pos=>{
-    userLat=pos.coords.latitude.toFixed(4);
-    userLon=pos.coords.longitude.toFixed(4);
+    const lat=pos.coords.latitude.toFixed(4),lon=pos.coords.longitude.toFixed(4);
     try{
-      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLon}&format=json&accept-language=th`,{mode:'cors'});
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=th`,{mode:'cors'});
       const d=await r.json();
       const c=d.address?.city||d.address?.town||d.address?.suburb||'';
-      const co=d.address?.country||'';
-      userCity=c?`${c}, ${co}`:co||`${userLat},${userLon}`;
-    }catch{userCity=`${userLat},${userLon}`;}
-    console.log('[CIPHER] Location:', userCity);
+      userCity=c?`${c}, ${d.address?.country||''}`:(`${lat},${lon}`);
+    }catch{userCity=`${lat},${lon}`;}
   },()=>{},{timeout:8000,maximumAge:300000});
 }
 
-// ── TTS ──────────────────────────────────────────────────────────
+function triggerCamera(){document.getElementById('file-inp').click();}
+function handleImage(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    pendingImg={data:e.target.result.split(',')[1],type:file.type};
+    const prev=document.getElementById('img-preview');
+    prev.src=e.target.result;prev.style.display='block';
+    document.getElementById('msg-inp').placeholder='ถามเกี่ยวกับรูปนี้...';
+    resize();document.getElementById('msg-inp').focus();
+  };
+  reader.readAsDataURL(file);input.value='';
+}
+function clearImage(){
+  pendingImg=null;
+  const prev=document.getElementById('img-preview');
+  prev.style.display='none';prev.src='';
+  document.getElementById('msg-inp').placeholder='พิมพ์หรือพูดกับ CIPHER...';
+}
+
 function unlockAudio(){
   if(audioUnlocked||!SY)return;
   const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.rate=10;SY.speak(u);
@@ -266,31 +534,53 @@ function loadVoices(){
   if(!SY)return;
   const v=SY.getVoices();
   voiceObj=v.find(x=>/narisa/i.test(x.name))||v.find(x=>/kanya/i.test(x.name))||v.find(x=>/เปรมวดี|premwadee/i.test(x.name))||v.find(x=>/อัจฉรา|atchara/i.test(x.name))||v.find(x=>x.lang==='th-TH'&&!/pattara|นิวัฒน์|male/i.test(x.name))||v.find(x=>x.lang==='th-TH')||v.find(x=>x.lang.startsWith('th'))||null;
-  voiceEN=v.find(x=>/samantha/i.test(x.name))||v.find(x=>/karen/i.test(x.name))||v.find(x=>/zira/i.test(x.name))||v.find(x=>/hazel/i.test(x.name))||v.find(x=>x.lang==='en-GB')||v.find(x=>x.lang==='en-US')||v.find(x=>x.lang.startsWith('en'))||null;
+  voiceEN=v.find(x=>/samantha/i.test(x.name))||v.find(x=>/karen/i.test(x.name))||v.find(x=>/zira|hazel/i.test(x.name))||v.find(x=>x.lang==='en-GB')||v.find(x=>x.lang==='en-US')||v.find(x=>x.lang.startsWith('en'))||null;
   voiceZH=v.find(x=>x.lang==='zh-TW')||v.find(x=>x.lang==='zh-CN')||v.find(x=>x.lang.startsWith('zh'))||null;
-  console.log('[CIPHER] TH:', voiceObj?.name, '| EN:', voiceEN?.name, '| ZH:', voiceZH?.name);
 }
 if(SY){loadVoices();SY.onvoiceschanged=loadVoices;setTimeout(loadVoices,600);}
 
+function numToThai(n){
+  const num=parseFloat(String(n).replace(/,/g,''));
+  if(isNaN(num)||num>1e12)return n;
+  if(num<0)return'ลบ'+numToThai(-num);
+  const ones=['','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'];
+  const tens=['','สิบ','ยี่สิบ','สามสิบ','สี่สิบ','ห้าสิบ','หกสิบ','เจ็ดสิบ','แปดสิบ','เก้าสิบ'];
+  const parts=String(n).replace(/,/g,'').split('.');
+  const ip=parseInt(parts[0]);
+  let r='';
+  if(ip===0)r='ศูนย์';
+  else{
+    let x=ip;
+    if(x>=1000000){r+=numToThai(Math.floor(x/1000000))+'ล้าน';x%=1000000;}
+    if(x>=100000){r+=numToThai(Math.floor(x/100000))+'แสน';x%=100000;}
+    if(x>=10000){r+=numToThai(Math.floor(x/10000))+'หมื่น';x%=10000;}
+    if(x>=1000){r+=numToThai(Math.floor(x/1000))+'พัน';x%=1000;}
+    if(x>=100){r+=ones[Math.floor(x/100)]+'ร้อย';x%=100;}
+    if(x>=10){r+=tens[Math.floor(x/10)];x%=10;}
+    if(x>0)r+=(ip>=20&&ip%10===1?'เอ็ด':ones[x]);
+  }
+  if(parts[1])r+='จุด'+parts[1].split('').map(d=>ones[parseInt(d)]||'ศูนย์').join('');
+  return r;
+}
+
 function cleanText(t){
-  return t.replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27FF}]/gu,'')
+  return t
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27FF}]/gu,'')
     .replace(/[*_`#>~|\[\]{}]/g,'').replace(/https?:\/\/\S+/g,'')
     .replace(/···+/g,'').replace(/--+/g,' ')
+    .replace(/(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/g,m=>numToThai(m))
     .replace(/\bBTC\b/g,'บิตคอยน์').replace(/\bETH\b/g,'อีเธอเรียม')
     .replace(/\bAI\b/g,'เอไอ').replace(/\bAPI\b/g,'เอพีไอ')
-    .replace(/\bUI\b/g,'ยูไอ').replace(/\bGPS\b/g,'จีพีเอส')
-    .replace(/\bWiFi\b|\bwifi\b/g,'ไวไฟ').replace(/\bOK\b/gi,'โอเค')
-    .replace(/(\d+)%/g,'$1 เปอร์เซ็นต์').replace(/\$(\d)/g,'$1 ดอลลาร์')
-    .replace(/\s+/g,' ').trim();
+    .replace(/\bGPS\b/g,'จีพีเอส').replace(/\bWiFi\b|\bwifi\b/g,'ไวไฟ')
+    .replace(/\bOK\b/gi,'โอเค').replace(/(%)/g,' เปอร์เซ็นต์')
+    .replace(/\$/g,'ดอลลาร์ ').replace(/\s+/g,' ').trim();
 }
 function detectLang(t){
   const th=(t.match(/[\u0E00-\u0E7F]/g)||[]).length;
   const zh=(t.match(/[\u4E00-\u9FFF\u3400-\u4DBF]/g)||[]).length;
   const en=(t.match(/[a-zA-Z]/g)||[]).length;
   const tot=th+zh+en+0.1;
-  if(zh/tot>=0.3)return'zh';
-  if(th/tot>=0.3)return'th';
-  return'en';
+  if(zh/tot>=0.3)return'zh';if(th/tot>=0.3)return'th';return'en';
 }
 
 let kaTimer=null;
@@ -302,37 +592,28 @@ function speak(text){
   unlockAudio();SY.cancel();
   setTimeout(()=>{
     const c=cleanText(text);if(!c)return;
-    // Split by sentence AND by language change
-    const parts=c.split(/(?<=[.!?ๆ。！？])\s+|(?<=ค่ะ|นะคะ|คะ)\s+/u).filter(s=>s.trim());
+    const words=c.split(/\s+/);
     const chunks=[];let buf='',bufLang='';
-    for(const s of parts){
-      // Split further by language within each sentence
-      const words=s.split(/\s+/);
-      for(const w of words){
-        const l=detectLang(w);
-        if(l!==bufLang&&buf&&buf.trim().length>2){
-          chunks.push({t:buf.trim(),l:bufLang});buf='';
-        }
-        bufLang=l;buf+=w+' ';
-      }
+    for(const w of words){
+      const l=detectLang(w);
+      if(l!==bufLang&&buf.trim().length>2){chunks.push({t:buf.trim(),l:bufLang});buf='';}
+      bufLang=l;buf+=w+' ';
     }
     if(buf.trim())chunks.push({t:buf.trim(),l:bufLang||'th'});
-    if(!chunks.length)return;
     let i=0;
     const nxt=()=>{
       if(i>=chunks.length){setSp(false);stopKA();return;}
       const ch=chunks[i++];const isZH=ch.l==='zh';const isEN=ch.l==='en';
       const u=new SpeechSynthesisUtterance(ch.t);
       if(isZH){u.voice=voiceZH||voiceObj;u.lang='zh-TW';u.rate=1.2;u.pitch=1.0;}
-      else if(isEN){u.voice=voiceEN||voiceObj;u.lang='en-GB';u.rate=1.15;u.pitch=1.05;}
-      else{u.voice=voiceObj;u.lang='th-TH';u.rate=1.2;u.pitch=1.0;}
+      else if(isEN){u.voice=voiceEN||voiceObj;u.lang='en-GB';u.rate=1.1;u.pitch=1.05;}
+      else{u.voice=voiceObj;u.lang='th-TH';u.rate=1.15;u.pitch=1.0;}
       u.volume=1;
       if(i===1)u.onstart=()=>{setSp(true);startKA();};
       u.onend=nxt;
       u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled'){setTimeout(nxt,50);return;}setSp(false);stopKA();};
       SY.speak(u);
-    };
-    nxt();
+    };nxt();
   },200);
 }
 function stopSpeak(){SY&&SY.cancel();setSp(false);stopKA();}
@@ -340,15 +621,10 @@ function replayLast(){if(lastReply){unlockAudio();speak(lastReply);}}
 function setSp(v){
   speaking=v;
   document.getElementById('stop-btn').style.display=v?'flex':'none';
-  setStat(v?'SPEAKING':listening?'LISTENING':'ONLINE',v?'var(--g1)':listening?'var(--red)':'');
+  setStat(v?'กำลังพูด':listening?'กำลังฟัง':'พร้อมใช้งาน');
 }
-function setStat(t,c){
-  document.getElementById('stat-txt').textContent=t;
-  const p=document.getElementById('spip');
-  p.style.background=c||'var(--g1)';p.style.boxShadow=`0 0 6px ${c||'var(--g1)'}`;
-}
+function setStat(t){document.getElementById('stat-txt').textContent=t;}
 
-// ── STT ──────────────────────────────────────────────────────────
 let rec=null;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){
@@ -363,27 +639,31 @@ function setLis(v){
   document.getElementById('inp-box').classList.toggle('mic-on',v);
   document.getElementById('mic-btn').classList.toggle('mic-on',v);
   document.getElementById('msg-inp').placeholder=v?'🎤 กำลังฟัง...':'พิมพ์หรือพูดกับ CIPHER...';
-  setStat(v?'LISTENING':'ONLINE',v?'var(--red)':'');
+  setStat(v?'กำลังฟัง':'พร้อมใช้งาน');
 }
 
-// ── Render ────────────────────────────────────────────────────────
-function addMsg(role,content){
+function addMsg(role,content,imgSrc){
   const isU=role==='user';
   const d=document.createElement('div');d.className='msg'+(isU?' usr':'');
-  const av=document.createElement('div');av.className='av '+(isU?'usr-av':'ai-av');av.textContent=isU?'YOU':'CI';
+  const av=document.createElement('div');av.className='av '+(isU?'usr-av':'ai-av');
+  av.textContent=isU?'คุณ':'C';
   const bd=document.createElement('div');bd.className='mb';
   const lb=document.createElement('div');lb.className='ml';
-  const now=new Date();
-  lb.textContent=isU?'[ YOU ]':'[ CIPHER ]';
-  const tm=document.createElement('span');tm.className='msg-time';tm.textContent=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  lb.textContent=isU?'คุณเอ็ม':'CIPHER';
+  const tm=document.createElement('span');tm.className='msg-time';
+  tm.textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
   lb.appendChild(tm);
   const bb=document.createElement('div');bb.className='bub '+(isU?'usr-b':'ai-b');
-  bb.title='แตะเพื่อ copy';
-  bb.onclick=()=>copyBubble(content);
+  bb.onclick=()=>copyBubble(content);bb.title='แตะเพื่อคัดลอก';
   const tx=document.createElement('span');bb.appendChild(tx);
+  if(imgSrc){
+    const img=document.createElement('img');img.src=imgSrc;
+    img.style.cssText='max-width:200px;max-height:160px;border-radius:10px;margin-top:8px;display:block;';
+    bb.appendChild(img);
+  }
   bd.appendChild(lb);bd.appendChild(bb);
   if(!isU&&SY){
-    const rb=document.createElement('button');rb.className='rbtn';rb.textContent='[ REPLAY ]';
+    const rb=document.createElement('button');rb.className='rbtn';rb.textContent='เล่นซ้ำ';
     rb.onclick=()=>{unlockAudio();speak(content);};bd.appendChild(rb);
   }
   d.appendChild(av);d.appendChild(bd);
@@ -393,125 +673,100 @@ function addMsg(role,content){
   else{tx.textContent=content;scrollBottom();}
 }
 
-function typewriter(el,text,speed=16){
+function typewriter(el,text,speed=14){
   el.textContent='';
   const cur=document.createElement('span');cur.className='type-cursor';el.appendChild(cur);
   let i=0;
   const go=()=>{
-    if(i<text.length){
-      el.insertBefore(document.createTextNode(text[i++]),cur);
-      setTimeout(go,text[i-1].match(/[ๆ.!?\n]/)?speed*3:speed);
-    }else{cur.remove();}
+    if(i<text.length){el.insertBefore(document.createTextNode(text[i++]),cur);setTimeout(go,text[i-1].match(/[ๆ.!?\n]/)?speed*3:speed);}
+    else cur.remove();
   };go();
 }
 
-function setLoad(v){
-  document.getElementById('loading').style.display=v?'flex':'none';
-  if(v)setTimeout(scrollBottom,50);
-}
-function scrollBottom(){
-  const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;
-}
-function scrollTop(){
-  document.getElementById('msgs').scrollTo({top:0,behavior:'smooth'});
-}
+function setLoad(v){document.getElementById('loading').style.display=v?'flex':'none';if(v)setTimeout(scrollBottom,50);}
+function scrollBottom(){const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;}
+function scrollTop(){document.getElementById('msgs').scrollTo({top:0,behavior:'smooth'});}
 function copyBubble(t){
-  navigator.clipboard.writeText(t).catch(()=>{}).finally(()=>{
-    const el=document.createElement('div');el.className='copy-toast';el.textContent='[ COPIED ]';
-    document.body.appendChild(el);setTimeout(()=>el.remove(),1500);
-  });
+  navigator.clipboard.writeText(t).catch(()=>{});
+  const el=document.createElement('div');el.className='copy-toast';el.textContent='คัดลอกแล้ว ✓';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1500);
 }
 
-// ── API ──────────────────────────────────────────────────────────
-async function callClaude(messages){
-  const apiMsgs=messages.map(m=>({role:m.role,content:m.content}));
+async function callClaude(messages,imgData){
+  const apiMsgs=messages.map((m,i,arr)=>{
+    if(imgData&&i===arr.length-1&&m.role==='user'){
+      return{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:imgData.type,data:imgData.data}},
+        {type:'text',text:m.content}
+      ]};
+    }
+    return{role:m.role,content:m.content};
+  });
   let reply='';
-
   for(let turn=0;turn<8;turn++){
     const res=await fetch(WORKER,{
       method:'POST',mode:'cors',
       headers:{'Content-Type':'application/json','x-api-key':AKEY},
       body:JSON.stringify({
-        model:MODEL,max_tokens:1024,
-        system:getSystem(),
+        model:MODEL,max_tokens:1024,system:getSystem(),
         messages:apiMsgs,
         tools:[{type:'web_search_20250305',name:'web_search',max_uses:5}]
       })
     });
     const data=await res.json();
-    const stop=data.stop_reason;
-    const blocks=data.content||[];
-    console.log('[CIPHER] turn',turn,'status:',res.status,'stop:',stop,'blocks:',blocks.map(b=>b.type));
-
+    const stop=data.stop_reason;const blocks=data.content||[];
+    console.log('[CIPHER] turn',turn,'stop:',stop,'types:',blocks.map(b=>b.type));
     if(!res.ok){
       const et=data?.error?.type||'';const em=data?.error?.message||'';
-      if(et==='authentication_error')return 'API Key ไม่ถูกต้อง กด KEY แล้วใส่ใหม่';
-      if(et==='insufficient_quota'||em.includes('credit'))return 'เครดิตหมด เติมได้ที่ console.anthropic.com';
-      if(et==='rate_limit_error')return 'ส่งเร็วเกินไป รอแป๊บแล้วลองใหม่';
-      return `เกิดปัญหา (${res.status}): ${em}`;
+      if(et==='authentication_error')return'API Key ไม่ถูกต้อง กด KEY แล้วใส่ใหม่';
+      if(et==='insufficient_quota'||em.includes('credit'))return'เครดิตหมด เติมได้ที่ console.anthropic.com';
+      if(et==='rate_limit_error')return'ส่งเร็วเกินไป รอแป๊บแล้วลองใหม่';
+      return`เกิดปัญหา: ${em}`;
     }
-
-    // Collect text
-    for(const b of blocks){
-      if(b.type==='text') reply+=b.text;
-    }
-
-    if(stop==='end_turn') break;
-
+    for(const b of blocks){if(b.type==='text')reply+=b.text;}
+    if(stop==='end_turn')break;
     if(stop==='tool_use'){
-      // ส่ง assistant message + tool_result กลับ
       apiMsgs.push({role:'assistant',content:blocks});
-      const results=blocks
-        .filter(b=>b.type==='tool_use')
-        .map(b=>({type:'tool_result',tool_use_id:b.id,content:''}));
-      if(results.length>0){
-        apiMsgs.push({role:'user',content:results});
-        reply=''; // รอผลจาก turn ถัดไป
-        continue;
-      }
+      const results=blocks.filter(b=>b.type==='tool_use').map(b=>({type:'tool_result',tool_use_id:b.id,content:''}));
+      if(results.length>0){apiMsgs.push({role:'user',content:results});reply='';continue;}
     }
     break;
   }
-
-  console.log('[CIPHER] final reply length:',reply.length);
   return reply||'ไม่ได้รับคำตอบ ลองใหม่อีกครั้ง';
 }
 
-// ── Send ─────────────────────────────────────────────────────────
 async function sendMsg(){
   const inp=document.getElementById('msg-inp');
-  const t=inp.value.trim();if(!t)return;
-  inp.value='';resize();stopSpeak();unlockAudio();
-  history.push({role:'user',content:t});
-  addMsg('user',t);
-  setLoad(true);setStat('PROCESSING','var(--g2)');
+  const t=inp.value.trim();
+  if(!t&&!pendingImg)return;
+  const msgText=t||(pendingImg?'วิเคราะห์รูปนี้':'');
+  const imgForDisplay=pendingImg?`data:${pendingImg.type};base64,${pendingImg.data}`:null;
+  const imgForAPI=pendingImg;
+  inp.value='';resize();stopSpeak();unlockAudio();clearImage();
+  history.push({role:'user',content:msgText});
+  addMsg('user',msgText,imgForDisplay);
+  setLoad(true);setStat('กำลังประมวลผล...');
   try{
-    const reply=await callClaude(history.slice(-20));
+    const reply=await callClaude(history.slice(-20),imgForAPI);
     history.push({role:'assistant',content:reply});
     if(history.length>40)history=history.slice(-40);
     localStorage.setItem('cipher_history_v2',JSON.stringify(history));
-    addMsg('assistant',reply);
-    lastReply=reply;speak(reply);
+    addMsg('assistant',reply);lastReply=reply;speak(reply);
   }catch(e){
-    console.error('[CIPHER] error:',e);
     const em='เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง';
-    history.push({role:'assistant',content:em});
-    addMsg('assistant',em);speak(em);
-  }finally{
-    setLoad(false);setStat('ONLINE','');
-  }
+    history.push({role:'assistant',content:em});addMsg('assistant',em);
+  }finally{setLoad(false);setStat('พร้อมใช้งาน');}
 }
 
-// ── Controls ──────────────────────────────────────────────────────
 function toggleVoice(){
   autoSpeak=!autoSpeak;if(!autoSpeak)stopSpeak();
   document.getElementById('vbtn').textContent=autoSpeak?'🔊':'🔇';
   document.getElementById('vbtn').classList.toggle('off',!autoSpeak);
-  document.getElementById('ft-voice').textContent=autoSpeak?'VOICE ON':'VOICE OFF';
+  document.getElementById('ft-voice').textContent=autoSpeak?'เปิดเสียง':'ปิดเสียง';
 }
 function toggleTheme(){document.getElementById('theme-panel').classList.toggle('show');}
 function setTheme(t){
-  document.body.className='';if(t!=='green')document.body.classList.add('theme-'+t);
+  document.body.className='';if(t!=='default')document.body.classList.add(t);
   localStorage.setItem('cipher_theme',t);
   document.getElementById('theme-panel').classList.remove('show');
 }
@@ -522,23 +777,22 @@ function changeFontSize(){
   localStorage.setItem('cipher_fontidx',fontIdx);
 }
 function clearChat(){
-  if(!confirm('ลบประวัติทั้งหมดไหม?'))return;
+  if(!confirm('ลบประวัติการสนทนาทั้งหมดไหม?'))return;
   history=[];localStorage.removeItem('cipher_history_v2');
   const m=document.getElementById('msgs'),l=document.getElementById('loading');
   while(m.firstChild&&m.firstChild!==l)m.removeChild(m.firstChild);
-  const g='ล้างประวัติแล้ว';history.push({role:'assistant',content:g});addMsg('assistant',g);
+  const g='ล้างประวัติแล้วค่ะ';history.push({role:'assistant',content:g});addMsg('assistant',g);
 }
 function resize(){
-  const e=document.getElementById('msg-inp');e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';
-  document.getElementById('send-btn').classList.toggle('dim',!e.value.trim());
+  const e=document.getElementById('msg-inp');e.style.height='auto';
+  e.style.height=Math.min(e.scrollHeight,120)+'px';
+  document.getElementById('send-btn').classList.toggle('dim',!e.value.trim()&&!pendingImg);
 }
 
-// ── Startup ──────────────────────────────────────────────────────
 function saveKey(){
   const k=document.getElementById('api-inp').value.trim();
   if(!k){alert('กรุณาใส่ API Key');return;}
-  unlockAudio();AKEY=k;localStorage.setItem('cipher_key',k);
-  runBoot();
+  unlockAudio();AKEY=k;localStorage.setItem('cipher_key',k);runBoot();
 }
 function clearKey(){
   if(!confirm('เปลี่ยน API Key ใหม่ไหม?'))return;
@@ -554,79 +808,60 @@ document.addEventListener('click',e=>{
 
 function runBoot(){
   document.getElementById('api-scr').style.display='none';
-  const boot=document.getElementById('boot-scr');boot.style.display='flex';boot.innerHTML='';
-  const lines=['> CIPHER SYSTEM v2.5','> INITIALIZING...','> CLAUDE HAIKU 4.5... OK','> VOICE ENGINE... OK','> GPS MODULE... OK','> ALL SYSTEMS NOMINAL','> WELCOME, คุณเอ็ม',''];
+  const boot=document.getElementById('boot-scr');boot.style.display='flex';
+  const fill=document.getElementById('boot-fill');
+  const msg=document.getElementById('boot-msg');
+  const steps=[
+    [10,'เริ่มต้นระบบ...'],
+    [30,'โหลด Claude Haiku 4.5...'],
+    [55,'เตรียม Voice Engine...'],
+    [75,'เชื่อมต่อ Web Search...'],
+    [90,'ตรวจสอบ GPS...'],
+    [100,'พร้อมแล้ว!']
+  ];
   let i=0;
   const next=()=>{
-    if(i>=lines.length){
-      boot.style.opacity='0';boot.style.transition='opacity .4s';
-      setTimeout(()=>{boot.style.display='none';boot.style.opacity='1';startApp();},400);return;
+    if(i>=steps.length){
+      setTimeout(()=>{
+        boot.style.opacity='0';boot.style.transition='opacity .4s';
+        setTimeout(()=>{boot.style.display='none';boot.style.opacity='1';startApp();},400);
+      },300);return;
     }
-    const dv=document.createElement('div');dv.className='boot-line';dv.textContent=lines[i++];boot.appendChild(dv);
-    setTimeout(next,lines[i-1]===''?200:120);
+    const[pct,text]=steps[i++];
+    fill.style.width=pct+'%';msg.textContent=text;
+    setTimeout(next,i===steps.length?400:250);
   };next();
 }
 
 function startApp(){
   document.getElementById('app').style.display='flex';
   initGPS();
-  const t=localStorage.getItem('cipher_theme');if(t&&t!=='green')document.body.classList.add('theme-'+t);
+  const t=localStorage.getItem('cipher_theme');
+  if(t&&t!=='default')document.body.classList.add(t);
   document.documentElement.style.setProperty('--fs',FONT_SIZES[fontIdx]);
   document.getElementById('fs-lbl').textContent=FONT_SIZES[fontIdx];
   document.getElementById('api-dot').classList.toggle('off',!AKEY);
-
-  // Restore history
-  if(history.length>0){
-    history.forEach(m=>addMsg(m.role,m.content));
-  }
-
-  // Greeting
+  if(history.length>0)history.forEach(m=>addMsg(m.role,m.content));
   const h=new Date().getHours();
   const gt=h<12?'อรุณสวัสดิ์':h<17?'สวัสดีตอนบ่าย':h<21?'สวัสดีตอนเย็น':'สวัสดีตอนดึก';
-  const g=`${gt} คุณเอ็ม CIPHER พร้อมแล้ว`;
-  history.push({role:'assistant',content:g});
-  addMsg('assistant',g);lastReply=g;
-
-  // Scroll buttons
-  const m=document.getElementById('msgs');
-  m.addEventListener('scroll',()=>{
-    const btn=document.getElementById('scroll-top');
-    if(btn)btn.style.display=m.scrollTop>200?'flex':'none';
+  const g=`${gt} คุณเอ็ม ไซเฟอร์พร้อมช่วยเหลือแล้วค่ะ`;
+  history.push({role:'assistant',content:g});addMsg('assistant',g);lastReply=g;
+  document.getElementById('msgs').addEventListener('scroll',()=>{
+    document.getElementById('scroll-top').style.display=
+      document.getElementById('msgs').scrollTop>200?'flex':'none';
   });
-
-  // Try speak after tap
   document.getElementById('tap-splash').style.display='flex';
 }
-
 function onTap(){
   const s=document.getElementById('tap-splash');
   unlockAudio();s.style.opacity='0';s.style.transition='opacity .3s';
   setTimeout(()=>s.style.display='none',300);
-  const try_speak=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(lastReply);else setTimeout(()=>try_speak(n+1),400);};
-  setTimeout(()=>try_speak(0),200);
+  const ts=(n)=>{if(n>10)return;if(voiceObj&&SY)speak(lastReply);else setTimeout(()=>ts(n+1),400);};
+  setTimeout(()=>ts(0),200);
 }
 
-// ── Matrix ────────────────────────────────────────────────────────
 (function(){
-  const cv=document.getElementById('matrix-canvas');if(!cv)return;
-  const ctx=cv.getContext('2d');let cols,drops;
-  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｦｧｨｩｪｫｬｭｮｯﾀﾁﾂﾃﾄ';
-  function init(){cv.width=window.innerWidth;cv.height=window.innerHeight;cols=Math.floor(cv.width/16);drops=Array(cols).fill(1);}
-  function draw(){ctx.fillStyle='rgba(8,12,8,0.05)';ctx.fillRect(0,0,cv.width,cv.height);ctx.fillStyle='#00ff41';ctx.font='14px Share Tech Mono,monospace';drops.forEach((y,i)=>{const ch=chars[Math.floor(Math.random()*chars.length)];ctx.fillText(ch,i*16,y*16);if(y*16>cv.height&&Math.random()>0.975)drops[i]=0;drops[i]++;});}
-  init();window.addEventListener('resize',init);setInterval(draw,50);
-})();
-
-// ── Wave ──────────────────────────────────────────────────────────
-(function(){
-  const c=document.getElementById('ld-wave');
-  [2,4,7,5,9,6,4,8,5,3].forEach((h,i)=>{
-    const s=document.createElement('span');s.style.height=h*2+'px';s.style.animationDelay=i*.09+'s';c.appendChild(s);
-  });
-})();
-
-// ── Init ──────────────────────────────────────────────────────────
-(function(){
-  const t=localStorage.getItem('cipher_theme');if(t&&t!=='green')document.body.classList.add('theme-'+t);
+  const t=localStorage.getItem('cipher_theme');if(t&&t!=='default')document.body.classList.add(t);
   document.documentElement.style.setProperty('--fs',FONT_SIZES[fontIdx]);
   if(AKEY)runBoot();
 })();
