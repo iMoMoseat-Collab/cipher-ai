@@ -408,6 +408,7 @@ body::before{
     </div>
     <div id="hbtns">
       <button class="hb danger" id="stop-btn" onclick="stopSpeak()">⏹</button>
+      <button class="hb" id="pause-btn" onclick="togglePause()" style="display:none;">⏸</button>
       <button class="hb" id="vbtn" onclick="toggleVoice()">🔊</button>
       <button class="hb" style="font-size:11px;letter-spacing:.5px;font-family:'DM Sans',sans-serif;font-weight:600;" onclick="clearKey()">KEY</button>
     </div>
@@ -469,7 +470,7 @@ const MODEL  = 'claude-haiku-4-5-20251001';
 const SYSTEM = `You are CIPHER, a female AI assistant for คุณเอ็ม.
 CRITICAL RULES:
 - Always respond in Thai language unless asked otherwise
-- You are female. NEVER use "ครับ". Only use "ค่ะ" or "คะ" when appropriate, not every sentence
+- You are female. STRICTLY FORBIDDEN to use "ครับ" ever. Use only "ค่ะ" or "คะ" sparingly and naturally
 - Refer to yourself as "ไซเฟอร์" or "ฉัน"
 - Address user as "คุณเอ็ม" only when greeting
 - Be concise, accurate, direct. No filler words
@@ -618,11 +619,36 @@ function speak(text){
     };nxt();
   },200);
 }
-function stopSpeak(){SY&&SY.cancel();setSp(false);stopKA();}
+function stopSpeak(){SY&&SY.cancel();setSp(false);stopKA();paused=false;document.getElementById('pause-btn').textContent='⏸';}
+
+let paused=false, typingActive=false, typingStop=false;
+function togglePause(){
+  // หยุด typewriter ถ้ากำลังแสดงอยู่
+  if(typingActive){
+    typingStop=true;
+    if(SY&&speaking){SY.pause();paused=true;document.getElementById('pause-btn').textContent='▶';}
+    else{document.getElementById('pause-btn').style.display='none';}
+    setStat('พร้อมใช้งาน');
+    return;
+  }
+  // หยุด/เล่นต่อเสียง
+  if(!SY||!speaking)return;
+  if(paused){
+    SY.resume();paused=false;
+    document.getElementById('pause-btn').textContent='⏸';
+    setStat('กำลังพูด');
+  }else{
+    SY.pause();paused=true;
+    document.getElementById('pause-btn').textContent='▶';
+    setStat('หยุดชั่วคราว');
+  }
+}
 function replayLast(){if(lastReply){unlockAudio();speak(lastReply);}}
 function setSp(v){
   speaking=v;
   document.getElementById('stop-btn').style.display=v?'flex':'none';
+  document.getElementById('pause-btn').style.display=v?'flex':'none';
+  if(!v){paused=false;document.getElementById('pause-btn').textContent='⏸';}
   setStat(v?'กำลังพูด':listening?'กำลังฟัง':'พร้อมใช้งาน');
 }
 function setStat(t){document.getElementById('stat-txt').textContent=t;}
@@ -671,21 +697,37 @@ function addMsg(role,content,imgSrc){
   d.appendChild(av);d.appendChild(bd);
   const mArea=document.getElementById('msgs');
   mArea.insertBefore(d,document.getElementById('loading'));
-  if(!isU){setTimeout(()=>{typewriter(tx,content);scrollBottom();},50);}
+  if(!isU){
+    setTimeout(()=>{
+      document.getElementById('pause-btn').style.display='flex';
+      typewriter(tx,content);
+      scrollBottom();
+    },50);
+  }
   else{tx.textContent=content;scrollBottom();}
 }
 
 function typewriter(el,text,speed=14){
-  el.textContent='';
+  el.textContent='';typingStop=false;typingActive=true;
   const cur=document.createElement('span');cur.className='type-cursor';el.appendChild(cur);
   let i=0;
   const go=()=>{
+    if(typingStop){
+      // หยุด typewriter ทันที แสดงข้อความทั้งหมด
+      el.insertBefore(document.createTextNode(text.slice(i)),cur);
+      cur.remove();typingActive=false;return;
+    }
     if(i<text.length){el.insertBefore(document.createTextNode(text[i++]),cur);setTimeout(go,text[i-1].match(/[ๆ.!?\n]/)?speed*3:speed);}
-    else cur.remove();
+    else{cur.remove();typingActive=false;}
   };go();
 }
 
-function setLoad(v){document.getElementById('loading').style.display=v?'flex':'none';if(v)setTimeout(scrollBottom,50);}
+function setLoad(v){
+  document.getElementById('loading').style.display=v?'flex':'none';
+  if(v)setTimeout(scrollBottom,50);
+  // แสดงปุ่ม pause ตอน loading
+  if(!v&&!speaking)document.getElementById('pause-btn').style.display='none';
+}
 function scrollBottom(){const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;}
 function scrollTop(){document.getElementById('msgs').scrollTo({top:0,behavior:'smooth'});}
 function copyBubble(t){
@@ -717,7 +759,7 @@ async function callClaude(messages,imgData){
     });
     const data=await res.json();
     const stop=data.stop_reason;const blocks=data.content||[];
-    console.log('[CIPHER] turn',turn,'stop:',stop,'types:',blocks.map(b=>b.type));
+
     if(!res.ok){
       const et=data?.error?.type||'';const em=data?.error?.message||'';
       if(et==='authentication_error')return'API Key ไม่ถูกต้อง กด KEY แล้วใส่ใหม่';
