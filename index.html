@@ -565,140 +565,38 @@ function typewriter(el,text,speed=16,cb){
 // ── API Proxy Gateway ───────────────────────────────────────────
 
 async function callAnthropic(messages){
-  let reply='', web=false;
   const apiMsgs=messages.map(m=>({role:m.role,content:m.content}));
-  for(let turn=0;turn<6;turn++){
+  try{
     const res=await fetch(WORKER_URL,{
-      method:'POST',mode:'cors',
+      method:'POST',
+      mode:'cors',
       headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY},
       body:JSON.stringify({
-        model:MODEL,max_tokens:1024,
+        model:MODEL,
+        max_tokens:1024,
         system:getSystemWithContext(),
-        messages:apiMsgs,
-        tools:[{type:'web_search_20250305',name:'web_search'}]
+        messages:apiMsgs
       })
     });
     const data=await res.json();
-    console.log('[CIPHER] API response:', data?.stop_reason, 'content blocks:', data?.content?.length, 'full:', JSON.stringify(data?.content?.slice(0,2)));
+    console.log('[CIPHER] status:', res.status, 'stop:', data.stop_reason, 'blocks:', data.content?.length);
     if(!res.ok){
-      const et=data?.error?.type||'';const em=data?.error?.message||'unknown';
+      const et=data?.error?.type||'';
+      const em=data?.error?.message||'unknown';
       if(et==='authentication_error')return{text:'API Key ไม่ถูกต้อง กด KEY แล้วใส่ใหม่'};
       if(et==='insufficient_quota'||em.includes('credit'))return{text:'เครดิตหมด เติมได้ที่ console.anthropic.com'};
       if(et==='rate_limit_error')return{text:'ส่งเร็วเกินไป รอแป๊บแล้วลองใหม่'};
       return{text:`เกิดปัญหา: ${em}`};
     }
-    const stopReason = data.stop_reason;
-    console.log('[CIPHER] turn', turn, 'stop_reason:', stopReason, 'blocks:', data.content?.map(b=>b.type));
-
-    for(const b of(data.content||[])){
-      if(b.type==='text') reply+=b.text;
-      if(b.type==='tool_use'&&b.name==='web_search') web=true;
-      if(b.type==='server_tool_use') web=true;
-      if(b.type==='tool_result'||b.type==='web_search_tool_result') web=true;
-    }
-
-    if(stopReason==='end_turn'){
-      break; // จบแล้ว
-    }
-
-    if(stopReason==='tool_use'){
-      // Claude ใช้ tool - ต้องส่ง tool_result กลับ
-      apiMsgs.push({role:'assistant', content:data.content});
-      const toolBlocks = (data.content||[]).filter(b=>b.type==='tool_use');
-      const toolResults = toolBlocks.map(tb=>({
-        type:'tool_result',
-        tool_use_id:tb.id,
-        content:'Search executed successfully.'
-      }));
-      if(toolResults.length>0){
-        apiMsgs.push({role:'user', content:toolResults});
-        reply=''; // reset reply รอผลจาก loop ถัดไป
-        continue;
-      }
-    }
-
-    // stop_reason อื่นๆ หยุด
-    break;
+    const reply=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    console.log('[CIPHER] reply length:', reply.length);
+    return{text:reply,web:false};
+  }catch(e){
+    console.error('[CIPHER] fetch error:',e);
+    return{text:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'};
   }
-  console.log('[CIPHER] reply:', reply, 'web:', web, 'length:', reply.length);
-  return{text:reply,web};
 }
 
-function updateDot(id,on){const d=document.getElementById(id+'-dot');if(d)d.classList.toggle('off',!on);}
-function updateStatus(){updateDot('groq',!!ANTHROPIC_KEY);}
-
-// ── GPS Location ─────────────────────────────────────────────────
-function initLocation(){
-  if(!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    userLat=pos.coords.latitude.toFixed(4);
-    userLon=pos.coords.longitude.toFixed(4);
-    // ลอง Nominatim ก่อน ถ้าไม่ได้ใช้ lat/lon เลย
-    try{
-      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLon}&format=json&accept-language=th`,{mode:'cors'});
-      const d=await r.json();
-      const city=d.address?.city||d.address?.town||d.address?.suburb||d.address?.county||'';
-      const country=d.address?.country||'';
-      userCity=city?`${city}, ${country}`:country||`${userLat}, ${userLon}`;
-    }catch(e){
-      // Nominatim ไม่ได้ ใช้ lat/lon แทน
-      userCity=`${userLat}, ${userLon}`;
-    }
-    console.log('[CIPHER] Location:', userCity);
-  },(err)=>{
-    console.log('[CIPHER] Location denied:', err.message);
-  },{timeout:10000,maximumAge:300000,enableHighAccuracy:false});
-}
-
-function getSystemWithContext(){
-  const now=new Date();
-  const dateStr=now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const timeStr=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-  let ctx=SYSTEM+`
-
-วันและเวลาปัจจุบัน: ${dateStr} เวลา ${timeStr} น. (ปี ${now.getFullYear()})`;
-  if(userCity) ctx+=`
-ตำแหน่งปัจจุบัน: ${userCity} (lat:${userLat}, lon:${userLon})`;
-  return ctx;
-}
-
-// ── Phone & Maps Detection ────────────────────────────────────────
-function enrichMessage(text){
-  // แปลงเบอร์โทรเป็น link
-  text=text.replace(/(0[0-9]{1,2}[-\s]?[0-9]{3,4}[-\s]?[0-9]{3,4})/g,
-    '<a href="tel:$1" style="color:var(--g1);text-decoration:underline;cursor:pointer">📞 $1</a>');
-  // แปลง URL เป็น link
-  text=text.replace(/(https?:\/\/[^\s]+)/g,
-    '<a href="$1" target="_blank" style="color:var(--g1);text-decoration:underline">$1</a>');
-  return text;
-}
-
-function extractPlaces(text){
-  const places=new Set();
-  const patterns=[
-    // สถานที่ขึ้นต้นด้วยคำนำหน้า
-    /(?:โรงพยาบาล|รพ\.?|วัด|ห้าง|ร้าน|โรงเรียน|มหาวิทยาลัย|สนามบิน|ท่าอากาศยาน|ศาล|สถานี|ตลาด|ห้องสมุด|พิพิธภัณฑ์|สวนสาธารณะ|อุทยาน|เขาหรือดอย|ชายหาด|หาด|เกาะ|น้ำตก|ถ้ำ)[ก-๙a-zA-Z\s]{1,25}/g,
-    // ชื่อ + จังหวัด/อำเภอ
-    /[ก-๙a-zA-Z][ก-๙a-zA-Z\s]{1,15}(?:จังหวัด|อำเภอ|เขต|แขวง|ตำบล)/g,
-    // ที่/ใกล้/แถว/ย่าน + ชื่อสถานที่
-    /(?:ที่|ใกล้|บริเวณ|แถว|ย่าน|ใน|จาก|ไป)\s+([ก-๙][ก-๙\s]{2,20})/g,
-    // ชื่อสถานที่ท่องเที่ยวที่รู้จักกัน
-    /(?:ดอย|เขา|หาด|เกาะ|น้ำตก|อ่าว|แหลม|ถ้ำ)[ก-๙a-zA-Z\s]{1,20}/g,
-    // ย่าน/ถนน
-    /(?:ถนน|ซอย|ย่าน)[ก-๙a-zA-Z\s]{1,20}/g,
-  ];
-  for(const p of patterns){
-    let m;p.lastIndex=0;
-    while((m=p.exec(text))!==null){
-      const place=(m[1]||m[0]).trim().replace(/\s+/g,' ').replace(/[.,:;!?]+$/,'');
-      if(place.length>2&&place.length<30) places.add(place);
-    }
-  }
-  return [...places].slice(0,3);
-}
-
-
-// ── Core Operations ───────────────────────────────────────────────
 async function sendMsg(){
   const el=document.getElementById('msg-inp');const val=el.value.trim();if(!val)return;
   el.value='';resize();stopSpeak();
