@@ -121,7 +121,7 @@ body::before{
 /* Messages */
 #msgs{
   flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:20px 16px 12px;
+  padding:16px 12px 12px;
   display:flex;flex-direction:column;gap:16px;
   position:relative;z-index:5;
   -webkit-overflow-scrolling:touch;
@@ -160,14 +160,15 @@ body::before{
   font-family:'DM Sans',sans-serif;font-size:10px;
   box-shadow:0 2px 8px var(--shadow);
 }
-.mb{max-width:80%;display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
+.mb{max-width:78%;min-width:0;display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
 .msg.usr .mb{align-items:flex-end;}
 .ml{font-size:9px;color:var(--ink4);padding:0 4px;display:flex;gap:6px;align-items:center;font-weight:500;}
 .msg-time{font-size:9px;color:var(--ink4);opacity:.7;}
 
 .bub{
-  padding:13px 17px;font-size:var(--fs);line-height:1.8;
+  padding:12px 15px;font-size:var(--fs);line-height:1.8;
   word-break:break-word;white-space:pre-wrap;
+  overflow-wrap:break-word;max-width:100%;
   font-family:'Noto Sans Thai','DM Sans','Sarabun',sans-serif;
   -webkit-font-smoothing:antialiased;
   -webkit-user-select:text;user-select:text;cursor:pointer;
