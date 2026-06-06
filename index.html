@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#FAF8F5"/>
 <title>CIPHER</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23FAF8F5'/><text x='50' y='68' text-anchor='middle' fill='%2392400E' font-size='52' font-family='Georgia,serif' font-weight='bold'>C</text></svg>"/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Sarabun:wght@300;400;500&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#FAF8F5;--bg2:#F5F1EB;--bg3:#EDE8E0;
@@ -31,7 +31,7 @@ body.th-dark{--bg:#1C1917;--bg2:#292524;--bg3:#3C3532;--card:#292524;--card2:#3C
 html,body{height:100%;height:-webkit-fill-available;overflow:hidden;}
 body{
   display:flex;flex-direction:column;
-  font-family:'Noto Sans Thai','DM Sans',sans-serif;
+  font-family:'Noto Sans Thai','DM Sans','Sarabun',sans-serif;
   color:var(--ink);background:var(--bg);
   position:fixed;inset:0;
   padding-top:env(safe-area-inset-top);
@@ -40,6 +40,11 @@ body{
 }
 
 /* Subtle texture */
+/* Force Thai font on all text */
+*:lang(th), .bub, #msgs, #msg-inp, .ml, .rbtn, #sbar, #stat-txt {
+  font-family:'Noto Sans Thai','Sarabun','DM Sans',sans-serif !important;
+}
+
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
@@ -161,9 +166,10 @@ body::before{
 .msg-time{font-size:9px;color:var(--ink4);opacity:.7;}
 
 .bub{
-  padding:13px 17px;font-size:var(--fs);line-height:1.7;
+  padding:13px 17px;font-size:var(--fs);line-height:1.8;
   word-break:break-word;white-space:pre-wrap;
-  font-family:'Noto Sans Thai','DM Sans',sans-serif;
+  font-family:'Noto Sans Thai','DM Sans','Sarabun',sans-serif;
+  -webkit-font-smoothing:antialiased;
   -webkit-user-select:text;user-select:text;cursor:pointer;
   transition:all .2s;position:relative;
 }
@@ -260,7 +266,7 @@ body::before{
 #msg-inp{
   flex:1;background:transparent;border:none;outline:none;
   color:var(--ink);font-size:15px;
-  font-family:'Noto Sans Thai','DM Sans',sans-serif;
+  font-family:'Noto Sans Thai','DM Sans','Sarabun',sans-serif;
   line-height:1.5;min-height:24px;max-height:120px;resize:none;
   caret-color:var(--acc);
 }
